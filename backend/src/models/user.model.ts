@@ -8,9 +8,8 @@ interface IUser {
     phone?: string;
     address?: string;
     isActive: boolean;
-    createdAt: Date;
+    bookings: mongoose.Types.ObjectId[]; 
 }
-
 
 const UserSchema = new Schema<IUser>(
     {
@@ -30,11 +29,23 @@ const UserSchema = new Schema<IUser>(
         phone: {
             type: String,
         },
+        address: {
+            type: String,
+        },
+        isActive: {
+            type: Boolean,
+            default: true,
+        },
         role: {
             type: String,
-            enum: ["user", "admin","organization"],
+            enum: ["user", "admin"],
             default: "user",
         },
+        
+        bookings: [{
+            type: mongoose.Schema.Types.ObjectId,
+            ref: "Booking",
+        }],
     },
     { timestamps: true }
 );
