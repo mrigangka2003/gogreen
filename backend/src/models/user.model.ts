@@ -4,11 +4,13 @@ interface IUser {
     name: string;
     email: string;
     password: string;
-    role: "user";
+    role: "user" | "admin";
     phone?: string;
     address?: string;
+    isActive: boolean;
     createdAt: Date;
 }
+
 
 const UserSchema = new Schema<IUser>(
     {
@@ -28,17 +30,14 @@ const UserSchema = new Schema<IUser>(
         phone: {
             type: String,
         },
-        address: {
-            type: String,
-        },
         role: {
             type: String,
-            enum: ["user"],
+            enum: ["user", "admin","organization"],
             default: "user",
         },
     },
     { timestamps: true }
 );
 
-const User = mongoose.model<IUser>("User" , UserSchema);
-export default User ;
+const User = mongoose.model<IUser>("User", UserSchema);
+export default User;

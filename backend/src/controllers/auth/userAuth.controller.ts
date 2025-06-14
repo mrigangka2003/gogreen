@@ -5,13 +5,14 @@ import User from "../../models/user.model";
 import { apiError, apiResponse } from "../../helper";
 import { hashPassword, generateToken } from "../../utils";
 
-const registerUser = async (req: Request, res: Response) => {
+const registerUser = async (req: Request, res: Response): Promise<void> => {
     try {
-        const { name, email, password, phone } = req.body;
+        const { name, email, password, phone, role } = req.body;
 
         const existingUser = await User.findOne({ email });
         if (existingUser) {
-            return apiError(res, 400, "User already exists");
+            apiError(res, 400, "User already exists");
+            return;
         }
 
         const hashed = await hashPassword(password);
@@ -21,12 +22,17 @@ const registerUser = async (req: Request, res: Response) => {
             email,
             password: hashed,
             phone,
-            role: "user",
+            role,
         });
 
-        const token = generateToken(user._id.toString(), "user");
+        const token = generateToken(user._id.toString(), role);
 
-        return apiResponse(res, 201, "User registered successfully", {
+        res.cookie("token", token, {
+            httpOnly: true,
+            maxAge: 7 * 24 * 60 * 60 * 1000,
+        });
+
+        apiResponse(res, 201, "registered successfully", {
             token,
             user: {
                 id: user._id,
@@ -36,23 +42,34 @@ const registerUser = async (req: Request, res: Response) => {
             },
         });
     } catch (error) {
-        return apiError(res, 500, "User registration failed", error);
+        apiError(res, 500, "registration failed", error);
     }
 };
 
-const loginUser = async (req: Request, res: Response) => {
+const loginUser = async (req: Request, res: Response): Promise<void> => {
     try {
         const { email, password } = req.body;
 
         const user = await User.findOne({ email });
-        if (!user) return apiError(res, 404, "User not found");
+        if (!user) {
+            apiError(res, 404, "User not found");
+            return;
+        }
 
         const isMatch = await bcrypt.compare(password, user.password);
-        if (!isMatch) return apiError(res, 401, "Invalid credentials");
+        if (!isMatch) {
+            apiError(res, 401, "Invalid credentials");
+            return;
+        }
 
-        const token = generateToken(user._id.toString(), "user");
+        const token = generateToken(user._id.toString(), user.role);
 
-        return apiResponse(res, 200, "User login successful", {
+        res.cookie("token", token, {
+            httpOnly: true,
+            maxAge: 7 * 24 * 60 * 60 * 1000,
+        });
+
+        apiResponse(res, 200, "login successful", {
             token,
             user: {
                 id: user._id,
@@ -62,7 +79,7 @@ const loginUser = async (req: Request, res: Response) => {
             },
         });
     } catch (error) {
-        return apiError(res, 500, "User login failed", error);
+        apiError(res, 500, "login failed", error);
     }
 };
 
