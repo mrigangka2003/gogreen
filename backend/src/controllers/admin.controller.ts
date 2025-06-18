@@ -7,7 +7,7 @@ import { AuthRequest } from "../middlewares/authMiddleware";
 
 
 
-export const getAllBookings = async (req: AuthRequest, res: Response):Promise<void> => {
+export const getAllUserBookings = async (req: AuthRequest, res: Response):Promise<void> => {
     if (req.user?.role !== "admin") {
         apiError(res, 403, "Access denied");
         return;
@@ -24,15 +24,49 @@ export const getAllBookings = async (req: AuthRequest, res: Response):Promise<vo
         apiError(res, 500, "Failed to fetch bookings", error);
     }
 };
-
-export const getAllUsers = async (req: AuthRequest, res: Response):Promise<void> => {
+export const getAllOrgBookings = async (req: AuthRequest, res: Response):Promise<void> => {
     if (req.user?.role !== "admin") {
         apiError(res, 403, "Access denied");
-        return ;
+        return;
     }
 
     try {
-        const users = await User.find({}, "name email phone role");
+        const bookings = await Booking.find().populate(
+            "org",
+            "name email phone"
+        ).sort({ createdAt: -1 }); 
+        ;
+        apiResponse(res, 200, "All bookings fetched", bookings);
+    } catch (error) {
+        apiError(res, 500, "Failed to fetch bookings", error);
+    }
+};
+
+
+
+export const getAllUsers = async (req: AuthRequest, res: Response): Promise<void> => {
+    if (req.user?.role !== "admin") {
+        apiError(res, 403, "Access denied");
+        return;
+    }
+
+    try {
+        const users = await User.find({ role: "user" });
+        apiResponse(res, 200, "All users fetched", users);
+    } catch (error) {
+        apiError(res, 500, "Failed to fetch users", error);
+    }
+};
+
+
+export const getAllOrg = async (req: AuthRequest, res: Response): Promise<void> => {
+    if (req.user?.role !== "admin") {
+        apiError(res, 403, "Access denied");
+        return;
+    }
+
+    try {
+        const users = await User.find({ role: "organization" });
         apiResponse(res, 200, "All users fetched", users);
     } catch (error) {
         apiError(res, 500, "Failed to fetch users", error);

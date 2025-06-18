@@ -4,6 +4,7 @@ import userRouter from "./user.routes";
 import adminRoutes from "./admin.routes";
 import { authenticate } from "../middlewares/authMiddleware";
 import { loginUser, logout, registerUser } from "../controllers";
+import organizationRoutes from "./organization.routes";
 
 const router = Router() ;
 
@@ -14,6 +15,6 @@ router.post('/logout', authenticate,logout);
 
 router.use('/user',userRouter) ;
 router.use('/admin',adminRoutes) ;
-
+router.use('/org',organizationRoutes) ;
 
 export default router ;

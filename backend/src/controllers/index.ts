@@ -1,16 +1,20 @@
 import { registerUser, loginUser } from "./auth/userAuth.controller";
-import { createBooking } from "./user.controller";
 
-
+import { createBooking,getBookingDetails,getUserBookings } from "./user.controller";
 import { logout } from "./auth/logout.controller";
+import { getAllUserBookings,getAllOrgBookings, getAllUsers,getAllOrg } from "./admin.controller";
 
-import { getAllBookings,getAllUsers } from "./admin.controller";
+
 export {
     registerUser,
     loginUser,
     createBooking,
-    
+    getBookingDetails,
+    getUserBookings,
+
     logout,
-    getAllBookings,
-    getAllUsers
+    getAllUserBookings,
+    getAllUsers,
+    getAllOrg,
+    getAllOrgBookings
 };

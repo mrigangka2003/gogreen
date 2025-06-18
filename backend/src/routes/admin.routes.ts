@@ -1,21 +1,20 @@
 import { Request, Response, Router } from "express";
 
-import { getAllBookings, getAllUsers} from "../controllers";
+import {
+    getAllUserBookings,
+    getAllOrg,
+    getAllUsers,
+    getAllOrgBookings,
+} from "../controllers";
 import { authenticate } from "../middlewares/authMiddleware";
 
+const adminRoutes = Router();
 
-const adminRoutes = Router() ;
+adminRoutes.get("/user-bookings", authenticate, getAllUserBookings);
+adminRoutes.get("/org-bookings", authenticate, getAllOrgBookings);
+adminRoutes.get("/users", authenticate, getAllUsers);
+
+adminRoutes.get("/organizations", authenticate, getAllOrg);
 
 
-adminRoutes.get('/allbookings',authenticate,getAllBookings) ;
-adminRoutes.get('/users',authenticate , getAllUsers) ;
-
-/*
-admin routes --  
-    other nav bars 
-    user list
-    get all user
-    get all orders 
-*/
-
-export default adminRoutes ;
+export default adminRoutes;
