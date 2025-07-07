@@ -349,36 +349,6 @@ const CorporateResponsibility: React.FC = () => {
                             />
                         </div>
                     </div>
-
-                    {/* Call to Action */}
-                    <div className="relative bg-gradient-to-br from-white to-gray-50 rounded-3xl shadow-2xl p-12 text-center overflow-hidden">
-                        <div className="absolute top-0 left-0 w-full h-full">
-                            <div className="absolute top-10 right-10 w-32 h-32 bg-[#98CD00]/10 rounded-full blur-2xl"></div>
-                            <div className="absolute bottom-10 left-10 w-48 h-48 bg-[#98CD00]/5 rounded-full blur-3xl"></div>
-                        </div>
-
-                        <div className="relative z-10">
-                            <h2 className="text-5xl font-bold mb-8 text-[#98CD00]">
-                                Join Us
-                            </h2>
-                            <p className="text-xl mb-8 max-w-4xl mx-auto text-gray-700 leading-relaxed">
-                                Corporate responsibility isn't just our policy —
-                                it's our purpose. Whether you're a partner,
-                                customer, investor, or changemaker, we invite
-                                you to walk this path with us.
-                            </p>
-                            <p className="text-3xl font-bold text-gray-800 mb-12 leading-relaxed">
-                                Together, let's shape a cleaner, fairer, and
-                                more sustainable India.
-                            </p>
-                            <button className="group relative px-12 py-6 bg-gradient-to-r from-[#98CD00] to-[#7AB800] text-white font-bold text-xl rounded-full shadow-2xl transform transition-all duration-500 hover:shadow-3xl hover:-translate-y-2 hover:scale-105">
-                                <span className="relative z-10">
-                                    Partner With Us
-                                </span>
-                                <div className="absolute inset-0 bg-gradient-to-r from-[#7AB800] to-[#98CD00] rounded-full opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
-                            </button>
-                        </div>
-                    </div>
                 </div>
             </section>
         </div>

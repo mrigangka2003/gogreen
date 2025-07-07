@@ -38,11 +38,6 @@ const Header: React.FC<HeaderProps> = ({ logoSrc = "/images/logo.jpg" }) => {
             active: true,
         },
         {
-            name: "Expertise and Innovation",
-            slug: "/expertise-and-innovation",
-            active: true,
-        },
-        {
             name: "Community Impact",
             slug: "/community-impact",
             active: true,
@@ -88,7 +83,7 @@ const Header: React.FC<HeaderProps> = ({ logoSrc = "/images/logo.jpg" }) => {
                 <nav className="flex justify-between flex-wrap items-center">
                     <div>
                         <Link to="/" onClick={closeNavBar}>
-                            <div className="flex-shrink-0 text-[#98CD00] text-2xl font-bold">
+                            <div className="flex-shrink-0 text-primary text-2xl font-bold">
                                 <img
                                     src={logoSrc}
                                     alt="GoGreen+ Logo"
@@ -101,7 +96,7 @@ const Header: React.FC<HeaderProps> = ({ logoSrc = "/images/logo.jpg" }) => {
                     <div className="md:hidden mr-4">
                         <button
                             onClick={toggleNavBar}
-                            className="text-[#98CD00] focus:outline-none"
+                            className="text-primary focus:outline-none"
                         >
                             {navOpen ? (
                                 <svg
@@ -148,7 +143,7 @@ const Header: React.FC<HeaderProps> = ({ logoSrc = "/images/logo.jpg" }) => {
                                     <Link
                                         to={item.slug}
                                         onClick={closeNavBar}
-                                        className="inline-block font-medium text-[#333] px-4 py-2 duration-200 hover:text-[#98CD00] transition text-base"
+                                        className="inline-block font-medium text-[#333] px-4 py-2 duration-200 hover:text-hover-color transition text-base"
                                     >
                                         {item.name}
                                     </Link>
@@ -160,7 +155,7 @@ const Header: React.FC<HeaderProps> = ({ logoSrc = "/images/logo.jpg" }) => {
                         <li className="relative">
                             <button
                                 onClick={toggleCareersDropdown}
-                                className="font-medium text-[#333] px-4 py-2 duration-200 hover:text-[#98CD00] transition text-base flex items-center focus:outline-none"
+                                className="font-medium text-[#333] px-4 py-2 duration-200 hover:text-hover-color transition text-base flex items-center focus:outline-none"
                             >
                                 Careers
                                 <svg
@@ -182,7 +177,7 @@ const Header: React.FC<HeaderProps> = ({ logoSrc = "/images/logo.jpg" }) => {
                                                 closeNavBar();
                                                 setCareersDropdownOpen(false);
                                             }}
-                                            className="block px-4 py-2 text-sm text-[#333] hover:bg-[#98CD00] hover:text-white transition duration-200"
+                                            className="block px-4 py-2 text-sm text-[#333] hover:bg-hover-color hover:text-white transition duration-200"
                                         >
                                             {item.name}
                                         </Link>

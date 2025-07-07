@@ -1,13 +1,16 @@
 import { Link } from "react-router-dom";
 
-import { Quote, Hero } from "../components";
+import { Quote, Hero, ServicesSpaces, Manufacturing, JoinUs } from "../components";
 
 const Home = () => {
     return (
-        <main className="flex flex-col">
+        <main className="flex flex-col gap-10">
             <Hero />
             <Quote />
+            <ServicesSpaces/>
             <AboutButton />
+            <Manufacturing/>
+            <JoinUs/>
         </main>
     );
 };
@@ -18,9 +21,9 @@ const AboutButton = () => {
             <Link to={"/about"} className="w-full max-w-2xl">
                 <button
                     className="
-                        w-full bg-[#98CD00] text-white font-semibold 
+                        w-full bg-primary text-white font-semibold 
                         py-4 px-8 rounded-lg shadow-lg 
-                        hover:bg-[#85B800] transition-colors duration-300 
+                        hover:bg-hover-color transition-colors duration-300 
                         focus:outline-none focus:ring-2 focus:ring-[#98CD00] focus:ring-opacity-75 
                         text-lg md:text-xl
                     "
