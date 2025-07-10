@@ -1,12 +1,12 @@
-import React, { useState } from "react";
+import { useState } from "react";
 import { Link } from "react-router-dom";
 import { ChevronDown, Menu, X } from "lucide-react";
 
-interface HeaderProps {
-    logoSrc?: string;
-}
+import logo from "../assets/logo.jpg"
 
-const Header: React.FC<HeaderProps> = ({ logoSrc = "/images/logo.jpg" }) => {
+
+
+const Header = () => {
     const [navOpen, setNavOpen] = useState(false);
     const [careersDropdownOpen, setCareersDropdownOpen] = useState(false);
 
@@ -86,9 +86,9 @@ const Header: React.FC<HeaderProps> = ({ logoSrc = "/images/logo.jpg" }) => {
                     <div className="flex-shrink-0">
                         <Link to="/" onClick={closeNavBar} className="block">
                             <img
-                                src={logoSrc}
+                                src={logo}
                                 alt="GoGreen+ Logo"
-                                className="h-12 w-auto transition-transform duration-200 hover:scale-105"
+                                className="h-18 w-auto transition-transform duration-200 hover:scale-105"
                             />
                         </Link>
                     </div>
