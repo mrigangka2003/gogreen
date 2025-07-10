@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import { Link } from "react-router-dom";
+import { ChevronDown, Menu, X } from "lucide-react";
 
 interface HeaderProps {
     logoSrc?: string;
@@ -78,97 +79,52 @@ const Header: React.FC<HeaderProps> = ({ logoSrc = "/images/logo.jpg" }) => {
     ];
 
     return (
-        <header className="py-4 shadow-md sticky top-0 z-50 bg-white w-full">
-            <div className="w-full px-4 sm:px-6 lg:px-8">
-                <nav className="flex justify-between flex-wrap items-center">
-                    <div>
-                        <Link to="/" onClick={closeNavBar}>
-                            <div className="flex-shrink-0 text-primary text-2xl font-bold">
-                                <img
-                                    src={logoSrc}
-                                    alt="GoGreen+ Logo"
-                                    className="h-16 w-auto"
-                                />
-                            </div>
+        <header className="sticky top-0 z-50 bg-white/95 backdrop-blur-md border-b border-gray-200 shadow-sm">
+            <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                <nav className="flex justify-between items-center h-20">
+                    {/* Logo */}
+                    <div className="flex-shrink-0">
+                        <Link to="/" onClick={closeNavBar} className="block">
+                            <img
+                                src={logoSrc}
+                                alt="GoGreen+ Logo"
+                                className="h-12 w-auto transition-transform duration-200 hover:scale-105"
+                            />
                         </Link>
                     </div>
 
-                    <div className="md:hidden mr-4">
-                        <button
-                            onClick={toggleNavBar}
-                            className="text-primary focus:outline-none"
-                        >
-                            {navOpen ? (
-                                <svg
-                                    className="w-6 h-6"
-                                    fill="none"
-                                    stroke="currentColor"
-                                    viewBox="0 0 24 24"
-                                >
-                                    <path
-                                        strokeLinecap="round"
-                                        strokeLinejoin="round"
-                                        strokeWidth="2"
-                                        d="M6 18L18 6M6 6l12 12"
-                                    />
-                                </svg>
-                            ) : (
-                                <svg
-                                    className="w-6 h-6"
-                                    fill="none"
-                                    stroke="currentColor"
-                                    viewBox="0 0 24 24"
-                                >
-                                    <path
-                                        strokeLinecap="round"
-                                        strokeLinejoin="round"
-                                        strokeWidth="2"
-                                        d="M4 6h16M4 12h16M4 18h16"
-                                    />
-                                </svg>
-                            )}
-                        </button>
-                    </div>
-
-                    <ul
-                        className={`ml-auto md:flex md:w-auto md:items-center md:flex-row md:space-x-6 ${
-                            navOpen
-                                ? "w-full flex flex-col items-center space-y-2 mt-4"
-                                : "hidden"
-                        }`}
-                    >
+                    {/* Desktop Navigation */}
+                    <div className="hidden lg:flex lg:items-center lg:space-x-8">
                         {navItems.map((item) =>
                             item.active ? (
-                                <li key={item.name}>
-                                    <Link
-                                        to={item.slug}
-                                        onClick={closeNavBar}
-                                        className="inline-block font-medium text-[#333] px-4 py-2 duration-200 hover:text-hover-color transition text-base"
-                                    >
-                                        {item.name}
-                                    </Link>
-                                </li>
+                                <Link
+                                    key={item.name}
+                                    to={item.slug}
+                                    className="relative text-gray-700 hover:text-primary-600 font-medium text-sm transition-colors duration-200 group"
+                                >
+                                    {item.name}
+                                    <span className="absolute inset-x-0 -bottom-1 h-0.5 bg-primary-600 scale-x-0 group-hover:scale-x-100 transition-transform duration-200"></span>
+                                </Link>
                             ) : null
                         )}
 
                         {/* Careers Dropdown */}
-                        <li className="relative">
+                        <div className="relative">
                             <button
                                 onClick={toggleCareersDropdown}
-                                className="font-medium text-[#333] px-4 py-2 duration-200 hover:text-hover-color transition text-base flex items-center focus:outline-none"
+                                className="relative text-gray-700 hover:text-primary-600 font-medium text-sm transition-colors duration-200 flex items-center group"
                             >
                                 Careers
-                                <svg
-                                    className="w-4 h-4 ml-1"
-                                    fill="currentColor"
-                                    viewBox="0 0 20 20"
-                                >
-                                    <path d="M5.23 7.21a.75.75 0 011.06.02L10 11.084l3.71-3.854a.75.75 0 111.08 1.04l-4.25 4.417a.75.75 0 01-1.08 0L5.21 8.27a.75.75 0 01.02-1.06z" />
-                                </svg>
+                                <ChevronDown
+                                    className={`ml-1 h-4 w-4 transition-transform duration-200 ${
+                                        careersDropdownOpen ? "rotate-180" : ""
+                                    }`}
+                                />
+                                <span className="absolute inset-x-0 -bottom-1 h-0.5 bg-primary-600 scale-x-0 group-hover:scale-x-100 transition-transform duration-200"></span>
                             </button>
 
                             {careersDropdownOpen && (
-                                <div className="absolute bg-white shadow-lg rounded-md mt-2 py-2 w-48 z-20 md:right-0">
+                                <div className="absolute right-0 mt-2 w-56 bg-white rounded-lg shadow-lg border border-gray-200 py-2 z-20">
                                     {careersItems.map((item) => (
                                         <Link
                                             key={item.name}
@@ -177,16 +133,83 @@ const Header: React.FC<HeaderProps> = ({ logoSrc = "/images/logo.jpg" }) => {
                                                 closeNavBar();
                                                 setCareersDropdownOpen(false);
                                             }}
-                                            className="block px-4 py-2 text-sm text-[#333] hover:bg-hover-color hover:text-white transition duration-200"
+                                            className="block px-4 py-3 text-sm text-gray-700 hover:bg-primary-50 hover:text-primary-600 transition-colors duration-200"
                                         >
                                             {item.name}
                                         </Link>
                                     ))}
                                 </div>
                             )}
-                        </li>
-                    </ul>
+                        </div>
+                    </div>
+
+                    {/* Mobile Menu Button */}
+                    <div className="lg:hidden">
+                        <button
+                            onClick={toggleNavBar}
+                            className="p-2 text-gray-700 hover:text-primary-600 hover:bg-gray-100 rounded-lg transition-colors duration-200"
+                        >
+                            {navOpen ? <X size={24} /> : <Menu size={24} />}
+                        </button>
+                    </div>
                 </nav>
+
+                {/* Mobile Navigation */}
+                {navOpen && (
+                    <div className="lg:hidden">
+                        <div className="px-2 pt-2 pb-3 space-y-1 bg-white border-t border-gray-200">
+                            {navItems.map((item) =>
+                                item.active ? (
+                                    <Link
+                                        key={item.name}
+                                        to={item.slug}
+                                        onClick={closeNavBar}
+                                        className="block px-3 py-2 text-base font-medium text-gray-700 hover:text-primary-600 hover:bg-gray-50 rounded-md transition-colors duration-200"
+                                    >
+                                        {item.name}
+                                    </Link>
+                                ) : null
+                            )}
+
+                            {/* Mobile Careers Section */}
+                            <div className="pt-2">
+                                <button
+                                    onClick={toggleCareersDropdown}
+                                    className="flex items-center justify-between w-full px-3 py-2 text-base font-medium text-gray-700 hover:text-primary-600 hover:bg-gray-50 rounded-md transition-colors duration-200"
+                                >
+                                    Careers
+                                    <ChevronDown
+                                        className={`h-4 w-4 transition-transform duration-200 ${
+                                            careersDropdownOpen
+                                                ? "rotate-180"
+                                                : ""
+                                        }`}
+                                    />
+                                </button>
+
+                                {careersDropdownOpen && (
+                                    <div className="mt-2 space-y-1">
+                                        {careersItems.map((item) => (
+                                            <Link
+                                                key={item.name}
+                                                to={item.slug}
+                                                onClick={() => {
+                                                    closeNavBar();
+                                                    setCareersDropdownOpen(
+                                                        false
+                                                    );
+                                                }}
+                                                className="block px-6 py-2 text-sm text-gray-600 hover:text-primary-600 hover:bg-gray-50 rounded-md transition-colors duration-200"
+                                            >
+                                                {item.name}
+                                            </Link>
+                                        ))}
+                                    </div>
+                                )}
+                            </div>
+                        </div>
+                    </div>
+                )}
             </div>
         </header>
     );

@@ -12,14 +12,13 @@ const ServicesSpaces = () => {
                 "Parks & Gardens",
             ],
         },
-
-        {
-            title: "Residential & Lifestyle",
-            items: ["Private Homes", "Apartments & Housing Complexes"],
-        },
         {
             title: "Sports & Entertainment",
             items: ["Sports Complexes", "Stadiums", "Event Venues"],
+        },
+        {
+            title: "Residential & Lifestyle",
+            items: ["Private Homes", "Apartments & Housing Complexes"],
         },
         {
             title: "Commercial & Retail",
@@ -42,7 +41,6 @@ const ServicesSpaces = () => {
             ],
         },
     ];
-
     return (
         <div className="px-4 sm:px-6 lg:px-8 py-12 max-w-7xl mx-auto">
             <div className="group flex flex-col justify-center items-center bg-white border border-primary rounded-2xl my-6 px-6 py-8 text-center hover:bg-primary hover:text-white transition-all duration-300 shadow-sm hover:shadow-lg">
@@ -53,13 +51,12 @@ const ServicesSpaces = () => {
                     Discover all the spaces where our services are available
                 </p>
             </div>
-
             {/* Cards Grid */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-6">
+            <div className="flex flex-wrap justify-center gap-6">
                 {spacesData.map((category, index) => (
                     <div
                         key={index}
-                        className="bg-white border border-gray-200 rounded-2xl shadow-md hover:shadow-lg transition-shadow duration-300 p-5"
+                        className="bg-white border border-gray-200 rounded-2xl shadow-md hover:shadow-lg transition-shadow duration-300 p-5 w-full sm:w-[calc(50%-12px)] lg:w-[calc(20%-19.2px)]"
                     >
                         <h3 className="text-lg font-semibold text-green-700 mb-4">
                             {category.title}
@@ -81,5 +78,4 @@ const ServicesSpaces = () => {
         </div>
     );
 };
-
 export default ServicesSpaces;

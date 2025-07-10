@@ -9,6 +9,7 @@ import {
     ProductsServices,
     CorporateResponsibility,
     About,
+    MemberPage,
 } from "./pages";
 
 const router = createBrowserRouter([
@@ -32,6 +33,10 @@ const router = createBrowserRouter([
                 path: "/about",
                 element: <About />,
             },
+            {
+                    path:"/about/:memberId",
+                    element:<MemberPage/>
+            }
         ],
     },
 ]);
