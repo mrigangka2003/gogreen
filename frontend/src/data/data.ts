@@ -7,92 +7,160 @@ import er_s_majumder from "../assets/team/er_s_majumder.jpeg";
 import a_saha from "../assets/team/Mr.A.Saha.jpg";
 import a_ghosh from "../assets/team/ms_a_ghosh.jpg";
 
+import samik_das from "../assets/team/samik_das_ceo.jpg";
+import bilash_chandra_roy from "../assets/team/bilash_chandra_roy.png";
+
+import EvVaccumCleaner from "../assets/EV_vaccum_cleaner.png"
+
 interface Advisors {
-    id:string;
+    id: string;
     name: string;
-    profession: string;
-    affiliation?: string;
     country: string;
     image?: string;
     about: string;
 }
 
-
-const advisors :Array<Advisors> = [
-    {
-        id:"s_dasgupta",
-        name:"Prof. (Dr.) Sabyasachi Dasgupta",
-        profession:"Proffessor",
-        affiliation:"Tripura University",
-        country:"India",
-        image:dr_s_dasgupta,
-        about:"Prof. Sabyasachi Dasgupta is a leading academic in the field of forestry and environmental science, currently serving as Professor and Head of the Department of Forestry and Biodiversity at Tripura University (Central). With nearly two decades of experience in teaching, research, and institutional leadership, he brings deep expertise in biodiversity conservation, ecosystem services, forest ecology, and environmental impact assessment. He holds a Ph.D. in Forestry (Ecology &amp; Environment) from the Wildlife Institute of India, FRI University, and has taught in premier institutions including HNB Garhwal Central University and Central Agricultural University. Prof. Dasgupta has published over 45 research papers and book chapters. His research spans a wide range of ecological themes from climate change impacts in the Himalayas to bamboo biodiversity and sacred groves in Northeast India. He is also actively involved in environmental policy as a member of the State Level Environment Impact Assessment Authority and serves as Vice President of the North East Chapter of the Indian Ecological Society. As an Advisor to Go Green Plus, Prof. Dasgupta brings scientific rigor and strategic guidance in shaping ecological sustainability, afforestation, and biodiversity initiatives making him an invaluable asset to the company’s mission for green development.",
-    },
-    {   
-        id:"s_nath_choudhury",
-        name:"Prof. (Dr.) Swarnali Nath Choudhury",
-        profession:"proffessor",
-        affiliation:"ICFAI University,Tripura",
-        country:"India",
-        image:snc,
-        about:"Dr. Swarnali Nath Choudhury is an accomplished academician, researcher, and academic leader with over 20 years of experience in the field of Chemistry and higher education. She holds an M.Sc. in Organic Chemistry and a Ph.D. in Medicinal Chemistry from Assam University, along with an M.Tech. in Petroleum Technology from Dibrugarh University. Currently, she serves as Professor of Chemistry and Dean of Placement at ICFAI University Tripura, where she plays a pivotal role in academic excellence and industry engagement. Dr. Choudhury’s research interests lie in Natural Products, Medicinal Chemistry, and Phytopharmacology, with a strong focus on traditional medicinal plants and their applications in tribal healthcare systems. She has published extensively in peer-reviewed journals and contributed chapters to academic books, reflecting her commitment to research and innovation. Her work bridges modern science with indigenous knowledge, making it both impactful and socially relevant. As an Advisor to our company Go Green Plus, Dr. Choudhury supports us by offering scientific and strategic guidance, fostering academia-industry collaboration, and helping to design effective training programs to enhance the skills of our employees and align them with current industry needs."
-    },
-    {   
-        id:"shyamal_majumder",
-        name:"Er. Shyamal Majumder",
-        profession:"Proffessor",
-        affiliation:"",
-        country:"India",
-        image:er_s_majumder,
-        about:"engineer"
-    },
-    {   
-        id:"abhijit_saha",
-        name:"Mr. Abhijit Saha",
-        profession:"entrepreneur",
-        affiliation:"",
-        country:"India",
-        image:a_saha,
-        about:"Abhijit Saha is a dynamic entrepreneur and the Founder-Director of Narayandip, a leading retail partner for top garment brands in Agartala, Tripura. With nearly two decades of experience, he has been instrumental in shaping the branded fashion retail, telecom, and distribution sectors in the region. Starting his journey in 2006 as a channel partner with Airtel, Abhijit expanded into DTH distribution and logistics by 2010. In 2013, he ventured into premium retail with the launch of the U.S. Polo Assn. store and steadily grew his portfolio to include major brands like ARROW, Pepe Jeans, Killer Jeans, Being Human, and CRIMSOUNE Club. Briefly entering electronics distribution with Samsung Mobile in 2021, Mr. Abhijit Saha has consistently demonstrated a keen eye for growth and diversification. Today, he is focused on strengthening his retail presence while exploring new ventures, earning wide respect in Tripura’s business community for his strategic vision and dedication to regional development."
-    },
-    {   
-        id:"anamika_ghosh",
-        name:"Ms. Anamika Ghosh",
-        profession:"Researcher",
-        affiliation:"University of Science and Technology, Meghalaya",
-        country:"India",
-        image:a_ghosh,
-        about:"Ms. Anamika Ghosh is a committed environmental professional with a strong academic and industry background in Environmental Science, ESG (Environmental, Social, and Governance), and EHSS (Environment, Health, Safety, and Sustainability). She holds an M.Sc. in Environmental Sciences from the University of Science and Technology, Meghalaya (USTM), where she built a solid foundation in environmental systems and sustainable development practices. She began her professional journey with GICIA India Pvt. Ltd., where she served as a Senior Program Officer and contributed to sustainability focused programs, certification systems, and field-based environmental compliance activities. Currently, Mrs. Ghosh is working as a Senior Executive - ESG &amp; EHSS at INDUS Enviro, where she plays a vital role in designing and executing ESG strategies, environmental risk assessments, sustainability reporting, and regulatory compliance initiatives for corporate clients. Her work integrates policy, environmental due diligence, and stakeholder engagement to align business practices with global sustainability goals. As an Advisor to Go Green Plus, Ms. Anamika Ghosh brings in depth knowledge of environmental governance, risk management, and sustainable development frameworks. Her expertise supports the company’s mission to lead environmentally responsible projects while promoting long-term ecological and social impact."
-    },
-    {   
-        id:"mrinal_kanti_deb",
-        name:"Dr. Mrinal Kanti Deb",
-        profession:"Proffesor",
-        affiliation:"Downtown University,Assam",
-        country:"India",
-        image:mk_deb,
-        about:" Dr. M.K. Deb is an esteemed academic and researcher in the field of rural development and migration studies. He currently serves as an Assistant Professor in the Faculty of Humanities and Social Sciences at Assam down town University, where he also coordinates the Institution’s Innovation Council (IIC). He holds both Master’s and Ph.D. degrees in Rural Management and Development. Dr. Deb has an extensive research portfolio, having published 7 journal articles and 9 book chapters in areas such as labor migration, tribal livelihoods, rural transformation, and social policy. His work includes empirical studies on Bangladesh-Tripura migration, livelihood shifts among the Kuki tribe, and the impact of welfare programs like MGNREGA on rural communities. He also developed innovative approaches for measuring tribal living standards using tools like Principal Component Analysis  As an Advisor to Go Green Plus, Dr. Deb contributes deep academic insight and grassroots experience to support the company’s vision for inclusive, sustainable development. His expertise enhances Go Green Plus focus on empowering rural communities through data-driven, environmentally conscious strategies."
-    },
-    {   
-        id:"swapan_das",
-        name:"Dr. Swapan Das",
-        profession:"Engineer",
-        affiliation:"",
-        country:"India",
-        image:dr_s_das,
-        about:"  Dr. Swapan Das is a highly accomplished engineering professional with over 15 years of experience in Indian Railways and specialized academic expertise in Municipal Solid Waste Management. He holds an M.Tech. in Mechanical Engineering and a Ph.D. in Municipal Solid Waste Management from one of India’s premier technical institution-Indian Institute of Engineering Science and Technology, Shibpur, West Bengal. With a deep commitment to sustainable development and environmental engineering, Dr. Das has published 6 research papers in international journals, presented 5 papers at international conferences, and contributed 1 book chapter and 3 national conference papers focusing primarily on solid waste treatment, sustainable urban systems, and waste to energy technologies. Alongside his technical career in public infrastructure, Dr. Das also serves as the Chief Advisor of Ultimate Car Care, a car manufacturing cum modern service company, where he plays a pivotal role in process optimization  sustainable design, and operational efficiency. His contributions support innovation in eco-friendly automotive solutions and advanced servicing infrastructure. As an Advisor to Go Green Plus, Dr. Das will play a key role in guiding the development of the company’s two upcoming electric vehicles (EVs). His expertise in mechanical systems, process design, and sustainable technology integration makes him an invaluable asset in driving forward Go Green Plus’s mission of clean mobility and eco-conscious engineering."
-    },
-    {   
-        id:"kushal_deb",
-        name:"Advocate Kushal Deb",
-        profession:"Advocate",
-        affiliation:"",
-        country:"India",
-        image:k_dev,
-        about:"Advocate Kushal Deb is a highly respected legal practitioner with a distinguished track record in civil, criminal, family, environmental and consumer law. With a large number of successfully handled cases and a renowned presence at the Tripura High Court, he is recognized for his sharp legal acumen, courtroom command, and commitment to justice. Over the years, Advocate Deb has built a reputation for delivering strategic legal solutions across a wide spectrum of matters, earning the trust of clients and peers alike. His ability to interpret and apply the law with precision makes him a sought- after counsel in both complex litigation and everyday legal affairs. As a Legal Advisor to Go Green Plus, Advocate Deb brings unmatched legal insight and experience to guide the organization in regulatory compliance, risk mitigation, and contractual governance. His involvement strengthens the company&#39;s foundation with lawful integrity and ensures that all initiatives align with current legal standards and ethical practices."
-    }
-]
-
-export {
-    advisors
+interface Executive {
+    id: string;
+    name: string;
+    country: string;
+    image?: string;
+    role: string;
+    linkedIn?: string;
+    googleScholar?: string;
+    about: string;
 }
+
+interface ProductAndServices {
+    title: string;
+    description: string;
+    image: string;
+    reversed?: boolean;
+}
+
+const services: Array<ProductAndServices> = [
+    {
+        title: "EV Vacuum Cleaner",
+        description:
+            "A fully electric vacuum cleaner engineered for large-scale outdoor cleaning tasks. Features high-powered suction with zero emissions, making it ideal for urban and industrial zones. Operates silently and efficiently, promoting sustainable public sanitation.",
+        image: EvVaccumCleaner,
+    },
+    {
+        title: "Door-to-Door Garbage Collector",
+        description:
+            "A compact, hand-towing garbage collection unit designed for narrow streets and residential areas. Enables efficient collection of household waste directly from the source. Lightweight, maneuverable, and perfect for daily municipal operations.",
+        image: "https://evreka.co/wp-content/uploads/2022/06/5-benefits-of-route-optimization-software-1-scaled.jpg",
+        reversed: true,
+    },
+    {
+        title: "Bio Gas Plant",
+        description:
+            "A sustainable solution that converts organic waste into clean biogas and nutrient-rich slurry. Helps manage waste efficiently while generating renewable energy for households or small industries. Reduces carbon footprint and promotes circular energy use.",
+        image: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSQ7ro-8HC-BrZRYMdWYE6r2AYN8H80u-Jokw&s",
+    },
+];
+
+const futureInnovations: Array<ProductAndServices> = [
+    {
+        title: "Waste-to-Fuel Systems",
+        description:
+            "An innovative system that converts organic and plastic waste into clean, usable fuel. Helps reduce landfill load while generating energy for local use. Supports circular economy and sustainable living.",
+        image: "https://gasificationplant.com/wp-content/uploads/2023/10/waste-to-energy-plant-modules.jpg",
+    },
+    {
+        title: "Pond Water Restoration Units",
+        description:
+            "Cutting-edge technology for reviving polluted ponds and improving water clarity. Naturally boosts aquatic biodiversity and controls harmful algae. Ideal for community ponds and urban water bodies.",
+        image: "data:image/jpeg;base64,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",
+    },
+    {
+        title: "Road Water Spray",
+        description:
+            "Designed to spray treated water on roads to suppress dust and lower ambient temperatures. Useful in cities and industrial zones during dry seasons. Promotes cleaner air and healthier urban spaces.",
+        image: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRV3DqBSG1AFD_Y0NFCcx4GYqx2tGbipnzoAhH1UXijxTdi-yz9ZGo-ty3a62a1iNRCV3Q&usqp=CAU",
+    },
+];
+
+const advisors: Array<Advisors> = [
+    {
+        id: "s_dasgupta",
+        name: "Prof. (Dr.) Sabyasachi Dasgupta",
+        country: "India",
+        image: dr_s_dasgupta,
+        about: "Prof. Sabyasachi Dasgupta is a leading academic in the field of forestry and environmental science, currently serving as Professor and Head of the Department of Forestry and Biodiversity at Tripura University (Central). With nearly two decades of experience in teaching, research, and institutional leadership, he brings deep expertise in biodiversity conservation, ecosystem services, forest ecology, and environmental impact assessment. He holds a Ph.D. in Forestry (Ecology &amp; Environment) from the Wildlife Institute of India, FRI University, and has taught in premier institutions including HNB Garhwal Central University and Central Agricultural University. Prof. Dasgupta has published over 45 research papers and book chapters. His research spans a wide range of ecological themes from climate change impacts in the Himalayas to bamboo biodiversity and sacred groves in Northeast India. He is also actively involved in environmental policy as a member of the State Level Environment Impact Assessment Authority and serves as Vice President of the North East Chapter of the Indian Ecological Society. As an Advisor to Go Green Plus, Prof. Dasgupta brings scientific rigor and strategic guidance in shaping ecological sustainability, afforestation, and biodiversity initiatives making him an invaluable asset to the company’s mission for green development.",
+    },
+    {
+        id: "s_nath_choudhury",
+        name: "Prof. (Dr.) Swarnali Nath Choudhury",
+        country: "India",
+        image: snc,
+        about: "Dr. Swarnali Nath Choudhury is an accomplished academician, researcher, and academic leader with over 20 years of experience in the field of Chemistry and higher education. She holds an M.Sc. in Organic Chemistry and a Ph.D. in Medicinal Chemistry from Assam University, along with an M.Tech. in Petroleum Technology from Dibrugarh University. Currently, she serves as Professor of Chemistry and Dean of Placement at ICFAI University Tripura, where she plays a pivotal role in academic excellence and industry engagement. Dr. Choudhury’s research interests lie in Natural Products, Medicinal Chemistry, and Phytopharmacology, with a strong focus on traditional medicinal plants and their applications in tribal healthcare systems. She has published extensively in peer-reviewed journals and contributed chapters to academic books, reflecting her commitment to research and innovation. Her work bridges modern science with indigenous knowledge, making it both impactful and socially relevant. As an Advisor to our company Go Green Plus, Dr. Choudhury supports us by offering scientific and strategic guidance, fostering academia-industry collaboration, and helping to design effective training programs to enhance the skills of our employees and align them with current industry needs.",
+    },
+    {
+        id: "shyamal_majumder",
+        name: "Er. Shyamal Majumder",
+        country: "India",
+        image: er_s_majumder,
+        about: "engineer",
+    },
+    {
+        id: "abhijit_saha",
+        name: "Mr. Abhijit Saha",
+        country: "India",
+        image: a_saha,
+        about: "Abhijit Saha is a dynamic entrepreneur and the Founder-Director of Narayandip, a leading retail partner for top garment brands in Agartala, Tripura. With nearly two decades of experience, he has been instrumental in shaping the branded fashion retail, telecom, and distribution sectors in the region. Starting his journey in 2006 as a channel partner with Airtel, Abhijit expanded into DTH distribution and logistics by 2010. In 2013, he ventured into premium retail with the launch of the U.S. Polo Assn. store and steadily grew his portfolio to include major brands like ARROW, Pepe Jeans, Killer Jeans, Being Human, and CRIMSOUNE Club. Briefly entering electronics distribution with Samsung Mobile in 2021, Mr. Abhijit Saha has consistently demonstrated a keen eye for growth and diversification. Today, he is focused on strengthening his retail presence while exploring new ventures, earning wide respect in Tripura’s business community for his strategic vision and dedication to regional development.",
+    },
+    {
+        id: "anamika_ghosh",
+        name: "Ms. Anamika Ghosh",
+        country: "India",
+        image: a_ghosh,
+        about: "Ms. Anamika Ghosh is a committed environmental professional with a strong academic and industry background in Environmental Science, ESG (Environmental, Social, and Governance), and EHSS (Environment, Health, Safety, and Sustainability). She holds an M.Sc. in Environmental Sciences from the University of Science and Technology, Meghalaya (USTM), where she built a solid foundation in environmental systems and sustainable development practices. She began her professional journey with GICIA India Pvt. Ltd., where she served as a Senior Program Officer and contributed to sustainability focused programs, certification systems, and field-based environmental compliance activities. Currently, Mrs. Ghosh is working as a Senior Executive - ESG &amp; EHSS at INDUS Enviro, where she plays a vital role in designing and executing ESG strategies, environmental risk assessments, sustainability reporting, and regulatory compliance initiatives for corporate clients. Her work integrates policy, environmental due diligence, and stakeholder engagement to align business practices with global sustainability goals. As an Advisor to Go Green Plus, Ms. Anamika Ghosh brings in depth knowledge of environmental governance, risk management, and sustainable development frameworks. Her expertise supports the company’s mission to lead environmentally responsible projects while promoting long-term ecological and social impact.",
+    },
+    {
+        id: "mrinal_kanti_deb",
+        name: "Dr. Mrinal Kanti Deb",
+        country: "India",
+        image: mk_deb,
+        about: " Dr. M.K. Deb is an esteemed academic and researcher in the field of rural development and migration studies. He currently serves as an Assistant Professor in the Faculty of Humanities and Social Sciences at Assam down town University, where he also coordinates the Institution’s Innovation Council (IIC). He holds both Master’s and Ph.D. degrees in Rural Management and Development. Dr. Deb has an extensive research portfolio, having published 7 journal articles and 9 book chapters in areas such as labor migration, tribal livelihoods, rural transformation, and social policy. His work includes empirical studies on Bangladesh-Tripura migration, livelihood shifts among the Kuki tribe, and the impact of welfare programs like MGNREGA on rural communities. He also developed innovative approaches for measuring tribal living standards using tools like Principal Component Analysis  As an Advisor to Go Green Plus, Dr. Deb contributes deep academic insight and grassroots experience to support the company’s vision for inclusive, sustainable development. His expertise enhances Go Green Plus focus on empowering rural communities through data-driven, environmentally conscious strategies.",
+    },
+    {
+        id: "swapan_das",
+        name: "Dr. Swapan Das",
+        country: "India",
+        image: dr_s_das,
+        about: "  Dr. Swapan Das is a highly accomplished engineering professional with over 15 years of experience in Indian Railways and specialized academic expertise in Municipal Solid Waste Management. He holds an M.Tech. in Mechanical Engineering and a Ph.D. in Municipal Solid Waste Management from one of India’s premier technical institution-Indian Institute of Engineering Science and Technology, Shibpur, West Bengal. With a deep commitment to sustainable development and environmental engineering, Dr. Das has published 6 research papers in international journals, presented 5 papers at international conferences, and contributed 1 book chapter and 3 national conference papers focusing primarily on solid waste treatment, sustainable urban systems, and waste to energy technologies. Alongside his technical career in public infrastructure, Dr. Das also serves as the Chief Advisor of Ultimate Car Care, a car manufacturing cum modern service company, where he plays a pivotal role in process optimization  sustainable design, and operational efficiency. His contributions support innovation in eco-friendly automotive solutions and advanced servicing infrastructure. As an Advisor to Go Green Plus, Dr. Das will play a key role in guiding the development of the company’s two upcoming electric vehicles (EVs). His expertise in mechanical systems, process design, and sustainable technology integration makes him an invaluable asset in driving forward Go Green Plus’s mission of clean mobility and eco-conscious engineering.",
+    },
+    {
+        id: "kushal_deb",
+        name: "Advocate Kushal Deb",
+        country: "India",
+        image: k_dev,
+        about: "Advocate Kushal Deb is a highly respected legal practitioner with a distinguished track record in civil, criminal, family, environmental and consumer law. With a large number of successfully handled cases and a renowned presence at the Tripura High Court, he is recognized for his sharp legal acumen, courtroom command, and commitment to justice. Over the years, Advocate Deb has built a reputation for delivering strategic legal solutions across a wide spectrum of matters, earning the trust of clients and peers alike. His ability to interpret and apply the law with precision makes him a sought- after counsel in both complex litigation and everyday legal affairs. As a Legal Advisor to Go Green Plus, Advocate Deb brings unmatched legal insight and experience to guide the organization in regulatory compliance, risk mitigation, and contractual governance. His involvement strengthens the company&#39;s foundation with lawful integrity and ensures that all initiatives align with current legal standards and ethical practices.",
+    },
+];
+
+const executives: Array<Executive> = [
+    {
+        id: "bilash_chandra_roy",
+        name: "Dr. Bilash Chandra Roy",
+        country: "India",
+        role: "Director & Founder, Go Green Plus",
+        image: bilash_chandra_roy,
+        linkedIn:
+            "https://www.linkedin.com/in/dr-bilash-chandra-roy-1b5a13143/",
+        googleScholar:
+            "https://scholar.google.com/citations?user=7FBH1sAAAAAJ&amp;hl=en",
+        about: "Dr. Bilash Chandra Roy is the Director and Founder of “Go Green Plus”, a cleantech startup committed to transforming urban waste management through sustainable innovation, smart electric mobility, and digital integration. Dr. Roy holds M.Sc. and Ph.D. degree in Chemistry. Dr. Roy specializes in the synthesis of transition metal complexes and luminescent lanthanide-based materials for catalysis, biophysical applications, and explosive detection. His research, which has resulted in over ten high-impact publications in journals such as Inorganic Chemistry, Soft Matter, and Coordination Chemistry Reviews, is backed by hands-on expertise in advanced characterization techniques and materials design. He has also authored two insightful book chapters on supramolecular chemistry and heterometallic magnetic materials. Dr. Roy’s patented invention of a portable explosive detection kit further reflects his drive to integrate chemistry, innovation, and social impact, making him a dynamic force at the intersection of research and sustainable enterprise. Dr. Roy&#39;s vision through Go Green Plus aligns deeply with his academic ethos - channeling scientific knowledge into real-world sustainability. The company develops compact electric vacuum cleaner vehicles for public sanitation, door-to-door garbage collection EVs for urban and residential zones, and a digital platform for real-time monitoring operations, customer engagement, and government accountability. Under his leadership, Go Green Plus is also piloting biogas conversion units to convert organic waste into renewable energy, creating a closed-loop, tech-enabled green solution. The startup not only addresses core environmental issues but also supports national goals like Swachh Bharat and Smart City missions. By combining advanced research with grassroots implementation, Dr. Roy is fostering a culture o  clean technology and environmental responsibility. His efforts continue to inspire innovation- driven entrepreneurship rooted in science, service, and sustainability.",
+    },
+    {
+        id: "samik_das",
+        name: "Mr. Samik Das",
+        country: "India",
+        image: samik_das,
+        role: "Co-Founder, MD & CEO, Go Green Plus",
+        about: "Mr. Samik Das is the Co-Founder, Managing Director, and Chief Executive Officer (CEO) of Go Green Plus, where he spearheads the company’s strategic growth, product innovation, and sustainable impact in the urban waste management and green mobility sector. A B.Tech graduate in Electronics and Communication Engineering and currently pursuing his MBA, Mr. Das combines strong technical expertise with emerging business leadership to drive the startup&#39;s mission forward. He completed a SCADA internship at GAIL, where he gained valuable experience in automation and system control technologies, which now form the backbone of Go Green Plus’s digital waste monitoring and smart city infrastructure. His early engineering project on temperature dependent automatic fan control reflects his hands-on problem-solving approach and energy efficient thinking. Beyond his technical and entrepreneurial roles, Mr. Das is actively engaged in social service, contributing to environmental awareness campaigns, community clean-up drives, and youth development programs. As Co-Founder, he plays a critical role in shaping the company’s portfolio, which includes electric street vacuum cleaners, door-to-door EV garbage collection systems, and integrated platforms for GPS based monitoring, mobile app services, and waste-to-biogas conversion. Under his visionary leadership, Go Green Plus is not only delivering innovative, affordable, and scalable solutions but also contributing to national missions like Swachh Bharat and Smart Cities. Mr. Das’s entrepreneurial drive and social commitment make him a changemaker in building a cleaner, greener, and smarter India.",
+    },
+];
+
+export { advisors, executives, services, futureInnovations };
