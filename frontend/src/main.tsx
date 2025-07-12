@@ -8,8 +8,15 @@ import {
     Home,
     ProductsServices,
     CorporateResponsibility,
+    CommunityImpact,
+    Media,
     About,
     MemberPage,
+    JobSearch,
+    Internships,
+    Events,
+    WorkingHere,
+    OurProcess,
 } from "./pages";
 
 const router = createBrowserRouter([
@@ -30,12 +37,44 @@ const router = createBrowserRouter([
                 element: <CorporateResponsibility />,
             },
             {
+                path: "/community-impact",
+                element: <CommunityImpact />,
+            },
+            {
+                path: "/media",
+                element: <Media />,
+            },
+            {
                 path: "/about",
                 element: <About />,
             },
             {
-                    path:"/about/:memberId",
-                    element:<MemberPage/>
+                path: "/about/:memberId",
+                element: <MemberPage />,
+            },
+            {
+                path: "/careers/job-search",
+                element: <JobSearch/>,
+            },
+            {
+                path: "/careers/job-search",
+                element: <JobSearch />,
+            },
+            {
+                path: "/careers/students/internships",
+                element: <Internships />,
+            },
+            {
+                path: "/careers/students/events",
+                element: <Events/>,
+            },
+            {
+                path: "/careers/working-here",
+                element: <WorkingHere/>,
+            },
+            {
+                path:"/careers/our-process",
+                element:<OurProcess/>
             }
         ],
     },

@@ -17,30 +17,30 @@ const ResponsibilityCard: React.FC<ResponsibilityCardProps> = ({
     icon,
 }) => {
     const cardClass = isDark
-        ? "bg-gradient-to-br from-[#98CD00] to-[#7AB800] text-white"
-        : "bg-white text-gray-800 border-l-4 border-[#98CD00]";
+        ? "bg-gradient-to-br from-green-600 to-green-700 text-white"
+        : "bg-white text-gray-800 border-l-4 border-green-600";
 
     const itemIconClass = isDark
-        ? "bg-white text-[#98CD00]"
-        : "bg-[#98CD00] text-white";
+        ? "bg-white text-green-600"
+        : "bg-green-600 text-white";
 
     return (
         <div
-            className={`p-10 rounded-3xl shadow-xl transform transition-all duration-500 hover:scale-105 hover:shadow-2xl ${cardClass}`}
+            className={`p-10 rounded-3xl shadow-xl transform transition-all duration-500 hover:scale-105 hover:shadow-2xl hover:-translate-y-2 ${cardClass}`}
         >
             <h2
-                className={`text-4xl font-bold mb-8 flex items-center ${
-                    isDark ? "text-white" : "text-[#98CD00]"
+                className={`text-4xl font-bold mb-8 flex items-center transition-colors duration-300 ${
+                    isDark ? "text-white hover:text-green-200" : "text-green-600 hover:text-green-700"
                 }`}
             >
-                <div className="mr-4 p-2 rounded-full bg-white/20">{icon}</div>
+                <div className="mr-4 p-2 rounded-full bg-white/20 hover:bg-white/30 transition-all duration-300 hover:scale-110">{icon}</div>
                 {title}
             </h2>
             <ul className="space-y-6 text-lg">
                 {items.map((item, index) => (
                     <li key={index} className="flex items-start group">
                         <span
-                            className={`${itemIconClass} p-2 rounded-full mr-4 mt-1 flex-shrink-0 group-hover:scale-110 transition-transform duration-300`}
+                            className={`${itemIconClass} p-2 rounded-full mr-4 mt-1 flex-shrink-0 group-hover:scale-110 group-hover:rotate-12 transition-all duration-300`}
                         >
                             <svg
                                 xmlns="http://www.w3.org/2000/svg"
@@ -60,12 +60,12 @@ const ResponsibilityCard: React.FC<ResponsibilityCardProps> = ({
                         <div className="group-hover:translate-x-2 transition-transform duration-300">
                             <strong
                                 className={`${
-                                    isDark ? "text-white" : "text-[#98CD00]"
-                                } font-semibold text-xl`}
+                                    isDark ? "text-white group-hover:text-green-200" : "text-green-600 group-hover:text-green-700"
+                                } font-semibold text-xl transition-colors duration-300`}
                             >
                                 {item.label}:
                             </strong>
-                            <span className="ml-2 leading-relaxed">
+                            <span className="ml-2 leading-relaxed group-hover:text-opacity-90 transition-all duration-300">
                                 {item.description}
                             </span>
                         </div>
@@ -88,15 +88,15 @@ const ImpactCard: React.FC<ImpactCardProps> = ({
     icon,
 }) => {
     return (
-        <div className="group relative bg-gradient-to-br from-[#98CD00] to-[#7AB800] text-white p-10 rounded-3xl shadow-xl transform transition-all duration-500 hover:shadow-2xl hover:-translate-y-3 hover:rotate-1">
+        <div className="group relative bg-gradient-to-br from-green-600 to-green-700 text-white p-10 rounded-3xl shadow-xl transform transition-all duration-500 hover:shadow-2xl hover:-translate-y-3 hover:rotate-1 hover:bg-gradient-to-br hover:from-green-500 hover:to-green-600">
             <div className="absolute inset-0 bg-gradient-to-br from-white/10 to-transparent rounded-3xl opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
             <div className="relative z-10">
-                <div className="flex justify-center mb-6 group-hover:scale-110 transition-transform duration-300">
-                    <span className="p-4 bg-white rounded-2xl inline-block shadow-lg">
-                        <div className="text-[#98CD00]">{icon}</div>
+                <div className="flex justify-center mb-6 group-hover:scale-110 group-hover:-rotate-6 transition-transform duration-300">
+                    <span className="p-4 bg-white rounded-2xl inline-block shadow-lg group-hover:shadow-2xl transition-shadow duration-300">
+                        <div className="text-green-600 group-hover:text-green-700 transition-colors duration-300">{icon}</div>
                     </span>
                 </div>
-                <h3 className="text-2xl font-bold mb-4 text-center group-hover:text-yellow-200 transition-colors duration-300">
+                <h3 className="text-2xl font-bold mb-4 text-center group-hover:text-green-200 transition-colors duration-300">
                     {title}
                 </h3>
                 <p className="text-center text-lg leading-relaxed opacity-95 group-hover:opacity-100 transition-opacity duration-300">
@@ -223,22 +223,22 @@ const CorporateResponsibility: React.FC = () => {
             {/* Hero Section */}
             <section className="relative bg-gradient-to-br from-white via-gray-50 to-gray-100 py-24 overflow-hidden">
                 <div className="absolute top-0 left-0 w-full h-full">
-                    <div className="absolute top-20 left-20 w-64 h-64 bg-[#98CD00]/5 rounded-full blur-3xl"></div>
-                    <div className="absolute bottom-20 right-20 w-96 h-96 bg-[#98CD00]/3 rounded-full blur-3xl"></div>
+                    <div className="absolute top-20 left-20 w-64 h-64 bg-green-600/5 rounded-full blur-3xl animate-pulse"></div>
+                    <div className="absolute bottom-20 right-20 w-96 h-96 bg-green-600/3 rounded-full blur-3xl animate-pulse delay-1000"></div>
                 </div>
 
                 <div className="relative container mx-auto px-6 max-w-6xl">
                     <div className="text-center mb-20">
-                        <h1 className="text-6xl lg:text-7xl font-bold mb-8 text-gray-800 leading-tight">
+                        <h1 className="text-6xl lg:text-7xl font-bold mb-8 text-gray-800 leading-tight hover:text-gray-700 transition-colors duration-300 cursor-default">
                             A Cleaner Tomorrow,{" "}
-                            <span className="bg-gradient-to-r from-[#98CD00] to-[#7AB800] bg-clip-text text-transparent">
+                            <span className="bg-gradient-to-r from-green-600 to-green-700 bg-clip-text text-transparent hover:from-green-500 hover:to-green-600 transition-all duration-300">
                                 A Shared Responsibility
                             </span>
                         </h1>
-                        <div className="w-32 h-2 bg-gradient-to-r from-[#98CD00] to-[#7AB800] rounded-full mx-auto mb-8"></div>
-                        <p className="text-2xl max-w-4xl mx-auto leading-relaxed text-gray-700">
+                        <div className="w-32 h-2 bg-gradient-to-r from-green-600 to-green-700 rounded-full mx-auto mb-8 hover:w-40 transition-all duration-300"></div>
+                        <p className="text-2xl max-w-4xl mx-auto leading-relaxed text-gray-700 hover:text-gray-600 transition-colors duration-300">
                             At{" "}
-                            <span className="font-bold text-[#98CD00]">
+                            <span className="font-bold text-green-600 hover:text-green-700 transition-colors duration-300">
                                 Go Green+
                             </span>
                             , corporate responsibility isn't a side initiative —
@@ -280,10 +280,10 @@ const CorporateResponsibility: React.FC = () => {
                     {/* Impact Cards */}
                     <div className="mt-24 mb-20">
                         <div className="text-center mb-16">
-                            <h2 className="text-5xl font-bold text-gray-800 mb-6">
+                            <h2 className="text-5xl font-bold text-gray-800 mb-6 hover:text-green-600 transition-colors duration-300 cursor-default">
                                 Our Impact
                             </h2>
-                            <div className="w-24 h-2 bg-gradient-to-r from-[#98CD00] to-[#7AB800] rounded-full mx-auto"></div>
+                            <div className="w-24 h-2 bg-gradient-to-r from-green-600 to-green-700 rounded-full mx-auto hover:w-32 transition-all duration-300"></div>
                         </div>
 
                         <div className="grid lg:grid-cols-3 gap-8">

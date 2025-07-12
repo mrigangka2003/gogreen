@@ -13,7 +13,7 @@ import VisitCareer from "./About/VisitCareer";
 import Team from "./About/Team";
 
 
-
+import ComingSoon from "./ComingSoon";
 
 export {
     Header,
@@ -27,4 +27,5 @@ export {
     OurMission,
     VisitCareer,
     Team,
+    ComingSoon
 }

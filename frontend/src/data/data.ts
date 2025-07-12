@@ -11,6 +11,7 @@ import samik_das from "../assets/team/samik_das_ceo.jpg";
 import bilash_chandra_roy from "../assets/team/bilash_chandra_roy.png";
 
 import EvVaccumCleaner from "../assets/EV_vaccum_cleaner.png"
+import doorToDoor from "../assets/door_to_door.jpg"
 
 interface Advisors {
     id: string;
@@ -49,7 +50,7 @@ const services: Array<ProductAndServices> = [
         title: "Door-to-Door Garbage Collector",
         description:
             "A compact, hand-towing garbage collection unit designed for narrow streets and residential areas. Enables efficient collection of household waste directly from the source. Lightweight, maneuverable, and perfect for daily municipal operations.",
-        image: "https://evreka.co/wp-content/uploads/2022/06/5-benefits-of-route-optimization-software-1-scaled.jpg",
+        image: doorToDoor,
         reversed: true,
     },
     {

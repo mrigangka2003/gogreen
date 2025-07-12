@@ -1,5 +1,5 @@
-import { useParams } from "react-router-dom";
-import { ArrowLeft, MapPin } from "lucide-react";
+import { useParams, Link } from "react-router-dom";
+import { ArrowLeft, MapPin, Linkedin } from "lucide-react";
 
 import { advisors, executives } from "../data/data";
 
@@ -54,15 +54,15 @@ const MemberPage = () => {
 
             {/* Main content */}
             {type === "advisor" ? (
-                <ForAdvisors member={member}/>
-            ):(
-                <ForExecutive member={member}/>
+                <ForAdvisors member={member} />
+            ) : (
+                <ForExecutive member={member} />
             )}
         </div>
     );
 };
 
-const ForExecutive = ({member}:any) => {
+const ForExecutive = ({ member }: any) => {
     return (
         <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
             <div className="bg-white shadow-xl overflow-hidden">
@@ -133,6 +133,14 @@ const ForExecutive = ({member}:any) => {
                                             {member.country}
                                         </span>
                                     </div>
+
+                                    {member.linkedIn && (
+                                        <div>
+                                            <Link className="cursor-pointer" to={member.linkedIn}>
+                                                <Linkedin />
+                                            </Link>
+                                        </div>
+                                    )}
                                 </div>
                             </div>
                         </div>
@@ -143,7 +151,7 @@ const ForExecutive = ({member}:any) => {
     );
 };
 
-const ForAdvisors = ({member}:any) => {
+const ForAdvisors = ({ member }: any) => {
     return (
         <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
             <div className="bg-white shadow-xl overflow-hidden">
