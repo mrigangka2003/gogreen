@@ -14,6 +14,7 @@ import Team from "./About/Team";
 
 
 import ComingSoon from "./ComingSoon";
+import ScrollToTop from "./ScrollToTop";
 
 export {
     Header,
@@ -27,5 +28,6 @@ export {
     OurMission,
     VisitCareer,
     Team,
-    ComingSoon
+    ComingSoon,
+    ScrollToTop
 }

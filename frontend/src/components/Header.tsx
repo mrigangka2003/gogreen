@@ -1,33 +1,20 @@
 import { useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useLocation } from "react-router-dom"; // ✅ Step 1
 import { ChevronDown, Menu, X } from "lucide-react";
-
-import logo from "../assets/logo.jpg"
-
-
+import logo from "../assets/logo.jpg";
 
 const Header = () => {
+    const location = useLocation(); // ✅ Get current route
     const [navOpen, setNavOpen] = useState(false);
     const [careersDropdownOpen, setCareersDropdownOpen] = useState(false);
 
-    const toggleNavBar = () => {
-        setNavOpen(!navOpen);
-    };
-
-    const closeNavBar = () => {
-        setNavOpen(false);
-    };
-
-    const toggleCareersDropdown = () => {
+    const toggleNavBar = () => setNavOpen(!navOpen);
+    const closeNavBar = () => setNavOpen(false);
+    const toggleCareersDropdown = () =>
         setCareersDropdownOpen(!careersDropdownOpen);
-    };
 
     const navItems = [
-        {
-            name: "Home",
-            slug: "/",
-            active: true,
-        },
+        { name: "Home", slug: "/", active: true },
         {
             name: "Product & Services",
             slug: "/product-and-services",
@@ -38,44 +25,17 @@ const Header = () => {
             slug: "/corporate-responsibility",
             active: true,
         },
-        {
-            name: "Community Impact",
-            slug: "/community-impact",
-            active: true,
-        },
-        {
-            name: "Media",
-            slug: "/media",
-            active: true,
-        },
-        {
-            name: "About",
-            slug: "/about",
-            active: true,
-        },
+        { name: "Community Impact", slug: "/community-impact", active: true },
+        { name: "Media", slug: "/media", active: true },
+        { name: "About", slug: "/about", active: true },
     ];
 
     const careersItems = [
-        {
-            name: "Job Search",
-            slug: "/careers/job-search",
-        },
-        {
-            name: "Internships",
-            slug: "/careers/students/internships",
-        },
-        {
-            name: "Events",
-            slug: "/careers/students/events",
-        },
-        {
-            name: "Working Here",
-            slug: "/careers/working-here",
-        },
-        {
-            name: "Our Process",
-            slug: "/careers/our-process",
-        },
+        { name: "Job Search", slug: "/careers/job-search" },
+        { name: "Internships", slug: "/careers/students/internships" },
+        { name: "Events", slug: "/careers/students/events" },
+        { name: "Working Here", slug: "/careers/working-here" },
+        { name: "Our Process", slug: "/careers/our-process" },
     ];
 
     return (
@@ -84,7 +44,7 @@ const Header = () => {
                 <nav className="flex justify-between items-center h-20">
                     {/* Logo */}
                     <div className="flex-shrink-0">
-                        <Link to="/" onClick={closeNavBar} className="block">
+                        <Link to="/" onClick={closeNavBar}>
                             <img
                                 src={logo}
                                 alt="GoGreen+ Logo"
@@ -100,10 +60,20 @@ const Header = () => {
                                 <Link
                                     key={item.name}
                                     to={item.slug}
-                                    className="relative text-gray-700 hover:text-primary-600 font-medium text-sm transition-colors duration-200 group"
+                                    className={`relative font-medium text-sm transition-colors duration-200 group ${
+                                        location.pathname === item.slug
+                                            ? "text-primary-600"
+                                            : "text-gray-700 hover:text-primary-600"
+                                    }`}
                                 >
                                     {item.name}
-                                    <span className="absolute inset-x-0 -bottom-1 h-0.5 bg-primary-600 scale-x-0 group-hover:scale-x-100 transition-transform duration-200"></span>
+                                    <span
+                                        className={`absolute inset-x-0 -bottom-1 h-0.5 bg-primary-600 transition-transform duration-200 ${
+                                            location.pathname === item.slug
+                                                ? "scale-x-100"
+                                                : "scale-x-0 group-hover:scale-x-100"
+                                        }`}
+                                    ></span>
                                 </Link>
                             ) : null
                         )}
@@ -133,7 +103,11 @@ const Header = () => {
                                                 closeNavBar();
                                                 setCareersDropdownOpen(false);
                                             }}
-                                            className="block px-4 py-3 text-sm text-gray-700 hover:bg-primary-50 hover:text-primary-600 transition-colors duration-200"
+                                            className={`block px-4 py-3 text-sm transition-colors duration-200 ${
+                                                location.pathname === item.slug
+                                                    ? "text-primary-600 bg-primary-50"
+                                                    : "text-gray-700 hover:bg-primary-50 hover:text-primary-600"
+                                            }`}
                                         >
                                             {item.name}
                                         </Link>
@@ -164,7 +138,11 @@ const Header = () => {
                                         key={item.name}
                                         to={item.slug}
                                         onClick={closeNavBar}
-                                        className="block px-3 py-2 text-base font-medium text-gray-700 hover:text-primary-600 hover:bg-gray-50 rounded-md transition-colors duration-200"
+                                        className={`block px-3 py-2 text-base font-medium rounded-md transition-colors duration-200 ${
+                                            location.pathname === item.slug
+                                                ? "text-primary-600 bg-primary-50"
+                                                : "text-gray-700 hover:text-primary-600 hover:bg-gray-50"
+                                        }`}
                                     >
                                         {item.name}
                                     </Link>
@@ -199,7 +177,12 @@ const Header = () => {
                                                         false
                                                     );
                                                 }}
-                                                className="block px-6 py-2 text-sm text-gray-600 hover:text-primary-600 hover:bg-gray-50 rounded-md transition-colors duration-200"
+                                                className={`block px-6 py-2 text-sm rounded-md transition-colors duration-200 ${
+                                                    location.pathname ===
+                                                    item.slug
+                                                        ? "text-primary-600 bg-primary-50"
+                                                        : "text-gray-600 hover:text-primary-600 hover:bg-gray-50"
+                                                }`}
                                             >
                                                 {item.name}
                                             </Link>
