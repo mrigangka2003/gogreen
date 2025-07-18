@@ -17,6 +17,7 @@ import {
     Events,
     WorkingHere,
     OurProcess,
+    Login
 } from "./pages";
 
 const router = createBrowserRouter([
@@ -75,6 +76,10 @@ const router = createBrowserRouter([
             {
                 path:"/careers/our-process",
                 element:<OurProcess/>
+            },
+            {
+                path:'/login',
+                element:<Login/>
             }
         ],
     },

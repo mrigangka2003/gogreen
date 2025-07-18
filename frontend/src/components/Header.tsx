@@ -1,10 +1,10 @@
 import { useState } from "react";
-import { Link, useLocation } from "react-router-dom"; // ✅ Step 1
+import { Link, useLocation } from "react-router-dom";
 import { ChevronDown, Menu, X } from "lucide-react";
-import logo from "../assets/logo.jpg";
+import logo from "../assets/logo.svg"
 
 const Header = () => {
-    const location = useLocation(); // ✅ Get current route
+    const location = useLocation(); 
     const [navOpen, setNavOpen] = useState(false);
     const [careersDropdownOpen, setCareersDropdownOpen] = useState(false);
 
@@ -40,7 +40,7 @@ const Header = () => {
 
     return (
         <header className="sticky top-0 z-50 bg-white/95 backdrop-blur-md border-b border-gray-200 shadow-sm">
-            <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div className="w-full mx-auto px-4 sm:px-6 lg:px-8">
                 <nav className="flex justify-between items-center h-20">
                     {/* Logo */}
                     <div className="flex-shrink-0">

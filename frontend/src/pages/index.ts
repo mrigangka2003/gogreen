@@ -10,6 +10,8 @@ import Internships from "./Internships";
 import Events from "./Events";
 import WorkingHere from "./WorkingHere";
 import OurProcess from "./OurProcess";
+import Login from "./Auth";
+
 
 export {
     Home,
@@ -23,5 +25,6 @@ export {
     Internships,
     Events,
     WorkingHere,
-    OurProcess 
+    OurProcess,
+    Login
 }

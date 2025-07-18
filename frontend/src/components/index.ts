@@ -1,20 +1,22 @@
 import Header from "./Header";
-import Footer from "./Footer"
+import Footer from "./Footer";
 import JoinUs from "./JoinUs";
 
 import Quote from "./Home/Quote";
 import Hero from "./Home/Hero";
 import ServicesSpaces from "./Home/ServicesSpace";
-import Manufacturing from "./Home/Manufacturing"
+import Manufacturing from "./Home/Manufacturing";
 
 import AboutBanner from "./About/AboutBanner";
 import OurMission from "./About/OurMission";
 import VisitCareer from "./About/VisitCareer";
 import Team from "./About/Team";
 
-
 import ComingSoon from "./ComingSoon";
 import ScrollToTop from "./ScrollToTop";
+
+import SignIn from "./Auth/SignIn";
+import Signup from "./Auth/Signup";
 
 export {
     Header,
@@ -29,5 +31,7 @@ export {
     VisitCareer,
     Team,
     ComingSoon,
-    ScrollToTop
-}
+    ScrollToTop,
+    SignIn,
+    Signup,
+};
