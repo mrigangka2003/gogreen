@@ -17,8 +17,11 @@ import {
     Events,
     WorkingHere,
     OurProcess,
-    Login
+    Auth,
+    Dashboard,
+    BookNow,
 } from "./pages";
+import ProtectedRoute from "./components/ProtectedRoute.tsx";
 
 const router = createBrowserRouter([
     {
@@ -55,7 +58,7 @@ const router = createBrowserRouter([
             },
             {
                 path: "/careers/job-search",
-                element: <JobSearch/>,
+                element: <JobSearch />,
             },
             {
                 path: "/careers/job-search",
@@ -67,20 +70,36 @@ const router = createBrowserRouter([
             },
             {
                 path: "/careers/students/events",
-                element: <Events/>,
+                element: <Events />,
             },
             {
                 path: "/careers/working-here",
-                element: <WorkingHere/>,
+                element: <WorkingHere />,
             },
             {
-                path:"/careers/our-process",
-                element:<OurProcess/>
+                path: "/careers/our-process",
+                element: <OurProcess />,
             },
             {
-                path:'/login',
-                element:<Login/>
-            }
+                path: "/dashboard",
+                element: (
+                    <ProtectedRoute>
+                        <Dashboard />
+                    </ProtectedRoute>
+                ),
+            },
+            {
+                path: "/book-now",
+                element: (
+                    <ProtectedRoute>
+                        <BookNow />
+                    </ProtectedRoute>
+                ),
+            },
+            {
+                path: "/login",
+                element: <Auth />,
+            },
         ],
     },
 ]);

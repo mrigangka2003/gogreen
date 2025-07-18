@@ -18,6 +18,9 @@ import ScrollToTop from "./ScrollToTop";
 import SignIn from "./Auth/SignIn";
 import Signup from "./Auth/Signup";
 
+
+import ProtectedRoute from "./ProtectedRoute";
+
 export {
     Header,
     Footer,
@@ -32,6 +35,7 @@ export {
     Team,
     ComingSoon,
     ScrollToTop,
+    ProtectedRoute,
     SignIn,
     Signup,
 };
