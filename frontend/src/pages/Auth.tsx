@@ -53,7 +53,6 @@ const Login = () => {
         </main>
     );
 };
-const inputClass =
-    "w-full pl-10 pr-3 py-2 mt-1 border border-gray-300 rounded-lg outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary transition text-sm text-gray-700 leading-tight";
+
 
 export default Login;
