@@ -38,7 +38,7 @@ const registerUser = async (req: Request, res: Response): Promise<void> => {
                 id: user._id,
                 name: user.name,
                 email: user.email,
-                role: "user",
+                role: role,
             },
         });
     } catch (error) {
@@ -75,7 +75,7 @@ const loginUser = async (req: Request, res: Response): Promise<void> => {
                 id: user._id,
                 name: user.name,
                 email: user.email,
-                role: "user",
+                role: user.role,
             },
         });
     } catch (error) {

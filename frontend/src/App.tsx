@@ -1,6 +1,6 @@
 import { Outlet } from "react-router-dom";
 
-import { Header, Footer, ScrollToTop, BookNowButton, ContactFloating } from "./components";
+import { Header, Footer, ScrollToTop } from "./components";
 
 
 function App() {
@@ -11,8 +11,6 @@ function App() {
                 <ScrollToTop/>
                 <Outlet />
             </main>
-            <BookNowButton/>
-            <ContactFloating/>
             <Footer />
         </>
     );

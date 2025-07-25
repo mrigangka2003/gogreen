@@ -1,6 +1,6 @@
 import { Link } from "react-router-dom";
 
-import { Quote, Hero, ServicesSpaces, Manufacturing, JoinUs } from "../components";
+import { Quote, Hero, ServicesSpaces, Manufacturing, JoinUs,BookNowButton,ContactFloating } from "../components";
 
 const Home = () => {
     return (
@@ -11,6 +11,8 @@ const Home = () => {
             <AboutButton />
             <Manufacturing/>
             <JoinUs/>
+            <BookNowButton/>
+            <ContactFloating/>
         </main>
     );
 };
