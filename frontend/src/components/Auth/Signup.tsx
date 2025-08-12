@@ -1,11 +1,21 @@
 import { useForm } from "react-hook-form";
 import type { FieldValues } from "react-hook-form";
-import { User, Mail, Lock, Phone } from "lucide-react";
+import { User as UserIcon, Mail, Lock, Phone } from "lucide-react";
+
+import axiosInstance from "../../api";
+import { useAuthStore } from "../../stores/auth";
+import type { User } from "../../stores/auth";
+import { useNavigate } from "react-router-dom";
+
 
 const inputClass =
     "w-full pl-10 pr-3 py-2 mt-1 border border-gray-300 rounded-lg outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary transition text-sm text-gray-700 leading-tight";
 
 const Signup = () => {
+
+    const setUser = useAuthStore((state)=>state.setUser); 
+    const navigate = useNavigate()
+
     const {
         register,
         handleSubmit,
@@ -13,8 +23,25 @@ const Signup = () => {
         formState: { errors, isSubmitting },
     } = useForm<FieldValues>();
 
-    const onSubmit = (data: FieldValues) => {
-        console.log("Signup payload:", data);
+
+
+    const onSubmit = async (data: FieldValues) => {
+        try {
+            const response = await axiosInstance.post("/signup", {
+                name: data.name,
+                email: data.email,
+                password: data.password,
+                phone: data.phone,
+                role: data.role,
+            });
+
+            const user : User = (response.data as any).data.user;
+            setUser(user);
+            navigate('/dashboard');
+
+        } catch (error:any) {
+            console.log("Login failed", error?.response?.data);
+        }
     };
 
     return (
@@ -33,7 +60,7 @@ const Signup = () => {
                 </label>
                 <div className="relative">
                     <div className="absolute bottom-2 left-0 pl-3 flex items-center pointer-events-none mt-6">
-                        <User className="h-5 w-5 text-gray-400" />
+                        <UserIcon className="h-5 w-5 text-gray-400" />
                     </div>
                     <input
                         id="name"

@@ -7,8 +7,6 @@ import Booking from "../models/booking.model";
 import User from "../models/user.model";
 
 
-
-
 const createBooking = async (
     req: AuthRequest,
     res: Response

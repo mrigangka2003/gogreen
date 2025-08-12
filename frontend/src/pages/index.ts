@@ -15,6 +15,9 @@ import Auth from "./Auth";
 
 import Dashboard from "./Dashboard";
 import BookNow from "./BookNow";
+import MyProfile from "./MyProfile";
+import MyBookings from "./MyBookings";
+
 
 
 export {
@@ -32,5 +35,7 @@ export {
     OurProcess,
     Auth,
     Dashboard,
-    BookNow
+    BookNow,
+    MyBookings,
+    MyProfile
 }

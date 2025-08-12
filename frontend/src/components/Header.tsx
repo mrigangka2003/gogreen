@@ -3,6 +3,7 @@ import { Link, NavLink, useNavigate } from "react-router-dom";
 import { ChevronDown, Menu, X } from "lucide-react";
 
 import logo from "../assets/logo.svg";
+import { useAuthStore } from "../stores/auth";
 
 type MenuItem = {
     label: string;
@@ -12,7 +13,10 @@ type MenuItem = {
 const Header = () => {
     const [showUserMenu, setShowUserMenu] = useState<boolean>(false);
     const [showCareersMenu, setShowCareersMenu] = useState<boolean>(false);
-    const [isAuthenticated, setIsAuthenticated] = useState<boolean>(false);
+
+    const user = useAuthStore((state)=>state.user);
+    const clearUser = useAuthStore((state)=>state.clearUser);
+
 
     const navigate = useNavigate();
 
@@ -44,6 +48,7 @@ const Header = () => {
     const userMenuItems: MenuItem[] = [
         { label: "My Profile", slug: "/my-profile" },
         { label: "My Bookings", slug: "/my-bookings" },
+        {label:"Dashboard" ,slug:"/dashboard"}
     ];
 
     return (
@@ -71,7 +76,7 @@ const Header = () => {
                                         : "text-gray-700 hover:text-green-700 transition-all duration-300 hover:scale-105 font-medium tracking-wide text-sm"
                                 }
                             >
-                                {item.name.toUpperCase()}
+                                {item.name}
                             </NavLink>
                         </li>
                     ))}
@@ -83,7 +88,7 @@ const Header = () => {
                             onMouseEnter={() => setShowCareersMenu(true)}
                             onMouseLeave={() => setShowCareersMenu(false)}
                         >
-                            CAREERS
+                            Careers
                             <ChevronDown
                                 className="transition-transform duration-300 group-hover:rotate-180"
                                 size={14}
@@ -117,7 +122,7 @@ const Header = () => {
 
                 {/* User Section */}
                 <div className="flex items-center gap-4">
-                    {isAuthenticated ? (
+                    {user ? (
                         <div>
                             <div className="flex items-center gap-3 cursor-pointer group relative">
                                 {/* Professional avatar with green accent */}
@@ -153,7 +158,7 @@ const Header = () => {
                                         <div
                                             className="py-3 px-4 rounded-xl hover:bg-red-50 hover:text-red-600 cursor-pointer transition-all duration-300 hover:translate-x-2 font-medium tracking-wide border border-transparent hover:border-red-200"
                                             onClick={() => {
-                                                setIsAuthenticated(false);
+                                                clearUser();
                                                 navigate("/");
                                             }}
                                         >

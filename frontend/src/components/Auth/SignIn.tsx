@@ -2,23 +2,47 @@ import { Mail, Lock } from "lucide-react";
 import { useForm } from "react-hook-form";
 import type { FieldValues } from "react-hook-form";
 
+import axiosInstance from "../../api";
+import { useAuthStore } from "../../stores/auth";
+import type { User } from "../../stores/auth";
+import { useNavigate } from "react-router-dom";
+
 const inputClass =
     "w-full pl-10 pr-3 py-2 mt-1 border border-gray-300 rounded-lg outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary transition text-sm text-gray-700 leading-tight";
 
 const SignIn = () => {
+    const navigate = useNavigate();
+
     const {
         register,
         handleSubmit,
-        getValues,
         formState: { errors, isSubmitting },
-    } = useForm();
+    } = useForm<FieldValues>();
 
-    const onSubmit = (data:FieldValues)=>{
-        console.log("Signin payload:", data);
-    }
+    const setUser = useAuthStore((state) => state.setUser);
+
+    const onSubmit = async (data: FieldValues) => {
+        try {
+            const response = await axiosInstance.post("/login", {
+                email: data.email,
+                password: data.password,
+            });
+
+            //quick fix
+            const user: User = (response.data as any).data.user;
+            setUser(user);
+            navigate("/dashboard");
+        } catch (error: any) {
+            console.log("Login failed", error?.response?.data);
+        }
+    };
 
     return (
-        <form className="space-y-3" onSubmit={handleSubmit(onSubmit)} noValidate>
+        <form
+            className="space-y-3"
+            onSubmit={handleSubmit(onSubmit)}
+            noValidate
+        >
             {/* Email */}
             <div>
                 <label
@@ -82,38 +106,6 @@ const SignIn = () => {
                 {errors.password && (
                     <p className="text-xs text-red-500 mt-1">
                         {errors.password.message as string}
-                    </p>
-                )}
-            </div>
-
-            {/* Confirm Password */}
-            <div>
-                <label
-                    htmlFor="confirmPassword"
-                    className="text-sm font-medium text-gray-700"
-                >
-                    Confirm Password
-                </label>
-                <div className="relative">
-                    <div className="absolute bottom-2 left-0 pl-3 flex items-center pointer-events-none mt-6">
-                        <Lock className="h-5 w-5 text-gray-400" />
-                    </div>
-                    <input
-                        id="confirmPassword"
-                        type="password"
-                        className={inputClass}
-                        placeholder="••••••••"
-                        {...register("confirmPassword", {
-                            required: "Please confirm your password",
-                            validate: (value) =>
-                                value === getValues("password") ||
-                                "Passwords do not match",
-                        })}
-                    />
-                </div>
-                {errors.confirmPassword && (
-                    <p className="text-xs text-red-500 mt-1">
-                        {errors.confirmPassword.message as string}
                     </p>
                 )}
             </div>

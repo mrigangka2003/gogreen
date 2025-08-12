@@ -21,6 +21,10 @@ import SignIn from "./Auth/SignIn";
 import Signup from "./Auth/Signup";
 
 
+import AdminDashboard from "./Dashboards/AdminDashboard";
+import UserDashboard from "./Dashboards/UserDashboard";
+import OrganizationDashboards from "./Dashboards/OrganizationDashboards";
+
 import ProtectedRoute from "./ProtectedRoute";
 
 export {
@@ -41,5 +45,9 @@ export {
     ProtectedRoute,
     SignIn,
     Signup,
-    ContactFloating
+    ContactFloating,
+
+    UserDashboard,
+    AdminDashboard,
+    OrganizationDashboards
 };

@@ -20,6 +20,8 @@ import {
     Auth,
     Dashboard,
     BookNow,
+    MyBookings,
+    MyProfile,
 } from "./pages";
 import ProtectedRoute from "./components/ProtectedRoute.tsx";
 
@@ -94,6 +96,18 @@ const router = createBrowserRouter([
                     <ProtectedRoute>
                         <BookNow />
                     </ProtectedRoute>
+                ),
+            },
+            {
+                path: "/my-profile",
+                element: (
+                    <MyProfile />
+                ),
+            },
+            {
+                path: "/my-bookings",
+                element: (
+                    <MyBookings/>
                 ),
             },
             {
