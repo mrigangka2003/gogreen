@@ -1,4 +1,4 @@
-import { AboutBanner, OurMission, VisitCareer,Team } from "../components";
+import { AboutBanner, OurMission,Team } from "../components";
 
 const About = () => {
     return (
@@ -6,7 +6,6 @@ const About = () => {
             <AboutBanner/>
             <OurMission/>
             <Testimonial />
-            <VisitCareer/>
             <Team/>
         </div>
     );

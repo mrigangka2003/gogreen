@@ -11,7 +11,6 @@ import Manufacturing from "./Home/Manufacturing";
 
 import AboutBanner from "./About/AboutBanner";
 import OurMission from "./About/OurMission";
-import VisitCareer from "./About/VisitCareer";
 import Team from "./About/Team";
 
 import ComingSoon from "./ComingSoon";
@@ -38,7 +37,6 @@ export {
     JoinUs,
     AboutBanner,
     OurMission,
-    VisitCareer,
     Team,
     ComingSoon,
     ScrollToTop,
