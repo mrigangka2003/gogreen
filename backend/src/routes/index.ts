@@ -1,20 +1,45 @@
 import { Router } from "express";
 
-import userRouter from "./user.routes";
+// Routes
+import userRoutes from "./user.routes";
+import empRoutes from "./emp.routes";
 import adminRoutes from "./admin.routes";
-import { authenticate } from "../middlewares/authMiddleware";
-import { loginUser, logout, registerUser } from "../controllers";
-import organizationRoutes from "./organization.routes";
+import superRoutes from "./superAdmin.routes";
 
-const router = Router() ;
+// Auth controllers
+import authController from "../controllers/auth/auth.controller";
 
-//common routes
-router.post('/signup',registerUser);
-router.post('/login', loginUser);
-router.post('/logout', authenticate,logout);
+// Middleware
+import { authMiddleware } from "../middlewares/auth";
 
-router.use('/user',userRouter) ;
-router.use('/admin',adminRoutes) ;
-router.use('/org',organizationRoutes) ;
+const router = Router();
 
-export default router ;
+/**
+ * 🔐 Auth routes
+ */
+router.post("/signup", authController.register);
+router.post("/login", authController.login);
+router.post("/logout", authMiddleware, authController.logout);
+
+/**
+ *  User/Org routes (user and org share the same routes/permissions)
+ */
+router.use("/user", userRoutes);
+router.use("/org", userRoutes); // reuse user routes for org role
+
+/**
+ *  Employee routes
+ */
+router.use("/emp", empRoutes);
+
+/**
+ *  Admin routes
+ */
+router.use("/admin", adminRoutes);
+
+/**
+ * Super Admin routes
+ */
+router.use("/super", superRoutes);
+
+export default router;

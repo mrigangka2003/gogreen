@@ -1,242 +1,243 @@
-import { Response } from "express";
-import mongoose from "mongoose";
-
-import { AuthRequest } from "../middlewares/authMiddleware";
-import { apiResponse, apiError } from "../helper";
+import { Request, Response } from "express";
 import Booking from "../models/booking.model";
+import Review from "../models/review.model";
 import User from "../models/user.model";
+import { apiError, apiResponse } from "../helper";
 
-
-const createBooking = async (
-    req: AuthRequest,
-    res: Response
-): Promise<void> => {
-    if (req.user?.role !== "user") {
-        apiError(res, 403, "Only users can create bookings");
-        return;
-    }
-
+/**
+ * Create a booking (self/org)
+ */
+const createBooking = async (req: Request, res: Response): Promise<void> => {
     try {
-        const { date, time, address, totalAmount, notes } = req.body;
-        const userId = req.user?.id;
+        const {
+            serviceType,
+            address,
+            phoneNumber,
+            instruction,
+            date,
+            timeSlot,
+        } = req.body;
 
-        if (!date || !time || !address) {
-            apiError(res, 400, "Date, time, and address are required");
+        if (!req.user) {
+            apiError(res, 401, "Unauthorized");
             return;
         }
 
-        if (!totalAmount || totalAmount <= 0) {
-            apiError(res, 400, "Valid total amount is required");
-            return;
-        }
-
-        let bookingDateTime;
-        try {
-            if (time.includes(":")) {
-                bookingDateTime = new Date(`${date}T${time}:00`);
-            } else {
-                bookingDateTime = new Date(`${date}T${time}`);
-            }
-        } catch (dateError) {
-            apiError(res, 400, "Invalid date or time format");
-            return;
-        }
-
-        if (bookingDateTime <= new Date()) {
-            apiError(res, 400, "Booking date must be in the future");
-            return;
-        }
-
-        const newBooking = new Booking({
-            userId: userId,
-            bookingDate: bookingDateTime,
-            totalAmount: totalAmount,
-            status: "pending",
-            paymentStatus: "pending",
-            notes: notes || undefined,
+        const booking = await Booking.create({
+            userId: req.user.id,
+            serviceType,
+            address,
+            phoneNumber,
+            instruction,
+            date,
+            timeSlot,
         });
 
-        const savedBooking = await newBooking.save();
-
-        await User.findByIdAndUpdate(
-            userId,
-            { $push: { bookings: savedBooking._id } },
-            { new: true }
-        );
-
-        const populatedBooking = await Booking.findById(
-            savedBooking._id
-        ).populate("userId", "name email phone");
-
-        apiResponse(res, 201, "Booking Successfully Created", populatedBooking);
-    } catch (error) {
-        apiError(res, 500, "Failed to create booking", error);
+        apiResponse(res, 201, "Booking created successfully", booking);
+    } catch (err) {
+        apiError(res, 500, "Failed to create booking", err);
     }
 };
 
-
-
-
-
-
-const getUserBookings = async (
-    req: AuthRequest,
-    res: Response
-): Promise<void> => {
+/**
+ * Update a booking (only own bookings if still pending)
+ */
+const updateBooking = async (req: Request, res: Response): Promise<void> => {
     try {
-        const userId = req.user._id;
-
-        if (!userId) {
-            apiError(res, 401, "User doesn't exists");
+        if (!req.user) {
+            apiError(res, 401, "Unauthorized");
             return;
         }
 
-        const userWithBookings = await User.findById(userId)
-            .populate({
-                path: "bookings",
-                select: "-__v",
-                options: { sort: { createdAt: -1 } },
-            })
-            .select("-password");
-
-        if (!userWithBookings) {
-            apiError(res, 404, "Bookings not found");
-            return;
-        }
-
-        apiResponse(res, 200, "Bookings Retrieved successfully");
-    } catch (error) {
-        apiError(res, 500, "Something went wrong");
-    }
-};
-
-
-
-
-
-
-
-const addBookingFeedback = async (
-    req: AuthRequest,
-    res: Response
-): Promise<void> => {
-    try {
-        const userId = req.user?.id;
-        const { bookingId } = req.params;
-        const { rating, comment } = req.body;
-
-        if (!userId) {
-            apiError(res, 401, "User doesn't exists");
-            return;
-        }
-
-        if (!bookingId || !rating) {
-            apiError(res, 401, "all the fields should be filled");
-            return;
-        }
-
-        if (rating < 1 || rating > 5) {
-            apiError(res, 401, "please rate in the range");
-            return;
-        }
-
-        if (!mongoose.Types.ObjectId.isValid(bookingId)) {
-            apiError(res, 400, "Invalid booking ID");
-            return;
-        }
-
-        const booking = await Booking.findById(bookingId);
+        const { id } = req.params;
+        const booking = await Booking.findOne({ _id: id, userId: req.user.id });
 
         if (!booking) {
             apiError(res, 404, "Booking not found");
             return;
         }
 
-        // Check if booking belongs to the authenticated user
-        if (booking.userId.toString() !== userId) {
-            apiError(res, 403, "This Booking doesn't belong to you");
-        }
-
-        // Check if booking is completed (optional - depends on your business logic)
-        if (booking.status !== "completed") {
-            apiError(
-                res,
-                400,
-                "You can only add booking that has been completed"
-            );
+        if (booking.status !== "pending") {
+            apiError(res, 400, "Only pending bookings can be updated");
             return;
         }
 
-        // Check if feedback already exists
-        if (booking.feedback) {
-            apiError(res, 400, "Booking has been given");
-            return;
-        }
+        Object.assign(booking, req.body);
+        await booking.save();
 
-        const updatedBooking = await Booking.findByIdAndUpdate(
-            bookingId,
-            {
-                feedback: {
-                    rating: rating,
-                    comment: comment || "",
-                    createdAt: new Date(),
-                },
-            },
-            { new: true, runValidators: true }
-        ).select("-__v");
-        apiResponse(res, 200, "Feedback added successfully", {
-            booking: updatedBooking,
-        });
-    } catch (error) {
-        apiError(res, 500, "Internal Server Error");
+        apiResponse(res, 200, "Booking updated successfully", booking);
+    } catch (err) {
+        apiError(res, 500, "Failed to update booking", err);
     }
 };
 
+/**
+ * Create review for own booking
+ */
+const createReviewSelf = async (req: Request, res: Response): Promise<void> => {
+    try {
+        if (!req.user) {
+            apiError(res, 401, "Unauthorized");
+            return;
+        }
 
+        const { bookingId, rating, feedback } = req.body;
+        const booking = await Booking.findOne({
+            _id: bookingId,
+            userId: req.user.id,
+        });
 
+        if (!booking) {
+            apiError(res, 404, "Booking not found");
+            return;
+        }
 
+        if (booking.status !== "completed") {
+            apiError(res, 400, "Cannot review until booking is completed");
+            return;
+        }
 
+        const review = await Review.create({
+            bookingId,
+            userId: req.user.id,
+            rating,
+            feedback,
+        });
 
+        apiResponse(res, 201, "Review created successfully", review);
+    } catch (err) {
+        apiError(res, 500, "Failed to create review", err);
+    }
+};
 
+/**
+ * Update own review
+ */
+const updateReviewSelf = async (req: Request, res: Response): Promise<void> => {
+    try {
+        if (!req.user) {
+            apiError(res, 401, "Unauthorized");
+            return;
+        }
 
-export const getBookingDetails = async (
-    req: AuthRequest,
+        const { id } = req.params;
+        const review = await Review.findOne({ _id: id, userId: req.user.id });
+
+        if (!review) {
+            apiError(res, 404, "Review not found");
+            return;
+        }
+
+        Object.assign(review, req.body);
+        await review.save();
+
+        apiResponse(res, 200, "Review updated successfully", review);
+    } catch (err) {
+        apiError(res, 500, "Failed to update review", err);
+    }
+};
+
+/**
+ * Delete own review
+ */
+const deleteReviewSelf = async (req: Request, res: Response): Promise<void> => {
+    try {
+        if (!req.user) {
+            apiError(res, 401, "Unauthorized");
+            return;
+        }
+
+        const { id } = req.params;
+        const review = await Review.findOneAndDelete({
+            _id: id,
+            userId: req.user.id,
+        });
+
+        if (!review) {
+            apiError(res, 404, "Review not found");
+            return;
+        }
+
+        apiResponse(res, 200, "Review deleted successfully", {});
+    } catch (err) {
+        apiError(res, 500, "Failed to delete review", err);
+    }
+};
+
+/**
+ * Get own profile
+ */
+const getProfileSelf = async (req: Request, res: Response): Promise<void> => {
+    try {
+        if (!req.user) {
+            apiError(res, 401, "Unauthorized");
+            return;
+        }
+
+        const user = await User.findById(req.user.id).select("-password");
+        if (!user) {
+            apiError(res, 404, "User not found");
+            return;
+        }
+
+        apiResponse(res, 200, "Profile fetched successfully", user);
+    } catch (err) {
+        apiError(res, 500, "Failed to fetch profile", err);
+    }
+};
+
+/**
+ * Update own profile
+ */
+const updateProfileSelf = async (
+    req: Request,
     res: Response
 ): Promise<void> => {
     try {
-        const userId = req.user?.id;
-        const { bookingId } = req.params;
-
-        if (!userId) {
-            apiError(res, 404, "User not authenticated");
-        }
-
-        if (!mongoose.Types.ObjectId.isValid(bookingId)) {
-            apiResponse(res, 400, "Invalid booking ID ");
+        if (!req.user) {
+            apiError(res, 401, "Unauthorized");
             return;
         }
 
-        const booking = await Booking.findById(bookingId).select("-__v");
+        const updated = await User.findByIdAndUpdate(req.user.id, req.body, {
+            new: true,
+            runValidators: true,
+        }).select("-password");
 
-        if (!booking) {
-            apiError(res, 401, "Booking not found");
-            return;
-        }
-
-        if (booking.userId.toString() !== userId) {
-            apiResponse(res, 403, "AccessDenied");
-            return;
-        }
-
-        apiResponse(
-            res,
-            200,
-            "Booking details retrieved Successfully",
-            booking
-        );
-    } catch (error) {
-        apiError(res, 500, "Internal Server Error");
+        apiResponse(res, 200, "Profile updated successfully", updated);
+    } catch (err) {
+        apiError(res, 500, "Failed to update profile", err);
     }
 };
 
-export { createBooking, getUserBookings, addBookingFeedback };
+/**
+ * Delete own profile
+ */
+const deleteProfileSelf = async (
+    req: Request,
+    res: Response
+): Promise<void> => {
+    try {
+        if (!req.user) {
+            apiError(res, 401, "Unauthorized");
+            return;
+        }
+
+        await User.findByIdAndDelete(req.user.id);
+
+        apiResponse(res, 200, "Profile deleted successfully", {});
+    } catch (err) {
+        apiError(res, 500, "Failed to delete profile", err);
+    }
+};
+
+export default {
+    createBooking,
+    updateBooking,
+    createReviewSelf,
+    updateReviewSelf,
+    deleteReviewSelf,
+    getProfileSelf,
+    updateProfileSelf,
+    deleteProfileSelf,
+};

@@ -1,7 +1,7 @@
 import { Router } from "express";
 import { authMiddleware } from "../middlewares/auth";
 import { requirePermissions } from "../middlewares/rbac";
-import adminController from "../controllers/admin.controller";
+import superController from "../controllers/superAdmin.controller";
 
 const router = Router();
 
@@ -10,28 +10,28 @@ router.get(
     "/accounts",
     authMiddleware,
     requirePermissions("GET_ALL_ACCOUNTS"),
-    adminController.getAllAccounts
+    superController.getAllAccounts
 );
 
 router.get(
     "/accounts/:userId/bookings",
     authMiddleware,
     requirePermissions("GET_BOOKING_HISTORY"),
-    adminController.getBookingHistory
+    superController.getBookingHistory
 );
 
 router.delete(
     "/accounts/:id",
     authMiddleware,
     requirePermissions("DELETE_ACCOUNT"),
-    adminController.deleteAccount
+    superController.deleteAccount
 );
 
 router.post(
-    "/accounts",
+    "/accounts/admin",
     authMiddleware,
-    requirePermissions("CREATE_ORG_EMP"),
-    adminController.createOrgEmp
+    requirePermissions("CREATE_ADMIN"),
+    superController.createAdmin
 );
 
 // 📌 Bookings
@@ -39,7 +39,7 @@ router.patch(
     "/bookings/assign",
     authMiddleware,
     requirePermissions("UPDATE_ASSIGN_BOOKING"),
-    adminController.updateAssignBooking
+    superController.updateAssignBooking
 );
 
 // 📌 Reviews
@@ -47,7 +47,7 @@ router.get(
     "/reviews",
     authMiddleware,
     requirePermissions("VIEW_ALL_REVIEWS"),
-    adminController.viewAllReviews
+    superController.viewAllReviews
 );
 
 // 📌 Profile
@@ -55,21 +55,21 @@ router.get(
     "/profile",
     authMiddleware,
     requirePermissions("GET_PROFILE_SELF"),
-    adminController.getProfileSelf
+    superController.getProfileSelf
 );
 
 router.patch(
     "/profile",
     authMiddleware,
     requirePermissions("UPDATE_PROFILE_SELF"),
-    adminController.updateProfileSelf
+    superController.updateProfileSelf
 );
 
 router.delete(
     "/profile",
     authMiddleware,
     requirePermissions("DELETE_PROFILE_SELF"),
-    adminController.deleteProfileSelf
+    superController.deleteProfileSelf
 );
 
 export default router;

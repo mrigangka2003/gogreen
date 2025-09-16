@@ -3,23 +3,24 @@ import User from "../models/user.model";
 import Booking from "../models/booking.model";
 import Review from "../models/review.model";
 import Role from "../models/role.model";
+
 import { apiError, apiResponse } from "../helper";
-import { Types } from "mongoose";
+import { hashPassword } from "../utils";
 
 /**
- * Get all accounts (users/orgs/emps)
+ * Get all accounts (user/org/emp/admin)
  */
 const getAllAccounts = async (_req: Request, res: Response): Promise<void> => {
     try {
         const accounts = await User.find().populate("role", "name");
-        apiResponse(res, 200, "Accounts fetched successfully", accounts);
+        apiResponse(res, 200, "All accounts fetched", accounts);
     } catch (err) {
         apiError(res, 500, "Failed to fetch accounts", err);
     }
 };
 
 /**
- * Get booking history of a specific user/org
+ * Get booking history of a specific account
  */
 const getBookingHistory = async (
     req: Request,
@@ -35,7 +36,7 @@ const getBookingHistory = async (
 };
 
 /**
- * Delete account (user/org/emp)
+ * Delete account (any role)
  */
 const deleteAccount = async (req: Request, res: Response): Promise<void> => {
     try {
@@ -54,7 +55,46 @@ const deleteAccount = async (req: Request, res: Response): Promise<void> => {
 };
 
 /**
- * Assign a booking to an employee
+ * Create an admin account
+ */
+const createAdmin = async (req: Request, res: Response): Promise<void> => {
+    try {
+        const { name, email, password, phone } = req.body;
+
+        const roleDoc = await Role.findOne({ name: "admin" });
+        if (!roleDoc) {
+            apiError(res, 500, "Admin role not configured");
+            return;
+        }
+
+        const existing = await User.findOne({ email }).lean();
+        if (existing) {
+            apiError(res, 400, "User already exists with this email");
+            return;
+        }
+
+        const hashed = await hashPassword(password);
+        const created = await User.create({
+            name,
+            email,
+            password: hashed,
+            phone,
+            role: roleDoc._id,
+        });
+
+        apiResponse(res, 201, "Admin account created", {
+            id: created._id,
+            name: created.name,
+            email: created.email,
+            role: "admin",
+        });
+    } catch (err) {
+        apiError(res, 500, "Failed to create admin", err);
+    }
+};
+
+/**
+ * Assign booking to an employee
  */
 const updateAssignBooking = async (
     req: Request,
@@ -75,7 +115,7 @@ const updateAssignBooking = async (
             return;
         }
 
-        booking.employeeId = employee._id as Types.ObjectId;
+        booking.employeeId = employee._id as any;
         booking.status = "assigned";
         booking.assignedAt = new Date();
         await booking.save();
@@ -95,50 +135,6 @@ const viewAllReviews = async (_req: Request, res: Response): Promise<void> => {
         apiResponse(res, 200, "All reviews fetched", reviews);
     } catch (err) {
         apiError(res, 500, "Failed to fetch reviews", err);
-    }
-};
-
-/**
- * Create an org/emp account
- */
-const createOrgEmp = async (req: Request, res: Response): Promise<void> => {
-    try {
-        const { name, email, password, phone, roleName } = req.body;
-
-        if (!["org", "emp"].includes(roleName)) {
-            apiError(res, 400, "Role must be 'org' or 'emp'");
-            return;
-        }
-
-        const roleDoc = await Role.findOne({ name: roleName });
-        if (!roleDoc) {
-            apiError(res, 400, "Role not found");
-            return;
-        }
-
-        const existing = await User.findOne({ email }).lean();
-        if (existing) {
-            apiError(res, 400, "User already exists with this email");
-            return;
-        }
-
-        // password will already be hashed in user model pre-save hook or manually before
-        const created = await User.create({
-            name,
-            email,
-            password, // hashPassword() if not using pre-save middleware
-            phone,
-            role: roleDoc._id,
-        });
-
-        apiResponse(res, 201, "Org/Emp account created successfully", {
-            id: created._id,
-            name: created.name,
-            email: created.email,
-            role: roleName,
-        });
-    } catch (err) {
-        apiError(res, 500, "Failed to create Org/Emp account", err);
     }
 };
 
@@ -212,9 +208,9 @@ export default {
     getAllAccounts,
     getBookingHistory,
     deleteAccount,
+    createAdmin,
     updateAssignBooking,
     viewAllReviews,
-    createOrgEmp,
     getProfileSelf,
     updateProfileSelf,
     deleteProfileSelf,

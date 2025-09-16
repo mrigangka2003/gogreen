@@ -1,18 +1,67 @@
-import { Router,Request,Response } from "express";
-import { createBooking, getBookingDetails, getUserBookings, loginUser, registerUser } from "../controllers";
-import { authenticate } from "../middlewares/authMiddleware";
-import { addBookingFeedback } from "../controllers/user.controller";
+import { Router } from "express";
+import { authMiddleware } from "../middlewares/auth";
+import { requirePermissions } from "../middlewares/rbac";
+import userController from "../controllers/user.controller";
 
+const router = Router();
 
-const userRouter = Router() ;
+// 📌 Booking
+router.post(
+    "/bookings",
+    authMiddleware,
+    requirePermissions("CREATE_BOOKING"),
+    userController.createBooking
+);
 
-userRouter.post('/book-now', authenticate,createBooking) ;
-userRouter.get('/bookings',authenticate,getUserBookings);
-userRouter.get('/bookings/:bookingId',authenticate,getBookingDetails);
-userRouter.post('/:bookingId/feedback',authenticate,addBookingFeedback);
+router.patch(
+    "/bookings/:id",
+    authMiddleware,
+    requirePermissions("UPDATE_BOOKING"),
+    userController.updateBooking
+);
 
-//buy now
-//payment
+// 📌 Review
+router.post(
+    "/reviews",
+    authMiddleware,
+    requirePermissions("CREATE_REVIEW_SELF"),
+    userController.createReviewSelf
+);
 
+router.patch(
+    "/reviews/:id",
+    authMiddleware,
+    requirePermissions("UPDATE_REVIEW_SELF"),
+    userController.updateReviewSelf
+);
 
-export default userRouter ;
+router.delete(
+    "/reviews/:id",
+    authMiddleware,
+    requirePermissions("DELETE_REVIEW_SELF"),
+    userController.deleteReviewSelf
+);
+
+// 📌 Profile
+router.get(
+    "/profile",
+    authMiddleware,
+    requirePermissions("GET_PROFILE_SELF"),
+    userController.getProfileSelf
+);
+
+router.patch(
+    "/profile",
+    authMiddleware,
+    requirePermissions("UPDATE_PROFILE_SELF"),
+    userController.updateProfileSelf
+);
+
+router.delete(
+    "/profile",
+    authMiddleware,
+    requirePermissions("DELETE_PROFILE_SELF"),
+    userController.deleteProfileSelf
+);
+
+export default router;

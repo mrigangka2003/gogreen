@@ -2,7 +2,7 @@ import mongoose, { Schema, model, Document, Types } from "mongoose";
 
 export interface IBooking extends Document {
     userId: Types.ObjectId;
-    employeeId?: Types.ObjectId | null;
+    employeeId?: Types.ObjectId ;
     serviceType: string;
     address: string;
     phoneNumber: string;
@@ -35,7 +35,7 @@ const BookingSchema = new Schema<IBooking>(
         },
         employeeId: {
             type: Schema.Types.ObjectId,
-            ref: "User",
+            ref: "Employee",
             default: null,
             index: true,
         },

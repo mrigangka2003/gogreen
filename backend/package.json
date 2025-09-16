@@ -21,7 +21,8 @@
     "express": "^5.1.0",
     "jsonwebtoken": "^9.0.2",
     "mongoose": "^8.15.1",
-    "path": "^0.12.7"
+    "path": "^0.12.7",
+    "zod": "^4.1.8"
   },
   "devDependencies": {
     "@types/bcrypt": "^5.0.2",
