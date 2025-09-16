@@ -4,7 +4,7 @@ export type User = {
     id : string,
     name:string,
     email:string,
-    role:'user' |'admin' |'org'
+    role:'user' |'admin' |'org' | 'emp'
 }
 
 type AuthState = {

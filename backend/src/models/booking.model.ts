@@ -1,75 +1,111 @@
-import mongoose, { Schema } from "mongoose";
+import mongoose, { Schema, model, Document, Types } from "mongoose";
 
-interface IBooking {
-    userId: mongoose.Types.ObjectId;
-    bookingDate: Date;
-    status: "pending" | "confirmed" | "completed" | "cancelled";
-    totalAmount: number;
-    paymentStatus: "pending" | "paid" | "failed" | "refunded";
-    notes?: string;
-    feedback?: IFeedback;
-}
-
-interface IFeedback {
-    rating: number;
-    comment?: string;
+export interface IBooking extends Document {
+    userId: Types.ObjectId;
+    employeeId?: Types.ObjectId | null;
+    serviceType: string;
+    address: string;
+    phoneNumber: string;
+    instruction?: string;
+    beforePhoto?: string;
+    afterPhoto?: string;
+    date: Date;
+    timeSlot?: string;
+    status: "pending" | "assigned" | "in_progress" | "completed" | "cancelled";
+    amount?: number;
+    paymentStatus?: "pending" | "paid" | "refunded";
+    assignedAt?: Date;
+    completedAt?: Date;
+    cancelledAt?: Date;
+    isActive: boolean;
     createdAt: Date;
+    updatedAt: Date;
+
+    // instance methods
+    markCompleted(): Promise<IBooking>;
 }
 
-const FeedbackSchema = new Schema<IFeedback>(
-    {
-        rating: {
-            type: Number,
-            required: true,
-            min: 1,
-            max: 5,
-        },
-        comment: {
-            type: String,
-            maxlength: 500,
-        },
-        createdAt: {
-            type: Date,
-            default: Date.now,
-        },
-    },
-    { _id: false }
-);
-
-const bookingSchema = new Schema<IBooking>(
+const BookingSchema = new Schema<IBooking>(
     {
         userId: {
-            type: mongoose.Schema.Types.ObjectId,
+            type: Schema.Types.ObjectId,
             ref: "User",
             required: true,
+            index: true,
         },
-        bookingDate: {
+        employeeId: {
+            type: Schema.Types.ObjectId,
+            ref: "User",
+            default: null,
+            index: true,
+        },
+        address: {
+            type: String,
+            required: true,
+            trim: true,
+        },
+        phoneNumber: {
+            type: String,
+            required: true,
+            trim: true,
+        },
+        instruction: {
+            type: String,
+            trim: true,
+            default: "",
+        },
+        beforePhoto: {
+            type: String,
+            default: "",
+        },
+        afterPhoto: {
+            type: String,
+            default: "",
+        },
+        date: {
             type: Date,
             required: true,
+            index: true,
+        },
+        timeSlot: {
+            type: String,
+            default: "",
         },
         status: {
             type: String,
-            enum: ["pending", "confirmed", "completed", "cancelled"],
+            enum: [
+                "pending",
+                "assigned",
+                "in_progress",
+                "completed",
+                "cancelled",
+            ],
             default: "pending",
+            index: true,
         },
-        totalAmount: {
-            type: Number,
-            required: true,
-            min: 0,
-        },
+        amount: { type: Number, default: 0 },
         paymentStatus: {
             type: String,
-            enum: ["pending", "paid", "failed", "refunded"],
+            enum: ["pending", "paid", "refunded"],
             default: "pending",
         },
-        notes: {
-            type: String,
-            maxlength: 1000,
-        },
-        feedback: FeedbackSchema,
+        assignedAt: { type: Date },
+        completedAt: { type: Date },
+        cancelledAt: { type: Date },
+        isActive: { type: Boolean, default: true },
     },
     { timestamps: true }
 );
 
-const Booking = mongoose.model<IBooking>("Booking", bookingSchema);
-export default Booking;
+BookingSchema.index({ employeeId: 1, date: 1 });
+BookingSchema.index({ userId: 1, status: 1, date: -1 });
+
+
+BookingSchema.virtual("review", {
+    ref: "Review",
+    localField: "_id",
+    foreignField: "bookingId",
+    justOne: true,
+});
+
+export default model<IBooking>("Booking", BookingSchema);

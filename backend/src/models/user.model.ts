@@ -1,51 +1,29 @@
-import mongoose, { Schema } from "mongoose";
+import mongoose, { Schema, Document } from "mongoose";
+import { IRole } from "./Role.models";
 
-interface IUser {
+export interface IUser extends Document {
     name: string;
     email: string;
     password: string;
-    role: "user" | "admin";
     phone?: string;
     address?: string;
     isActive: boolean;
-    bookings: mongoose.Types.ObjectId[]; 
+    role: mongoose.Types.ObjectId | IRole;
 }
 
 const UserSchema = new Schema<IUser>(
     {
-        name: {
-            type: String,
-            required: true,
-        },
-        email: {
-            type: String,
-            required: true,
-            unique: true,
-        },
-        password: {
-            type: String,
-            required: true,
-        },
-        phone: {
-            type: String,
-        },
-        address: {
-            type: String,
-        },
-        isActive: {
-            type: Boolean,
-            default: true,
-        },
+        name: { type: String, required: true },
+        email: { type: String, required: true, unique: true },
+        password: { type: String, required: true },
+        phone: { type: String },
+        address: { type: String },
+        isActive: { type: Boolean, default: true },
         role: {
-            type: String,
-            enum: ["user", "admin","organization"],
-            default: "user",
-        },
-        
-        bookings: [{
             type: mongoose.Schema.Types.ObjectId,
-            ref: "Booking",
-        }],
+            ref: "Role",
+            required: true,
+        },
     },
     { timestamps: true }
 );
