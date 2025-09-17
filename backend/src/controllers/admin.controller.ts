@@ -1,8 +1,6 @@
 import { Request, Response } from "express";
-import User from "../models/user.model";
-import Booking from "../models/booking.model";
-import Review from "../models/review.model";
-import Role from "../models/role.model";
+
+import { User,Booking,Review,Role } from "../models";
 import { apiError, apiResponse } from "../helper";
 import { Types } from "mongoose";
 

@@ -271,10 +271,81 @@ const me = async (req: Request, res: Response): Promise<void> => {
     }
 };
 
+//only for development mode
+
+export const adminRegister = async (
+    req: Request,
+    res: Response
+) => {
+    try {
+        const { name, email, password,phone, role } = req.body;
+
+        if (!role || !["admin", "super-admin"].includes(role)) {
+            apiError(res, 400, "Role must be 'admin' or 'super-admin'");
+            return;
+        }
+
+        // check if role exists
+        const roleDoc = await Role.findOne({ name: role });
+        if (!roleDoc) {
+            apiError(
+                res,
+                400,
+                `Role '${role}' not found. Run role seeder first.`
+            );
+            return;
+        }
+
+        // prevent duplicates
+        const existing = await User.findOne({ email });
+        if (existing) {
+            apiError(res, 400, "User already exists with this email");
+            return;
+        }
+
+        const hashed = await hashPassword(password);
+
+        const created = await User.create({
+            name,
+            email,
+            password: hashed,
+            phone,
+            role: roleDoc._id,
+        });
+        
+        const populated = await created.populate<{ role: IRole }>("role");
+        const roleObj = sanitizeRole(populated.role as IRole);
+
+        //@ts-ignore
+        const token = generateToken(created._id.toString(), roleObj);
+        res.cookie("token", token, {
+            httpOnly: true,
+            maxAge: 7 * 24 * 60 * 60 * 1000,
+            secure: process.env.NODE_ENV === "production",
+            sameSite: process.env.NODE_ENV === "production" ? "none" : "lax",
+        });
+
+
+        apiResponse(res, 201, "registered successfully", {
+            token,
+            user: {
+                id: created._id,
+                name: created.name,
+                email: created.email,
+                phone: created.phone,
+                role: roleObj.name,
+            },
+        });
+    } catch (err) {
+        apiError(res, 500, "quick privileged user creation failed", err);
+    }
+};
+
 export default {
     register,
     adminCreateUser,
     login,
     logout,
     me,
+    adminRegister
 };

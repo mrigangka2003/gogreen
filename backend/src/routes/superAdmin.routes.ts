@@ -2,7 +2,7 @@ import { Router } from "express";
 import { authMiddleware } from "../middlewares/auth";
 import { requirePermissions } from "../middlewares/rbac";
 import superController from "../controllers/superAdmin.controller";
-
+import adminController from "../controllers/admin.controller";
 const router = Router();
 
 // 📌 Accounts
@@ -32,6 +32,13 @@ router.post(
     authMiddleware,
     requirePermissions("CREATE_ADMIN"),
     superController.createAdmin
+);
+
+router.post(
+    "/accounts",
+    authMiddleware,
+    requirePermissions("CREATE_ORG_EMP"),
+    adminController.createOrgEmp
 );
 
 // 📌 Bookings

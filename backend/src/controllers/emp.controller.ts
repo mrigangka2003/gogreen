@@ -1,7 +1,7 @@
 import { Request, Response } from "express";
-import Booking from "../models/booking.model";
-import Review from "../models/review.model";
-import User from "../models/user.model";
+
+import { User,Booking,Review } from "../models";
+
 import { apiError, apiResponse } from "../helper";
 
 /**

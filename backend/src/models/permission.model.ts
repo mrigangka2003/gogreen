@@ -1,7 +1,7 @@
 import mongoose, { Document, Schema } from "mongoose";
 
 export interface IPermission extends Document {
-    name: string;         
+    name: string;
     description?: string;
     createdAt?: Date;
     updatedAt?: Date;
@@ -15,5 +15,8 @@ const PermissionSchema = new Schema<IPermission>(
     { timestamps: true }
 );
 
-const Permission = mongoose.model<IPermission>("Permission", PermissionSchema);
+const Permission =
+    mongoose.models.Permission ||
+    mongoose.model<IPermission>("Permission", PermissionSchema);
+
 export default Permission;

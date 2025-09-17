@@ -46,5 +46,5 @@ RoleSchema.methods.hasPermission = function (this: IRole, permissionName: string
     return perms.some((p) => (p as any).name === permissionName);
 };
 
-const Role = mongoose.model<IRole>("Role", RoleSchema);
+const Role = mongoose.models.Role || mongoose.model<IRole>("Role", RoleSchema);
 export default Role;

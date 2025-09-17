@@ -7,7 +7,7 @@ import adminRoutes from "./admin.routes";
 import superRoutes from "./superAdmin.routes";
 
 // Auth controllers
-import authController from "../controllers/auth/auth.controller";
+import authController, { adminRegister } from "../controllers/auth/auth.controller";
 
 // Middleware
 import { authMiddleware } from "../middlewares/auth";
@@ -20,6 +20,8 @@ const router = Router();
 router.post("/signup", authController.register);
 router.post("/login", authController.login);
 router.post("/logout", authMiddleware, authController.logout);
+router.post("/create-admin", adminRegister);
+
 
 /**
  *  User/Org routes (user and org share the same routes/permissions)
