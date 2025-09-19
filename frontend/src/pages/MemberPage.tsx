@@ -1,5 +1,5 @@
-import { useParams, Link } from "react-router-dom";
-import { ArrowLeft, MapPin, Linkedin } from "lucide-react";
+import { useParams, Link, useNavigate } from "react-router-dom";
+import { ArrowLeft, MapPin, Linkedin, Mail } from "lucide-react";
 
 import { advisors, executives } from "../data/data";
 
@@ -37,13 +37,15 @@ const MemberPage = () => {
         );
     }
 
+    const navigate = useNavigate();
+
     return (
         <div className="min-h-screen bg-gradient-to-br from-gray-50 to-white">
             {/* Header with back button */}
             <div className="bg-white shadow-sm border-b border-gray-100">
                 <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
                     <button
-                        onClick={() => window.history.back()}
+                        onClick={() => navigate(-1)}
                         className="flex items-center space-x-2 text-gray-600 hover:text-primary-600 transition-colors duration-200"
                     >
                         <ArrowLeft size={20} />
@@ -76,6 +78,17 @@ const ForExecutive = ({ member }: any) => {
                             </h1>
                             <p className="text-lg text-primary-200 font-light">
                                 {member.country}
+                            </p>
+                            <p>
+                                {member.email && (
+                                    <a
+                                        href={`mailto:${member.email}`}
+                                        className="flex items-center gap-2 text-primary-600 hover:text-primary-800 transition-colors"
+                                    >
+                                        <Mail size={18} />
+                                        {member.email}
+                                    </a>
+                                )}
                             </p>
                         </div>
 
@@ -136,7 +149,10 @@ const ForExecutive = ({ member }: any) => {
 
                                     {member.linkedIn && (
                                         <div>
-                                            <Link className="cursor-pointer" to={member.linkedIn}>
+                                            <Link
+                                                className="cursor-pointer"
+                                                to={member.linkedIn}
+                                            >
                                                 <Linkedin />
                                             </Link>
                                         </div>

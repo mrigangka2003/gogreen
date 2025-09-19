@@ -30,6 +30,7 @@ interface Executive {
     linkedIn?: string;
     googleScholar?: string;
     about: string;
+    email?:string
 }
 
 interface ProductAndServices {
@@ -102,7 +103,7 @@ const advisors: Array<Advisors> = [
         name: "Er. Shyamal Majumder",
         country: "India",
         image: er_s_majumder,
-        about: "engineer",
+        about: "Er. Shymal Majumder is a distinguished civil engineer and entrepreneur, best known as the founder of CS Cube Consultation, a leading construction consultancy firm based in Agartala, Tripura. With a career marked by technical expertise, leadership, and innovation, he has made significant contributions to the infrastructure development of the region.Born and raised in Jadavpur, West Bengal, Shymal Majumder pursued his Bachelor of Technology (B.Tech.) in Civil Engineering from Jadavpur University, one of the most prestigious institutions in India. After completing his degree, he gained extensive professional experience working with several renowned construction consultancy firms, where he honed his skills in project planning, design, and execution.In 2007, driven by his vision of providing quality engineering and consultancy services, he established CS Cube Consultation in Agartala. Under his leadership, the company has grown remarkably, successfully handling a wide range of projects including residential, commercial, and infrastructure developments. Over the years, CS Cube Consultation has become a trusted name in the construction sector in Tripura, thanks to his commitment to innovation, sustainability, and client satisfaction.With his entrepreneurial spirit and decades of experience, Er. Shymal Majumder has not only built a successful enterprise but has also contributed to shaping the urban landscape of Agartala. His journey from Jadavpur to becoming a prominent figure in Tripura’s construction industry stands as an inspiration for aspiring engineers and entrepreneurs alike. Today, with his vast experience, he extends his guidance to Go Green Plus, strengthening its mission with sustainable infrastructure solutions, smart project execution, and eco-friendly innovations for a cleaner Tripura.",
     },
     {
         id: "abhijit_saha",
@@ -148,6 +149,7 @@ const executives: Array<Executive> = [
         country: "India",
         role: "Director & Founder, Go Green Plus",
         image: bilash_chandra_roy,
+        email:"director.gogreenplus@gmail.com",
         linkedIn:
             "https://www.linkedin.com/in/dr-bilash-chandra-roy-1b5a13143/",
         googleScholar:

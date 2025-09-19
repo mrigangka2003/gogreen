@@ -25,38 +25,36 @@ const Team = () => {
                         {executives.map((exec, idx) => (
                             <div
                                 key={idx}
-                                className="group bg-white shadow-lg hover:shadow-2xl transition-all duration-300 overflow-hidden flex flex-col items-center text-center p-6 transform hover:-translate-y-2 hover:scale-105 relative before:absolute before:inset-0 before:bg-gradient-to-br before:from-primary-50 before:to-transparent before:opacity-0 before:transition-opacity before:duration-300 hover:before:opacity-100"
+                                className="group relative w-64 h-80 bg-gray-100 rounded-2xl overflow-hidden shadow-lg hover:shadow-2xl transition-all duration-300 transform hover:-translate-y-2 hover:scale-105 cursor-pointer"
                                 onClick={() => navigate(`/about/${exec.id}`)}
                             >
-                                <div className="relative mb-6 group-hover:scale-110 transition-transform duration-300">
-                                    {exec.image ? (
-                                        <img
-                                            src={exec.image}
-                                            alt={exec.name}
-                                            className="w-40 h-40 object-cover border-4 border-white shadow-lg relative z-10"
+                                {exec.image ? (
+                                    <img
+                                        src={exec.image}
+                                        alt={exec.name}
+                                        className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
+                                    />
+                                ) : (
+                                    <div className="w-full h-full flex items-center justify-center bg-gray-200">
+                                        <User
+                                            size={64}
+                                            className="text-gray-400"
                                         />
-                                    ) : (
-                                        <div className="w-40 h-40 flex items-center justify-center bg-gray-100 border-4 border-white shadow-lg rounded-2xl">
-                                            <User
-                                                size={64}
-                                                className="text-gray-400"
-                                            />
-                                        </div>
-                                    )}
-                                    <div className="absolute inset-0 bg-gradient-to-br from-primary-400 to-primary-600 opacity-0 group-hover:opacity-20 transition-opacity duration-300"></div>
-                                </div>
+                                    </div>
+                                )}
 
-                                <div className="relative z-10">
-                                    <h3 className="text-lg font-bold text-gray-800 mb-1 group-hover:text-primary-700 transition-colors duration-300">
+                                {/* Gradient Overlay */}
+                                <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/20 to-transparent"></div>
+
+                                {/* Text Content */}
+                                <div className="absolute bottom-0 left-0 w-full p-4 text-center text-white z-10">
+                                    <h3 className="text-lg font-bold mb-1">
                                         {exec.name}
                                     </h3>
-                                    <p className="text-sm text-gray-600 italic">
+                                    <p className="text-sm italic">
                                         {exec.role}
                                     </p>
                                 </div>
-
-                                {/* Subtle accent line */}
-                                <div className="absolute bottom-0 left-0 w-full h-1 bg-gradient-to-r from-primary-500 to-primary-700 transform scale-x-0 group-hover:scale-x-100 transition-transform duration-300 origin-left"></div>
                             </div>
                         ))}
                     </div>
@@ -70,37 +68,49 @@ const Team = () => {
                             Our Advisors
                         </h2>
                     </div>
+
+                    {/* Divider */}
                     <div className="flex items-center justify-center mb-8">
                         <div className="w-12 h-0.5 bg-gradient-to-r from-transparent via-green-500 to-transparent"></div>
                         <div className="w-2 h-2 bg-green-500 rounded-full mx-4"></div>
                         <div className="w-12 h-0.5 bg-gradient-to-r from-transparent via-green-500 to-transparent"></div>
                     </div>
 
+                    {/* Advisors Grid */}
                     <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-8">
                         {advisors.map((advisor, idx) => (
                             <div
                                 key={idx}
-                                className="group bg-white shadow-lg hover:shadow-2xl transition-all duration-300 overflow-hidden flex flex-col items-center text-center p-6 transform hover:-translate-y-2 hover:scale-105 relative before:absolute before:inset-0 before:bg-gradient-to-br before:from-primary-50 before:to-transparent before:opacity-0 before:transition-opacity before:duration-300 hover:before:opacity-100"
+                                className="group relative w-full h-72 rounded-2xl overflow-hidden shadow-lg hover:shadow-2xl transform hover:-translate-y-2 hover:scale-105 transition-all duration-300 cursor-pointer"
                                 onClick={() => navigate(`/about/${advisor.id}`)}
                             >
-                                {advisor.image && (
-                                    <div className="relative mb-6 group-hover:scale-110 transition-transform duration-300">
-                                        <img
-                                            src={advisor.image}
-                                            alt={advisor.name}
-                                            className="w-40 h-40 object-cover border-4 border-white shadow-lg relative z-10 rounded-2xl"
+                                {/* Full Image */}
+                                {advisor.image ? (
+                                    <img
+                                        src={advisor.image}
+                                        alt={advisor.name}
+                                        className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
+                                    />
+                                ) : (
+                                    <div className="w-full h-full flex items-center justify-center bg-gray-200">
+                                        <User
+                                            size={64}
+                                            className="text-gray-400"
                                         />
-                                        <div className="absolute inset-0 bg-gradient-to-br from-primary-400 to-primary-600 opacity-0 group-hover:opacity-20 transition-opacity duration-300"></div>
                                     </div>
                                 )}
 
-                                <div className="relative z-10">
-                                    <h3 className="text-lg font-bold text-gray-800 mb-2 group-hover:text-primary-700 transition-colors duration-300">
+                                {/* Gradient Overlay for readability */}
+                                <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/20 to-transparent"></div>
+
+                                {/* Text Content */}
+                                <div className="absolute bottom-0 left-0 w-full p-4 text-center text-white z-10">
+                                    <h3 className="text-lg font-bold mb-1">
                                         {advisor.name}
                                     </h3>
                                 </div>
 
-                                {/* Subtle accent line */}
+                                {/* Accent Line (optional, animates on hover) */}
                                 <div className="absolute bottom-0 left-0 w-full h-1 bg-gradient-to-r from-primary-500 to-primary-700 transform scale-x-0 group-hover:scale-x-100 transition-transform duration-300 origin-left"></div>
                             </div>
                         ))}

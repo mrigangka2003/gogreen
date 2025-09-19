@@ -81,6 +81,12 @@ const register = async (req: Request, res: Response): Promise<void> => {
         const populated = await created.populate<{ role: IRole }>("role");
         const roleObj = sanitizeRole(populated.role as IRole);
 
+        const permissions: string[] = Array.isArray(
+            (roleObj as any).permissions
+        )
+            ? (roleObj as any).permissions
+            : [];
+
         //@ts-ignore
         const token = generateToken(created._id.toString(), roleObj);
 
@@ -99,6 +105,7 @@ const register = async (req: Request, res: Response): Promise<void> => {
                 email: created.email,
                 phone: created.phone,
                 role: roleObj.name,
+                permissions,
             },
         });
     } catch (err) {
@@ -201,6 +208,12 @@ const login = async (req: Request, res: Response): Promise<void> => {
 
         const roleObj = sanitizeRole(user.role as IRole);
 
+        const permissions: string[] = Array.isArray(
+            (roleObj as any).permissions
+        )
+            ? (roleObj as any).permissions
+            : [];
+
         //@ts-ignore
         const token = generateToken(user._id.toString(), roleObj);
 
@@ -218,6 +231,7 @@ const login = async (req: Request, res: Response): Promise<void> => {
                 name: user.name,
                 email: user.email,
                 role: roleObj.name,
+                permissions,
             },
         });
     } catch (err) {
@@ -273,12 +287,9 @@ const me = async (req: Request, res: Response): Promise<void> => {
 
 //only for development mode
 
-export const adminRegister = async (
-    req: Request,
-    res: Response
-) => {
+export const adminRegister = async (req: Request, res: Response) => {
     try {
-        const { name, email, password,phone, role } = req.body;
+        const { name, email, password, phone, role } = req.body;
 
         if (!role || !["admin", "super-admin"].includes(role)) {
             apiError(res, 400, "Role must be 'admin' or 'super-admin'");
@@ -312,7 +323,7 @@ export const adminRegister = async (
             phone,
             role: roleDoc._id,
         });
-        
+
         const populated = await created.populate<{ role: IRole }>("role");
         const roleObj = sanitizeRole(populated.role as IRole);
 
@@ -324,7 +335,6 @@ export const adminRegister = async (
             secure: process.env.NODE_ENV === "production",
             sameSite: process.env.NODE_ENV === "production" ? "none" : "lax",
         });
-
 
         apiResponse(res, 201, "registered successfully", {
             token,
@@ -347,5 +357,5 @@ export default {
     login,
     logout,
     me,
-    adminRegister
+    adminRegister,
 };

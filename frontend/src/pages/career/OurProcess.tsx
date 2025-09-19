@@ -1,4 +1,4 @@
-import { ComingSoon } from "../components";
+import { ComingSoon } from "../../components";
 
 const OurProcess = () => {
     return (

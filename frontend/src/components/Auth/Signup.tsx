@@ -7,15 +7,12 @@ import { useAuthStore } from "../../stores/auth";
 import type { User } from "../../stores/auth";
 import { useNavigate } from "react-router-dom";
 
-
-
 const inputClass =
     "w-full pl-10 pr-3 py-2 mt-1 border border-gray-300 rounded-lg outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary transition text-sm text-gray-700 leading-tight";
 
 const Signup = () => {
-
-    const setUser = useAuthStore((state)=>state.setUser); 
-    const navigate = useNavigate()
+    const setUser = useAuthStore((state) => state.setUser);
+    const navigate = useNavigate();
 
     const {
         register,
@@ -24,8 +21,6 @@ const Signup = () => {
         formState: { errors, isSubmitting },
     } = useForm<FieldValues>();
 
-
-
     const onSubmit = async (data: FieldValues) => {
         try {
             const response = await axiosInstance.post("/signup", {
@@ -33,14 +28,13 @@ const Signup = () => {
                 email: data.email,
                 password: data.password,
                 phone: data.phone,
-                role: data.role,
+                role: "user",
             });
 
-            const user : User = (response.data as any).data.user;
+            const user: User = (response.data as any).data.user;
             setUser(user);
-            navigate('/dashboard');
-
-        } catch (error:any) {
+            navigate("/dashboard");
+        } catch (error: any) {
             console.log(error?.response?.data);
         }
     };
@@ -147,32 +141,6 @@ const Signup = () => {
                 {errors.phone && (
                     <p className="text-xs text-red-500 mt-1">
                         {errors.phone.message as string}
-                    </p>
-                )}
-            </div>
-
-            {/* Role */}
-            <div>
-                <label
-                    htmlFor="role"
-                    className="text-sm font-medium text-gray-700"
-                >
-                    Account Type
-                </label>
-                <select
-                    id="role"
-                    className={inputClass.replace("pl-10", "pl-4")}
-                    {...register("role", {
-                        required: "Please select an account type",
-                    })}
-                >
-                    <option value="">Select type</option>
-                    <option value="user">User</option>
-                    <option value="org">Organization</option>
-                </select>
-                {errors.role && (
-                    <p className="text-xs text-red-500 mt-1">
-                        {errors.role.message as string}
                     </p>
                 )}
             </div>

@@ -23,6 +23,8 @@ import Signup from "./Auth/Signup";
 import AdminDashboard from "./Dashboards/AdminDashboard";
 import UserDashboard from "./Dashboards/UserDashboard";
 import OrganizationDashboards from "./Dashboards/OrganizationDashboards";
+import EmployeeDashboard from "./Dashboards/EmployeeDashboard";
+import SuperAdminDashboard from "./Dashboards/SuperAdminDashboard";
 
 import ProtectedRoute from "./ProtectedRoute";
 
@@ -47,5 +49,7 @@ export {
 
     UserDashboard,
     AdminDashboard,
-    OrganizationDashboards
+    OrganizationDashboards,
+    EmployeeDashboard,
+    SuperAdminDashboard
 };
