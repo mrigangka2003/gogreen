@@ -40,7 +40,6 @@ const DashboardLayout: React.FC<Props> = ({
             {/* Sidebar */}
             <Sidebar
                 UserRoles={user.role}
-                userId={user.id ?? user._id}
                 basePath={`${basePath}/${user.role}`} // keeps your logic
             />
 

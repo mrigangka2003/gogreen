@@ -35,7 +35,7 @@ const sidebarMap: Record<UserRole, SideBarItem[]> = {
             icon: <CalendarCheck size={20} />,
         },
         { title: "Reviews", path: "my-reviews", icon: <Star size={20} /> },
-        { title: "Profile", path: "profile/:id", icon: <User size={20} /> },
+        { title: "Profile", path: "profile", icon: <User size={20} /> },
     ],
     admin: [
         {
@@ -54,7 +54,7 @@ const sidebarMap: Record<UserRole, SideBarItem[]> = {
             path: "add-management",
             icon: <Settings size={20} />,
         },
-        { title: "Profile", path: "profile/:id", icon: <User size={20} /> },
+        { title: "Profile", path: "profile", icon: <User size={20} /> },
     ],
     org: [
         { title: "Book Now", path: "book-now", icon: <Home size={20} /> },
@@ -64,7 +64,7 @@ const sidebarMap: Record<UserRole, SideBarItem[]> = {
             icon: <CalendarCheck size={20} />,
         },
         { title: "Reviews", path: "my-reviews", icon: <Star size={20} /> },
-        { title: "Profile", path: "profile/:id", icon: <User size={20} /> },
+        { title: "Profile", path: "profile", icon: <User size={20} /> },
     ],
     emp: [
         {
@@ -77,7 +77,7 @@ const sidebarMap: Record<UserRole, SideBarItem[]> = {
             path: "tasks/in-progress",
             icon: <ClipboardList size={20} />,
         },
-        { title: "Profile", path: "profile/:id", icon: <User size={20} /> },
+        { title: "Profile", path: "profile", icon: <User size={20} /> },
     ],
     "super-admin": [
         { title: "Accounts", path: "accounts", icon: <Users size={20} /> },
@@ -99,7 +99,6 @@ const sidebarMap: Record<UserRole, SideBarItem[]> = {
 /* --------------  COMPONENT  -------------- */
 const Sidebar = ({
     UserRoles,
-    userId,
     basePath = "/dashboard",
 }: {
     UserRoles: UserRole;
@@ -110,20 +109,13 @@ const Sidebar = ({
     const navigate = useNavigate();
     const items = sidebarMap[UserRoles] ?? [];
 
-    const currentUser = useAuthStore((s: any) => s.user);
     const clearUser = useAuthStore((s) => s.clearUser);
 
-    const resolvedUserId =
-        userId ?? (currentUser && (currentUser.id || currentUser._id));
 
     const toggleMobileSidebar = () => setIsMobileOpen((v) => !v);
 
     const makeLink = (rawPath: string) => {
         let path = rawPath;
-        if (rawPath.includes(":id")) {
-            if (resolvedUserId) path = rawPath.replace(":id", resolvedUserId);
-            else path = "profile";
-        }
         if (path.startsWith("/")) return path;
         const base = basePath ? basePath.replace(/\/$/, "") : "";
         return `${base}/${path}`.replace(/\/+/g, "/");

@@ -25,9 +25,7 @@ import {
     Dashboard,
     BookNow,
     MyBookings,
-    // MyProfile,
 } from "./pages";
-
 
 import ProtectedRoute from "./components/ProtectedRoute.tsx";
 import DashboardLayout from "./components/Dashboard-layout/DashboardLayout.tsx";
@@ -41,6 +39,7 @@ const SuperReviews = lazy(() => import("./pages/super/SuperReviews.tsx"));
 const SuperCreateAdmin = lazy(
     () => import("./pages/super/SuperCreateAdmin.tsx")
 );
+const MyProfile = lazy(() => import("./pages/MyProfile.tsx"));
 
 const router = createBrowserRouter([
     {
@@ -125,88 +124,92 @@ const router = createBrowserRouter([
         path: "/dashboard/user",
         element: (
             <ProtectedRoute allowedRoles={["user"]}>
-                <DashboardLayout/>
+                <DashboardLayout />
             </ProtectedRoute>
         ),
         children: [
             { index: true, element: <UserDashboard /> },
-            { path: "book-now", element: < BookNow/> },
+            { path: "book-now", element: <BookNow /> },
             { path: "my-bookings", element: <MyBookings /> },
+            { path: "profile", element: <MyProfile /> },
         ],
     },
 
     // /* –– Org –– */
-    
+
     {
         path: "/dashboard/org",
         element: (
             <ProtectedRoute allowedRoles={["org"]}>
-                <DashboardLayout/>
+                <DashboardLayout />
             </ProtectedRoute>
         ),
         children: [
             { index: true, element: <UserDashboard /> },
-            { path: "book-now", element: < BookNow/> },
+            { path: "book-now", element: <BookNow /> },
             { path: "my-bookings", element: <MyBookings /> },
+            { path: "profile", element: <MyProfile /> },
         ],
     },
 
-        {
+    {
         path: "/dashboard/emp",
         element: (
             <ProtectedRoute allowedRoles={["emp"]}>
-                <DashboardLayout/>
+                <DashboardLayout />
             </ProtectedRoute>
         ),
         children: [
             { index: true, element: <UserDashboard /> },
-            { path: "book-now", element: < BookNow/> },
+            { path: "book-now", element: <BookNow /> },
             { path: "my-bookings", element: <MyBookings /> },
+            { path: "profile", element: <MyProfile /> },
         ],
     },
 
-
     // /* –– ADMIN –– */
-        {
+    {
         path: "/dashboard/admin",
         element: (
             <ProtectedRoute allowedRoles={["admin"]}>
-                <DashboardLayout/>
+                <DashboardLayout />
             </ProtectedRoute>
         ),
         children: [
             { index: true, element: <UserDashboard /> },
-            { path: "book-now", element: < BookNow/> },
+            { path: "book-now", element: <BookNow /> },
             { path: "my-bookings", element: <MyBookings /> },
+            { path: "profile", element: <MyProfile /> },
         ],
     },
-
-
 
     /* –– SUPER-ADMIN –– */
     {
         path: "/dashboard/super-admin",
         element: (
             <ProtectedRoute allowedRoles={["super-admin"]}>
-                <DashboardLayout/>
+                <DashboardLayout />
             </ProtectedRoute>
         ),
         children: [
             { index: true, element: <SuperAdminDashboard /> },
             { path: "accounts", element: <SuperAccounts /> },
-            // {
-            //     path: "accounts/:userId/bookings",
-            //     element: <SuperAccountBookings />,
-            // },
             { path: "create-admin", element: <SuperCreateAdmin /> },
-            // { path: "bookings/assign", element: <SuperAssignBooking /> },
             { path: "all-reviews", element: <SuperReviews /> },
-            // { path: "audit", element: <SuperAudit /> },
-            // { path: "settings", element: <SuperSettings /> },
-            // { path: "profile", element: <MyProfile /> },
-            // { path: "profile/:id", element: <MyProfile /> },
+            { path: "profile", element: <MyProfile /> },
         ],
     },
+
+    // {
+    //     path: "/profile",
+    //     element: (
+    //         <ProtectedRoute
+    //             allowedRoles={["user", "emp", "org", "admin", "super-admin"]}
+    //         >
+    //             <MyProfile />
+    //         </ProtectedRoute>
+    //     ),
+    // },
 
     /* ---------- 404 ---------- */
     { path: "*", element: <Navigate to="/" replace /> },

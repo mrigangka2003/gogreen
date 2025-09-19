@@ -1,13 +1,10 @@
-
 function SuperAdminDashboard() {
     return (
-    <div>
-        SuperAdminDashboard
-        <h1>
-            hehe
+        <div>
+            SuperAdminDashboard
+            <h1>hehe</h1>
             <h2>HEHE</h2>
-        </h1>
-    </div>
+        </div>
     );
 }
 

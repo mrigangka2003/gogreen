@@ -46,7 +46,6 @@ const Header = () => {
     ];
 
     const userMenuItems: MenuItem[] = [
-        { label: "My Profile", slug: "/my-profile" },
         { label: "My Bookings", slug: "/my-bookings" },
         {label:"Dashboard" ,slug:"/dashboard"}
     ];
