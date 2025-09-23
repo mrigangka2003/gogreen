@@ -8,7 +8,6 @@ import { apiError, apiResponse } from "../helper";
 const createBooking = async (req: Request, res: Response): Promise<void> => {
     try {
         const {
-            serviceType,
             address,
             phoneNumber,
             instruction,
@@ -23,7 +22,6 @@ const createBooking = async (req: Request, res: Response): Promise<void> => {
 
         const booking = await Booking.create({
             userId: req.user.id,
-            serviceType,
             address,
             phoneNumber,
             instruction,
@@ -229,6 +227,49 @@ const deleteProfileSelf = async (
     }
 };
 
+export const getMyBookings = async (req: Request, res: Response): Promise<void> => {
+    try {
+        if (!req.user) {                 // same guard you use above
+            apiError(res, 401, "Unauthorized");
+            return;
+        }
+
+        const { id: userId, role } = req.user;
+        if (!["user", "org"].includes(role)) {
+            apiError(res, 403, "Role cannot view bookings");
+            return;
+        }
+
+        const page  = Number(req.query.page)  || 1;
+        const limit = Number(req.query.limit) || 20;
+        const skip  = (page - 1) * limit;
+
+        const filter: any = { userId, isActive: true };
+        if (req.query.status) filter.status = req.query.status;
+
+        const [bookings, total] = await Promise.all([
+            Booking.find(filter)
+                .populate("employeeId", "name phone")
+                .populate("review")
+                .sort({ createdAt: -1 })
+                .skip(skip)
+                .limit(limit)
+                .lean(),
+            Booking.countDocuments(filter),
+        ]);
+
+        if (!bookings.length) {
+            apiError(res, 404, "No bookings found");
+            return;
+        }
+
+        apiResponse(res, 200, "Bookings fetched", { bookings, total, page, pages: Math.ceil(total / limit) });
+    } catch (err) {
+        apiError(res, 500, "Failed to fetch bookings", err);
+    }
+};
+
+
 export default {
     createBooking,
     updateBooking,
@@ -238,4 +279,5 @@ export default {
     getProfileSelf,
     updateProfileSelf,
     deleteProfileSelf,
+    getMyBookings
 };

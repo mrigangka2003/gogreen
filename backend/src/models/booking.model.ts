@@ -35,7 +35,7 @@ const BookingSchema = new Schema<IBooking>(
         },
         employeeId: {
             type: Schema.Types.ObjectId,
-            ref: "Employee",
+            ref: "User",
             default: null,
             index: true,
         },

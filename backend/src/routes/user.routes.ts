@@ -20,6 +20,11 @@ router.patch(
     userController.updateBooking
 );
 
+router.get('/my-bookings',
+    authMiddleware,
+    userController.getMyBookings
+)
+
 // 📌 Review
 router.post(
     "/reviews",
