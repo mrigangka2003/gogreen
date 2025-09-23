@@ -39,6 +39,8 @@ const SuperReviews = lazy(() => import("./pages/super/SuperReviews.tsx"));
 const SuperCreateAdmin = lazy(
     () => import("./pages/super/SuperCreateAdmin.tsx")
 );
+
+const MyReviews = lazy(()=>import("./pages/MyReviews.tsx"));
 const MyProfile = lazy(() => import("./pages/MyProfile.tsx"));
 
 const router = createBrowserRouter([
@@ -131,6 +133,7 @@ const router = createBrowserRouter([
             { index: true, element: <UserDashboard /> },
             { path: "book-now", element: <BookNow /> },
             { path: "my-bookings", element: <MyBookings /> },
+            { path: "my-reviews", element: <MyReviews /> },
             { path: "profile", element: <MyProfile /> },
         ],
     },
@@ -148,6 +151,7 @@ const router = createBrowserRouter([
             { index: true, element: <UserDashboard /> },
             { path: "book-now", element: <BookNow /> },
             { path: "my-bookings", element: <MyBookings /> },
+            { path: "my-reviews", element: <MyReviews /> },
             { path: "profile", element: <MyProfile /> },
         ],
     },

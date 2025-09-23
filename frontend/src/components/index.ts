@@ -1,7 +1,7 @@
 import Header from "./Header";
 import Footer from "./Footer";
 import JoinUs from "./JoinUs";
-import BookNowButton from "./BookNow";
+import BookNowButton from "./BookNowButton";
 import ContactFloating from "./ContactFloating";
 
 import Quote from "./Home/Quote";

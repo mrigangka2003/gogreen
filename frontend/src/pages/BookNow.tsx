@@ -1,129 +1,173 @@
 import { useForm } from "react-hook-form";
-import type { FieldValues } from "react-hook-form";
-import { Calendar, Clock, MapPin, FileText } from "lucide-react";
+import {toast} from "react-toastify"
 
-const BookNow = () => {
+import { useAuthStore } from "../stores/auth";
+import axiosInstance from "../api";
+
+type FormValues = {
+    address: string;
+    phoneNumber: string;
+    instruction?: string;
+    date: string;
+    timeSlot: string;
+};
+
+const ENDPOINTS: Record<string, string> = {
+    user: "/user/bookings",
+    org: "/org/bookings",
+};
+
+export default function BookingForm({ className = "" }) {
+    const { user } = useAuthStore();
     const {
         register,
         handleSubmit,
+        reset,
         formState: { errors, isSubmitting },
-    } = useForm<FieldValues>();
+    } = useForm<FormValues>();
 
-    const onSubmit = (data: FieldValues) => {
-        console.log(data);
+    const onSubmit = async (data: FormValues) => {
+        const role = user?.role;
+        const endpoint =
+            role === "org"
+                ? ENDPOINTS.org
+                : role === "user"
+                ? ENDPOINTS.user
+                : undefined;
+
+        if (!endpoint) {
+            console.error("No booking endpoint for role:", role);
+            toast.error(
+                "Your account type cannot create bookings. Contact support."
+            );
+            return;
+        }
+
+        try {
+            await axiosInstance.post(endpoint, data);
+
+            toast.success("Booking confirmed — we’ll see you soon!");
+
+            setTimeout(() => {
+                reset();
+            }, 200);
+        } catch (err: any) {
+            console.error("Booking error:", err);
+            const msg =
+                err?.response?.data?.message ||
+                err?.message ||
+                "Unable to create booking";
+            toast.error(msg);
+        }
     };
 
     return (
-        <div className="flex items-center justify-center min-h-screen bg-white px-4">
-            <form
-                onSubmit={handleSubmit(onSubmit)}
-                className="w-full max-w-lg bg-white p-8 rounded-2xl shadow-lg border border-gray-200 space-y-6"
-            >
-                <h2 className="text-2xl font-semibold text-green-700 text-center">
-                    Book Your Appointment
-                </h2>
-                <p className="text-gray-500 text-center text-sm">
-                    Please fill out the form to confirm your booking
-                </p>
-
-                {/* Date */}
+        <form
+            onSubmit={handleSubmit(onSubmit)}
+            className={`w-full max-w-2xl mx-auto bg-white rounded-2xl shadow p-6 space-y-4 ${className}`}
+        >
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
-                    <label className="flex items-center gap-2 text-gray-700 text-sm mb-1">
-                        <Calendar size={16} /> Date
+                    <label className="block text-sm font-medium mb-1">
+                        Phone *
                     </label>
                     <input
+                        {...register("phoneNumber", {
+                            required: "Required",
+                            pattern: {
+                                value: /^[0-9]{10,15}$/,
+                                message: "Invalid number",
+                            },
+                        })}
+                        type="tel"
+                        className="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
+                    />
+                    {errors.phoneNumber && (
+                        <span className="text-xs text-red-600">
+                            {errors.phoneNumber.message}
+                        </span>
+                    )}
+                </div>
+
+                <div>
+                    <label className="block text-sm font-medium mb-1">
+                        Date *
+                    </label>
+                    <input
+                        {...register("date", { required: "Required" })}
                         type="date"
-                        {...register("date", { required: "Date is required" })}
-                        className="w-full px-4 py-2 bg-white text-gray-800 rounded-lg border border-gray-300 focus:border-green-500 focus:ring-2 focus:ring-green-400 outline-none"
+                        min={new Date().toISOString().split("T")[0]}
+                        className="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
                     />
                     {errors.date && (
-                        <p className="text-red-500 text-sm mt-1">
-                            {errors.date.message as string}
-                        </p>
+                        <span className="text-xs text-red-600">
+                            {errors.date.message}
+                        </span>
+                    )}
+                </div>
+            </div>
+
+            <div>
+                <label className="block text-sm font-medium mb-1">
+                    Address *
+                </label>
+                <textarea
+                    {...register("address", {
+                        required: "Required",
+                        minLength: { value: 5, message: "Too short" },
+                    })}
+                    rows={2}
+                    className="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary resize-none"
+                />
+                {errors.address && (
+                    <span className="text-xs text-red-600">
+                        {errors.address.message}
+                    </span>
+                )}
+            </div>
+
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div>
+                    <label className="block text-sm font-medium mb-1">
+                        Time slot *
+                    </label>
+                    <select
+                        {...register("timeSlot", { required: "Required" })}
+                        className="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
+                    >
+                        <option value="">Select</option>
+                        <option>08:00-10:00</option>
+                        <option>10:00-12:00</option>
+                        <option>12:00-14:00</option>
+                        <option>14:00-16:00</option>
+                        <option>16:00-18:00</option>
+                    </select>
+                    {errors.timeSlot && (
+                        <span className="text-xs text-red-600">
+                            {errors.timeSlot.message}
+                        </span>
                     )}
                 </div>
 
-                {/* Time */}
                 <div>
-                    <label className="flex items-center gap-2 text-gray-700 text-sm mb-1">
-                        <Clock size={16} /> Time
+                    <label className="block text-sm font-medium mb-1">
+                        Instructions
                     </label>
                     <input
-                        type="time"
-                        {...register("time", { required: "Time is required" })}
-                        className="w-full px-4 py-2 bg-white text-gray-800 rounded-lg border border-gray-300 focus:border-green-500 focus:ring-2 focus:ring-green-400 outline-none"
-                    />
-                    {errors.time && (
-                        <p className="text-red-500 text-sm mt-1">
-                            {errors.time.message as string}
-                        </p>
-                    )}
-                </div>
-
-                {/* Address */}
-                <div>
-                    <label className="flex items-center gap-2 text-gray-700 text-sm mb-1">
-                        <MapPin size={16} /> Address
-                    </label>
-                    <input
-                        type="text"
-                        placeholder="Enter your address"
-                        {...register("address", {
-                            required: "Address is required",
-                        })}
-                        className="w-full px-4 py-2 bg-white text-gray-800 rounded-lg border border-gray-300 focus:border-green-500 focus:ring-2 focus:ring-green-400 outline-none"
-                    />
-                    {errors.address && (
-                        <p className="text-red-500 text-sm mt-1">
-                            {errors.address.message as string}
-                        </p>
-                    )}
-                </div>
-
-                {/* Total Amount */}
-                <div>
-                    <label className="flex items-center gap-2 text-gray-700 text-sm mb-1">
-                        ₹ Total Amount
-                    </label>
-                    <input
-                        type="number"
-                        placeholder="Enter total amount"
-                        {...register("totalAmount", {
-                            required: "Total amount is required",
-                        })}
-                        className="w-full px-4 py-2 bg-white text-gray-800 rounded-lg border border-gray-300 focus:border-green-500 focus:ring-2 focus:ring-green-400 outline-none"
-                    />
-                    {errors.totalAmount && (
-                        <p className="text-red-500 text-sm mt-1">
-                            {errors.totalAmount.message as string}
-                        </p>
-                    )}
-                </div>
-
-                {/* Notes */}
-                <div>
-                    <label className="flex items-center gap-2 text-gray-700 text-sm mb-1">
-                        <FileText size={16} /> Notes (Optional)
-                    </label>
-                    <textarea
-                        placeholder="Any special instructions..."
-                        {...register("notes")}
-                        className="w-full px-4 py-2 bg-white text-gray-800 rounded-lg border border-gray-300 focus:border-green-500 focus:ring-2 focus:ring-green-400 outline-none resize-none"
-                        rows={3}
+                        {...register("instruction")}
+                        placeholder="Gate code, etc."
+                        className="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
                     />
                 </div>
+            </div>
 
-                {/* Submit */}
-                <button
-                    type="submit"
-                    disabled={isSubmitting}
-                    className="w-full py-3 bg-green-600 hover:bg-green-500 text-white font-medium rounded-lg shadow-md transition-all duration-300 disabled:opacity-50"
-                >
-                    {isSubmitting ? "Booking..." : "Book Now"}
-                </button>
-            </form>
-        </div>
+            <button
+                type="submit"
+                disabled={isSubmitting}
+                className={`w-full py-2.5 rounded-lg font-semibold text-white bg-primary hover:bg-primary-hover disabled:opacity-60`}
+            >
+                {isSubmitting ? "Booking..." : "Create booking"}
+            </button>
+        </form>
     );
-};
-
-export default BookNow;
+}

@@ -17,11 +17,12 @@ import Dashboard from "./Dashboard/Dashboard";
 import BookNow from "./BookNow";
 import MyProfile from "./MyProfile";
 import MyBookings from "./MyBookings";
-
+import MyReviews from "./MyReviews";
 
 import SuperAccounts from "./super/SuperAccounts";
 import SuperCreateAdmin from "./super/SuperCreateAdmin";
 import SuperReviews from "./super/SuperReviews";
+
 
 
 export {
@@ -44,5 +45,6 @@ export {
     MyProfile,
     SuperAccounts,
     SuperCreateAdmin,
-    SuperReviews
+    SuperReviews,
+    MyReviews
 };
