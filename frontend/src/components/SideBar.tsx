@@ -83,7 +83,7 @@ const sidebarMap: Record<UserRole, SideBarItem[]> = {
         { title: "Accounts", path: "accounts", icon: <Users size={20} /> },
         {
             title: "Bookings",
-            path: "bookings",
+            path: "all-bookings",
             icon: <ClipboardList size={20} />,
         },
         {

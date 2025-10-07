@@ -29,16 +29,14 @@ import {
 
 import ProtectedRoute from "./components/ProtectedRoute.tsx";
 import DashboardLayout from "./components/Dashboard-layout/DashboardLayout.tsx";
-import { UserDashboard } from "./components/index.ts";
+import { AdminDashboard, UserDashboard } from "./components/index.ts";
 
 const SuperAccounts = lazy(() => import("./pages/super/SuperAccounts.tsx"));
-const SuperAdminDashboard = lazy(
-    () => import("./pages/super/SuperAdminDashboard.tsx")
-);
+const SuperAdminDashboard = lazy(() => import("./pages/super/SuperAdminDashboard.tsx"));
 const SuperReviews = lazy(() => import("./pages/super/SuperReviews.tsx"));
-const SuperCreateAdmin = lazy(
-    () => import("./pages/super/SuperCreateAdmin.tsx")
-);
+const SuperCreateAdmin = lazy(() => import("./pages/super/SuperCreateAdmin.tsx"));
+const AssignBooking = lazy(()=>import("./pages/AssignBooking.tsx"));
+
 
 const MyReviews = lazy(()=>import("./pages/MyReviews.tsx"));
 const MyProfile = lazy(() => import("./pages/MyProfile.tsx"));
@@ -180,9 +178,10 @@ const router = createBrowserRouter([
             </ProtectedRoute>
         ),
         children: [
-            { index: true, element: <UserDashboard /> },
-            { path: "book-now", element: <BookNow /> },
-            { path: "my-bookings", element: <MyBookings /> },
+            { index: true, element: <AdminDashboard /> },
+            { path: "accounts", element: <BookNow /> },
+            { path: "all-bookings", element: <AssignBooking /> },
+            { path: "reviews", element: <MyBookings /> },
             { path: "profile", element: <MyProfile /> },
         ],
     },
@@ -198,6 +197,7 @@ const router = createBrowserRouter([
         children: [
             { index: true, element: <SuperAdminDashboard /> },
             { path: "accounts", element: <SuperAccounts /> },
+            { path: "all-bookings", element: <AssignBooking /> },
             { path: "create-admin", element: <SuperCreateAdmin /> },
             { path: "all-reviews", element: <SuperReviews /> },
             { path: "profile", element: <MyProfile /> },

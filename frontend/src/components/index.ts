@@ -27,6 +27,7 @@ import EmployeeDashboard from "./Dashboards/EmployeeDashboard";
 import SuperAdminDashboard from "./Dashboards/SuperAdminDashboard";
 
 import ProtectedRoute from "./ProtectedRoute";
+import Notification from "./Notification";
 
 export {
     Header,
@@ -51,5 +52,6 @@ export {
     AdminDashboard,
     OrganizationDashboards,
     EmployeeDashboard,
-    SuperAdminDashboard
+    SuperAdminDashboard,
+    Notification
 };
