@@ -1,8 +1,8 @@
 import { Request, Response } from "express";
-
-import { User,Booking,Review,Role } from "../models";
-import { apiError, apiResponse } from "../helper";
 import { Types } from "mongoose";
+
+import { User, Booking, Review, Role } from "../models";
+import { apiError, apiResponse } from "../helper";
 
 /**
  * Get all accounts (users/orgs/emps)
@@ -13,6 +13,39 @@ const getAllAccounts = async (_req: Request, res: Response): Promise<void> => {
         apiResponse(res, 200, "Accounts fetched successfully", accounts);
     } catch (err) {
         apiError(res, 500, "Failed to fetch accounts", err);
+    }
+};
+
+/**
+ * Get all bookings 
+ * Supports optional filters via query params
+ */
+const getAllBookings = async (req: Request, res: Response): Promise<void> => {
+    try {
+        const { status, userId, employeeId, startDate, endDate } = req.query;
+
+        // Build dynamic filter object
+        const filter: any = {};
+
+        if (status) filter.status = status;
+        if (userId) filter.userId = userId;
+        if (employeeId) filter.employeeId = employeeId;
+
+        if (startDate || endDate) {
+            filter.date = {};
+            if (startDate) filter.date.$gte = new Date(startDate as string);
+            if (endDate) filter.date.$lte = new Date(endDate as string);
+        }
+
+        // Sort newest → oldest using createdAt
+        const bookings = await Booking.find(filter)
+            .populate("userId", "name email phone")
+            .populate("employeeId", "name email phone")
+            .sort({ createdAt: -1 }); // 👈 newest first
+
+        apiResponse(res, 200, "Bookings fetched successfully", bookings);
+    } catch (err) {
+        apiError(res, 500, "Failed to fetch bookings", err);
     }
 };
 
@@ -209,6 +242,7 @@ const deleteProfileSelf = async (
 export default {
     getAllAccounts,
     getBookingHistory,
+    getAllBookings,
     deleteAccount,
     updateAssignBooking,
     viewAllReviews,

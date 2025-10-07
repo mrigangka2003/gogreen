@@ -3,6 +3,7 @@ import { authMiddleware } from "../middlewares/auth";
 import { requirePermissions } from "../middlewares/rbac";
 import superController from "../controllers/superAdmin.controller";
 import adminController from "../controllers/admin.controller";
+import superAdminController from "../controllers/superAdmin.controller";
 const router = Router();
 
 // 📌 Accounts
@@ -42,6 +43,13 @@ router.post(
 );
 
 // 📌 Bookings
+router.get(
+    "/bookings",
+    authMiddleware,
+    requirePermissions("VIEW_ALL_BOOKINGS"),
+    superAdminController.getAllBookings
+);
+
 router.patch(
     "/bookings/assign",
     authMiddleware,
