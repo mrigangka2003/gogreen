@@ -54,7 +54,7 @@ const DashboardLayout: React.FC<Props> = ({
                             borderColor: `${FIFTH}1a`,
                         }}
                     >
-                        <div className="max-w-7xl mx-auto">
+                        <div className="max-w-7xl mx-auto hidden md:block">
                             <h1
                                 className="text-lg font-semibold"
                                 style={{ color: FOURTH }}

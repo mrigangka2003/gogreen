@@ -1,9 +1,9 @@
 import React, { useEffect, useMemo, useState } from "react";
 import axiosInstance from "../../api";
 import { Notification } from "../../components";
+import { RefreshCw } from "lucide-react";
 
 /* ----------------------------- Types / Helpers ----------------------------- */
-// Roles used in UI (normalized)
 type Role = "user" | "org" | "emp" | "admin" | "super_admin";
 
 export type Account = {
@@ -83,7 +83,6 @@ const Avatar: React.FC<{
             .join("")
             .toUpperCase() ?? "—";
     return src ? (
-        // eslint-disable-next-line @next/next/no-img-element
         <img
             src={src}
             alt={name}
@@ -117,7 +116,6 @@ const AccountsPage: React.FC = () => {
     const [accounts, setAccounts] = useState<Account[]>([]);
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
-
     const [activeRoles, setActiveRoles] = useState<Set<Role>>(new Set());
     const [query, setQuery] = useState("");
     const [debouncedQuery, setDebouncedQuery] = useState(query);
@@ -126,62 +124,53 @@ const AccountsPage: React.FC = () => {
         type: "success" | "error";
     } | null>(null);
 
-    // Pagination (client-side)
+    // Pagination
     const [page, setPage] = useState(1);
     const PAGE_SIZE = 12;
 
-    useEffect(() => {
-        let mounted = true;
-        const fetchAccounts = async () => {
-            setLoading(true);
-            setError(null);
-            try {
-                const endpoint = "/super/accounts";
-                const res = await axiosInstance.get<ApiResponse>(endpoint);
+    /* --------------------------- Fetch Accounts --------------------------- */
+    const fetchAccounts = async () => {
+        setLoading(true);
+        setError(null);
+        try {
+            const endpoint = "/super/accounts";
+            const res = await axiosInstance.get<ApiResponse>(endpoint);
 
-                if (!mounted) return;
-
-                if (res.data?.success) {
-                    const rawList = res.data.data ?? [];
-                    const mapped: Account[] = rawList.map((r) => ({
-                        id: r._id,
-                        name: r.name?.trim() ?? "—",
-                        email: r.email ?? "",
-                        phone: r.phone ?? "",
-                        isActive: r.isActive,
-                        role: normalizeRoleName(r.role?.name),
-                        avatarUrl: r["avatarUrl"] ?? null,
-                        createdAt: safeDate(r.createdAt) ?? null,
-                        raw: r,
-                    }));
-                    setAccounts(mapped);
-                } else {
-                    const msg = res.data?.message ?? "Failed to fetch accounts";
-                    setError(msg);
-                    setNotification({ message: msg, type: "error" });
-                }
-            } catch (err: any) {
-                console.error("Accounts fetch error", err);
-                const msg =
-                    err?.response?.data?.message ||
-                    err?.message ||
-                    "Network error";
-                if (mounted) {
-                    setError(msg);
-                    setNotification({ message: msg, type: "error" });
-                }
-            } finally {
-                if (mounted) setLoading(false);
+            if (res.data?.success) {
+                const rawList = res.data.data ?? [];
+                const mapped: Account[] = rawList.map((r) => ({
+                    id: r._id,
+                    name: r.name?.trim() ?? "—",
+                    email: r.email ?? "",
+                    phone: r.phone ?? "",
+                    isActive: r.isActive,
+                    role: normalizeRoleName(r.role?.name),
+                    avatarUrl: r["avatarUrl"] ?? null,
+                    createdAt: safeDate(r.createdAt) ?? null,
+                    raw: r,
+                }));
+                setAccounts(mapped);
+            } else {
+                const msg = res.data?.message ?? "Failed to fetch accounts";
+                setError(msg);
+                setNotification({ message: msg, type: "error" });
             }
-        };
+        } catch (err: any) {
+            console.error("Accounts fetch error", err);
+            const msg =
+                err?.response?.data?.message || err?.message || "Network error";
+            setError(msg);
+            setNotification({ message: msg, type: "error" });
+        } finally {
+            setLoading(false);
+        }
+    };
 
+    useEffect(() => {
         fetchAccounts();
-        return () => {
-            mounted = false;
-        };
     }, []);
 
-    // Debounce search query (300ms)
+    // Debounce search query
     useEffect(() => {
         const id = setTimeout(
             () => setDebouncedQuery(query.trim().toLowerCase()),
@@ -204,6 +193,10 @@ const AccountsPage: React.FC = () => {
         setActiveRoles(new Set());
         setQuery("");
         setPage(1);
+    };
+
+    const handleRefresh = () => {
+        fetchAccounts(); // SPA refresh without full reload
     };
 
     const filteredAccounts = useMemo(() => {
@@ -241,6 +234,7 @@ const AccountsPage: React.FC = () => {
         page * PAGE_SIZE
     );
 
+    /* --------------------------- Render --------------------------- */
     return (
         <div className="p-4 sm:p-6 lg:p-8">
             <div className="max-w-6xl mx-auto">
@@ -255,11 +249,12 @@ const AccountsPage: React.FC = () => {
                         </p>
                     </div>
 
-                    <div className="w-full sm:w-auto flex items-center gap-2">
+                    {/* Search & buttons */}
+                    <div className="w-full sm:w-auto flex flex-wrap items-center gap-2">
                         <label htmlFor="accounts-search" className="sr-only">
                             Search accounts
                         </label>
-                        <div className="relative flex-1">
+                        <div className="relative flex-1 min-w-[160px]">
                             <input
                                 id="accounts-search"
                                 value={query}
@@ -269,7 +264,6 @@ const AccountsPage: React.FC = () => {
                                 }}
                                 placeholder="Search name, email or phone..."
                                 className="w-full px-3 py-2 rounded-xl border border-gray-200 outline-none focus:ring-2 focus:ring-primary"
-                                aria-label="Search accounts by name, email or phone"
                             />
                             {query && (
                                 <button
@@ -287,14 +281,22 @@ const AccountsPage: React.FC = () => {
 
                         <button
                             onClick={clearFilters}
-                            className="px-3 py-2 rounded-xl bg-white border border-gray-200 hover:shadow-sm text-sm"
+                            className="px-3 py-2 rounded-xl bg-white border border-gray-200 hover:shadow-sm text-sm flex items-center gap-1"
                         >
                             Clear
+                        </button>
+
+                        <button
+                            onClick={handleRefresh}
+                            className="px-3 py-2 rounded-xl bg-blue-600 text-white hover:bg-blue-700 text-sm flex items-center gap-1"
+                        >
+                            <RefreshCw className="w-4 h-4" />
+                            <span className="hidden sm:inline">Refresh</span>
                         </button>
                     </div>
                 </div>
 
-                {/* Role filters - scrollable on small screens */}
+                {/* Role filters */}
                 <div className="mb-4">
                     <div className="flex gap-2 overflow-x-auto no-scrollbar py-1">
                         {AVAILABLE_ROLES.map((role) => {
@@ -347,15 +349,14 @@ const AccountsPage: React.FC = () => {
                             </div>
 
                             {/* Pagination controls */}
-                            <div className="mt-6 flex items-center justify-between gap-3">
+                            <div className="mt-6 flex flex-col sm:flex-row items-center justify-between gap-3">
                                 <div className="text-sm text-gray-500">
                                     Showing{" "}
                                     <span className="font-medium">
                                         {(page - 1) * PAGE_SIZE + 1}
                                     </span>{" "}
-                                    —
+                                    —{" "}
                                     <span className="font-medium">
-                                        {" "}
                                         {Math.min(
                                             page * PAGE_SIZE,
                                             filteredAccounts.length
@@ -374,7 +375,6 @@ const AccountsPage: React.FC = () => {
                                         }
                                         disabled={page === 1}
                                         className="px-3 py-1 rounded-xl bg-white border border-gray-200 hover:shadow-sm disabled:opacity-50"
-                                        aria-label="Previous page"
                                     >
                                         Prev
                                     </button>
@@ -389,7 +389,6 @@ const AccountsPage: React.FC = () => {
                                         }
                                         disabled={page === totalPages}
                                         className="px-3 py-1 rounded-xl bg-white border border-gray-200 hover:shadow-sm disabled:opacity-50"
-                                        aria-label="Next page"
                                     >
                                         Next
                                     </button>
@@ -415,7 +414,7 @@ const AccountsPage: React.FC = () => {
 
 export default AccountsPage;
 
-/* --------------------------- AccountCard subcomponent -------------------------- */
+/* --------------------------- AccountCard --------------------------- */
 const AccountCard: React.FC<{ account: Account }> = ({ account }) => {
     const { name, email, phone, avatarUrl, role, createdAt, isActive } =
         account;
@@ -478,7 +477,6 @@ const AccountCard: React.FC<{ account: Account }> = ({ account }) => {
                         <button
                             className="px-3 py-1 rounded-xl text-sm bg-white border border-gray-200 hover:shadow-sm"
                             onClick={() => console.log("view", account.id)}
-                            aria-label={`View ${name}`}
                         >
                             View
                         </button>
@@ -490,11 +488,9 @@ const AccountCard: React.FC<{ account: Account }> = ({ account }) => {
                                     console.log("action", account.id)
                                 }
                                 aria-haspopup="menu"
-                                aria-label={`Open actions for ${name}`}
                             >
                                 Actions
                             </button>
-                            {/* Simple dropdown placeholder - replace with real menu if needed */}
                         </div>
                     </div>
                 </div>
@@ -503,7 +499,7 @@ const AccountCard: React.FC<{ account: Account }> = ({ account }) => {
     );
 };
 
-/* ------------------------------- Skeletons --------------------------------- */
+/* --------------------------- Skeleton --------------------------- */
 const SkeletonGrid: React.FC = () => {
     const items = new Array(6).fill(null);
     return (

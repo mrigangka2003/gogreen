@@ -50,8 +50,6 @@ const SuperCreateAdmin: React.FC = () => {
 
     const onSubmit = async (data: FormValues) => {
         try {
-            // If you have an API, call it here:
-            // const res = await axiosInstance.post<{ success: boolean; message: string }>('/admin/create', values);
 
             const res = await axiosInstance.post('/accounts/admin',data)
 
@@ -72,7 +70,6 @@ const SuperCreateAdmin: React.FC = () => {
                 });
             }
         } catch (err: any) {
-            // If you used axios and have a server message, extract it:
             const msg =
                 err?.response?.data?.message || "Server or network error";
             setNotification({ message: msg, type: "error" });

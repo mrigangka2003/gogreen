@@ -1,51 +1,33 @@
-import { useNavigate } from "react-router-dom";
-import { Calendar, User, FileText } from "lucide-react";
+const HEADER_REM = 4; 
 
 const UserDashboard = () => {
-    const navigate = useNavigate();
 
-    const actions = [
-        {
-            label: "Book Now",
-            icon: <Calendar size={20} />,
-            onClick: () => navigate("/book-now"),
-            primary: true,
-        },
-        {
-            label: "My Profile",
-            icon: <User size={20} />,
-            onClick: () => navigate("/my-profile"),
-        },
-        {
-            label: "My Bookings",
-            icon: <FileText size={20} />,
-            onClick: () => navigate("/my-bookings"),
-        },
-    ];
+    const minHeightStyle = {
+
+        minHeight: `calc(100vh - ${HEADER_REM}rem)`,
+        paddingTop: `calc(env(safe-area-inset-top, 0px) + ${HEADER_REM}rem)`,
+    };
 
     return (
-        <div className="min-h-screen bg-green-600 flex items-center justify-center p-6">
-            <div className="bg-white w-full max-w-3xl p-8 rounded-2xl shadow-lg">
-                <h1 className="text-2xl font-semibold text-green-700 text-center mb-8">
-                    Welcome to Your Dashboard
-                </h1>
+        <div
+            
+            className="w-full h-screen bg-[#f8faf8] flex items-start justify-center p-6 box-border overflow-y-auto"
+            style={minHeightStyle}
+        >
+            <div className="w-full max-w-3xl">
+                <div className="relative z-10 bg-white p-6 sm:p-12 rounded-3xl shadow-md text-center border border-green-100">
+                    <h1 className="text-3xl sm:text-5xl font-extrabold text-green-700 leading-tight break-words">
+                        Welcome to Your Dashboard
+                    </h1>
 
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
-                    {actions.map((action, idx) => (
-                        <button
-                            key={idx}
-                            onClick={action.onClick}
-                            className={`flex items-center gap-3 px-6 py-4 rounded-lg shadow-md text-lg font-medium transition-all duration-300
-                ${
-                    action.primary
-                        ? "bg-green-600 text-white hover:bg-green-500"
-                        : "bg-gray-100 text-gray-800 hover:bg-gray-200"
-                }`}
-                        >
-                            {action.icon}
-                            {action.label}
-                        </button>
-                    ))}
+                    <p className="mt-4 text-base sm:text-lg text-green-600 font-medium max-w-xl mx-auto">
+                        Manage your profile, track your bookings, and stay
+                        connected — all in one simple and organized place.
+                    </p>
+
+                    <div className="mt-8">
+                        <div className="h-1 w-24 bg-green-500 mx-auto rounded-full" />
+                    </div>
                 </div>
             </div>
         </div>

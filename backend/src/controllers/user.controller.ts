@@ -258,10 +258,10 @@ export const getMyBookings = async (req: Request, res: Response): Promise<void> 
             Booking.countDocuments(filter),
         ]);
 
-        if (!bookings.length) {
-            apiError(res, 404, "No bookings found");
-            return;
-        }
+        // if (!bookings.length) {
+        //     apiError(res, 404, "No bookings found");
+        //     return;
+        // }
 
         apiResponse(res, 200, "Bookings fetched", { bookings, total, page, pages: Math.ceil(total / limit) });
     } catch (err) {

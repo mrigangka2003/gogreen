@@ -1,4 +1,17 @@
 const JoinUs = () => {
+    // Replace this with your official email address
+    const email = "gogreenplus.in@gmail.com";
+    const subject =
+        "We want to partner with you and make the city green and clean";
+
+    const handleEmailClick = () => {
+        // Encode the subject properly for email clients
+        const mailtoLink = `mailto:${email}?subject=${encodeURIComponent(
+            subject
+        )}`;
+        window.location.href = mailtoLink;
+    };
+
     return (
         <div className="px-4 sm:px-6 lg:px-8 py-10">
             <div className="max-w-6xl mx-auto border border-gray-200 shadow-2xl rounded-3xl overflow-hidden">
@@ -12,6 +25,7 @@ const JoinUs = () => {
                         <h2 className="text-4xl sm:text-5xl font-bold mb-6 sm:mb-8 text-primary">
                             Join Us
                         </h2>
+
                         <p className="text-lg sm:text-xl mb-6 sm:mb-8 max-w-4xl mx-auto text-gray-700 leading-relaxed">
                             Be part of the change you want to see! We're
                             inviting NGOs, volunteers, and community groups to
@@ -19,11 +33,17 @@ const JoinUs = () => {
                             footprint and promote sustainability. Let's work
                             together to make a difference.
                         </p>
+
                         <p className="text-2xl sm:text-3xl font-bold text-gray-800 mb-8 sm:mb-12 leading-relaxed">
                             Together, let's shape a cleaner, fairer, and more
                             sustainable India.
                         </p>
-                        <button className="group relative px-10 sm:px-12 py-4 sm:py-6 bg-gradient-to-r from-primary to-hover-color text-white font-bold text-lg sm:text-xl rounded-full shadow-2xl transform transition-all duration-500 hover:shadow-3xl hover:-translate-y-2 hover:scale-105">
+
+                        {/* Updated button */}
+                        <button
+                            onClick={handleEmailClick}
+                            className="group relative px-10 sm:px-12 py-4 sm:py-6 bg-gradient-to-r from-primary to-hover-color text-white font-bold text-lg sm:text-xl rounded-full shadow-2xl transform transition-all duration-500 hover:shadow-3xl hover:-translate-y-2 hover:scale-105"
+                        >
                             <span className="relative z-10">
                                 Partner With Us
                             </span>
