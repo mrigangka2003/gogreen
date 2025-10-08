@@ -10,7 +10,7 @@ const app = express();
 
 app.use(
     cors({
-        origin: "http://localhost:5173", 
+        origin: "http://localhost:5173",
         credentials: true,
     })
 );
@@ -26,8 +26,8 @@ app.get("/", (req: Request, res: Response) => {
 
 connectDB()
     .then(() => {
-        app.listen(PORT || 8000, () => {
-            console.log(`⚙️ Server is running at port : http://localhost:8000`);
+        app.listen(PORT, "0.0.0.0", () => {
+            console.log(`✅ Server listening on port ${PORT}`);
         });
     })
     .catch((err) => {
