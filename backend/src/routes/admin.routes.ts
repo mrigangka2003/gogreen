@@ -35,6 +35,13 @@ router.post(
 );
 
 // 📌 Bookings
+router.get(
+    "/bookings",
+    authMiddleware,
+    requirePermissions("VIEW_ALL_BOOKINGS"),
+    adminController.getAllBookings
+);
+
 router.patch(
     "/bookings/assign",
     authMiddleware,
