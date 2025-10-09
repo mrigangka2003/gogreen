@@ -79,9 +79,30 @@ const JobSearch: React.FC = () => {
         return matchesSearch && matchesType;
     });
 
+
     const handleApply = (jobId: number, jobTitle: string) => {
-        alert(`Applied to ${jobTitle}! ${jobId}`);
-    };
+    const recipient = 'gogreenplus.in@gmail.com';
+    const subject = `Application for ${jobId} (ID: ${jobTitle})`;
+    const body = `Dear Hiring Team,
+
+I am writing to express my interest in the ${jobTitle} position (Internship ID: ${jobId}).
+
+Contact Details:
+Name: [Your Name]
+Email: [Your Email]
+Phone: [Your Phone]
+
+Please find my resume attached to this email.
+
+Thank you for considering my application.
+
+Best regards,
+[Your Name]`;
+
+    const mailtoLink = `mailto:${recipient}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
+    
+    window.location.href = mailtoLink;
+};
 
     return (
         <div className="min-h-screen bg-gray-50 p-6">
