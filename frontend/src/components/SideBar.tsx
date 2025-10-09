@@ -8,7 +8,6 @@ import {
     Star,
     User,
     Users,
-    ClipboardPlus,
     Settings,
     Menu,
     X,
@@ -40,20 +39,17 @@ const sidebarMap: Record<UserRole, SideBarItem[]> = {
     admin: [
         {
             title: "Bookings",
-            path: "current-bookings",
+            path: "all-bookings",
             icon: <Users size={20} />,
         },
-        { title: "All Users", path: "all-users", icon: <Users size={20} /> },
-        {
-            title: "Past Bookings",
-            path: "past-bookings",
-            icon: <ClipboardPlus size={20} />,
-        },
+        { title: "Accounts", path: "accounts", icon: <Users size={20} /> },
         {
             title: "Add Management",
             path: "add-management",
             icon: <Settings size={20} />,
         },
+        { title: "Reviews", path: "all-reviews", icon: <Star size={20} /> },
+
         { title: "Profile", path: "profile", icon: <User size={20} /> },
     ],
     org: [
@@ -110,7 +106,6 @@ const Sidebar = ({
     const items = sidebarMap[UserRoles] ?? [];
 
     const clearUser = useAuthStore((s) => s.clearUser);
-
 
     const toggleMobileSidebar = () => setIsMobileOpen((v) => !v);
 

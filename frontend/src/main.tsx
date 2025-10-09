@@ -35,9 +35,13 @@ const SuperAccounts = lazy(() => import("./pages/super/SuperAccounts.tsx"));
 const SuperAdminDashboard = lazy(() => import("./pages/super/SuperAdminDashboard.tsx"));
 const SuperReviews = lazy(() => import("./pages/super/SuperReviews.tsx"));
 const SuperCreateAdmin = lazy(() => import("./pages/super/SuperCreateAdmin.tsx"));
+
+//admin pages
+const AdminAccounts = lazy(()=>import("./pages/Admin/AdminAccounts.tsx"))
+const AddManagement = lazy(()=>import("./pages/Admin/AddManagement.tsx"))
+
+
 const AssignBooking = lazy(()=>import("./pages/AssignBooking.tsx"));
-
-
 const MyReviews = lazy(()=>import("./pages/MyReviews.tsx"));
 const MyProfile = lazy(() => import("./pages/MyProfile.tsx"));
 
@@ -179,9 +183,10 @@ const router = createBrowserRouter([
         ),
         children: [
             { index: true, element: <AdminDashboard /> },
-            { path: "accounts", element: <BookNow /> },
-            { path: "all-bookings", element: <AssignBooking /> },
-            { path: "reviews", element: <MyBookings /> },
+            { path: "all-bookings", element: <BookNow /> },
+            { path: "accounts", element: <AdminAccounts /> },
+            { path: "all-reviews", element: <MyBookings /> },
+            { path: "add-management", element: <AddManagement /> },
             { path: "profile", element: <MyProfile /> },
         ],
     },

@@ -1,8 +1,25 @@
-import React from 'react';
+import React from "react";
 const AdminDashboard: React.FC = () => {
     return (
-        <div className="min-h-screen bg-gradient-to-br bg-primary flex items-center justify-center relative overflow-hidden">
-        
+        <div
+            className="w-full h-screen bg-[#f8faf8] flex items-start justify-center p-6 box-border overflow-y-auto"
+        >
+            <div className="w-full max-w-3xl">
+                <div className="relative z-10 bg-white p-6 sm:p-12 rounded-3xl shadow-md text-center border border-green-100">
+                    <h1 className="text-3xl sm:text-5xl font-extrabold text-green-700 leading-tight break-words">
+                        Welcome to Your Dashboard
+                    </h1>
+
+                    <p className="mt-4 text-base sm:text-lg text-green-600 font-medium max-w-xl mx-auto">
+                        Manage As Admin, Help others to experience the good service, and stay
+                        connected — all in one simple and organized place.
+                    </p>
+
+                    <div className="mt-8">
+                        <div className="h-1 w-24 bg-green-500 mx-auto rounded-full" />
+                    </div>
+                </div>
+            </div>
         </div>
     );
 };
