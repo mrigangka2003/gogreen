@@ -1,5 +1,5 @@
 import { useMemo } from "react";
-import { useParams, Link, useNavigate } from "react-router-dom";
+import { useParams, useNavigate } from "react-router-dom";
 import { ArrowLeft, MapPin, Linkedin, Mail, BadgeInfo } from "lucide-react";
 
 import { advisors, executives, itTeam } from "../data/data";
