@@ -10,6 +10,9 @@ import a_ghosh from "../assets/team/ms_a_ghosh.jpg";
 import samik_das from "../assets/team/samik_das_ceo.jpg";
 import bilash_chandra_roy from "../assets/team/bilash_chandra_roy.png";
 
+import debaprasad from "../assets/team/debaprasad_paul.jpeg";
+import mrigangkadatta from "../assets/team/mrigangkadatta.jpeg"
+
 import EvVaccumCleaner from "../assets/EV_vaccum_cleaner.png"
 import doorToDoor from "../assets/door_to_door.jpg"
 
@@ -166,4 +169,27 @@ const executives: Array<Executive> = [
     },
 ];
 
-export { advisors, executives, services, futureInnovations };
+const itTeam :Array<Executive> = [
+    {
+        id: "debaprasadpaul",
+        name: "Debaprasad Paul",
+        country: "India",
+        role: "Developer",
+        image: debaprasad,
+        linkedIn:
+            "https://www.linkedin.com/in/debaprasad-paul/",
+        about: "Debaprasad Paul is a Senior Software Engineer with a strong background in designing and delivering large-scale financial systems. His career spans building robust banking applications that power transactions for millions of users and developing platforms that enable global securities lending for institutional clients.Throughout his journey, Debaprasad has focused on creating solutions that simplify complex financial workflows without compromising on security or performance. He excels at translating business requirements into intuitive, user-friendly experiences that meet the highest standards of reliability and compliance.Passionate about solving real-world problems through technology, Debaprasad combines technical expertise with a deep understanding of financial ecosystems. He takes pride in building products that drive tangible value for businesses and make financial processes seamless for end users."
+    },
+    {
+        id: "mrigangkadatta",
+        name: "Mrigangka Datta",
+        country: "India",
+        role: "Developer",
+        image: mrigangkadatta, 
+        linkedIn:
+            "https://www.linkedin.com/in/mrigangkad",
+        about: "Just a Developer",
+    },
+]
+
+export { advisors, executives, services, futureInnovations , itTeam };
