@@ -6,6 +6,7 @@ import snc from "../assets/team/dr_snc.png";
 import er_s_majumder from "../assets/team/er_s_majumder.jpeg";
 import a_saha from "../assets/team/Mr.A.Saha.jpg";
 import a_ghosh from "../assets/team/ms_a_ghosh.jpg";
+import manik_chakraborty from "../assets/team/manik_chakraborty.jpeg"
 
 import samik_das from "../assets/team/samik_das_ceo.jpg";
 import bilash_chandra_roy from "../assets/team/bilash_chandra_roy.png";
@@ -143,6 +144,13 @@ const advisors: Array<Advisors> = [
         image: k_dev,
         about: "Advocate Kushal Deb is a highly respected legal practitioner with a distinguished track record in civil, criminal, family, environmental and consumer law. With a large number of successfully handled cases and a renowned presence at the Tripura High Court, he is recognized for his sharp legal acumen, courtroom command, and commitment to justice. Over the years, Advocate Deb has built a reputation for delivering strategic legal solutions across a wide spectrum of matters, earning the trust of clients and peers alike. His ability to interpret and apply the law with precision makes him a sought- after counsel in both complex litigation and everyday legal affairs. As a Legal Advisor to Go Green Plus, Advocate Deb brings unmatched legal insight and experience to guide the organization in regulatory compliance, risk mitigation, and contractual governance. His involvement strengthens the company&#39;s foundation with lawful integrity and ensures that all initiatives align with current legal standards and ethical practices.",
     },
+    {
+        id:"manik_chakraborty",
+        name:"Dr Manik Chakraborty",
+        country:"India",
+        image:manik_chakraborty,
+        about:"Dr. Manik Chakraborty is an accomplished academician and researcher in the field of Commerce, currently serving as an Assistant Professor in the Department of Commerce at St. Xavier’s University, Kolkata.He ranked 1st in the Higher Secondary (+2) Examination conducted by the Tripura Board of Secondary Education in 2011 and received the Economic Science Society of Tripura (ESSOT) award for securing the top position in the same year. He completed his B.Com (Honours) from Goenka College of Commerce and Business Administration, Kolkata, where he was awarded for outstanding performance in 2014. Dr. Chakraborty obtained his M.Com degree from the University of Calcutta in 2016. He qualified both the National Eligibility Test (NET) conducted by UGC and the State Level Eligibility Test (SLET) in 2017. He was awarded a Ph.D. in Commerce from Tripura (Central) University in 2024 for his research on “Impact of Capital Structure on Corporate Financial Performance: Evidence from NSE Listed Public Companies in India.” His area of specialization lies in Accounting and Finance, with strong research interests in corporate finance, capital structure, and regional economic development. Before joining St. Xavier’s University, Dr. Chakraborty served as a Guest Faculty at MBB College, BBM College, and Tripura (Central) University, and later as an Assistant Professor at Holy Cross College, Agartala. His academic journey reflects a blend of excellence, dedication, and a strong commitment to advancing commerce education and research.As an advisor of Go Green Plus, Dr. Chakraborty will contribute significantly to the Go Green Plus initiative by guiding its financial planning, cost benefit analysis, and PPP framework. His expertise in corporate finance and economic impact assessment will help design a sustainable and scalable revenue model, ensuring that the project aligns with both economic viability and environmental sustainability goals of Tripura’s clean-tech tourism ecosystem."
+    }
 ];
 
 const executives: Array<Executive> = [
