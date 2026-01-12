@@ -1,5 +1,6 @@
 import { Request, Response } from "express";
 import { Types } from "mongoose";
+import bcrypt from "bcrypt";
 
 import { User, Booking, Review, Role } from "../models";
 import { apiError, apiResponse } from "../helper";
@@ -152,12 +153,12 @@ const createOrgEmp = async (req: Request, res: Response): Promise<void> => {
             apiError(res, 400, "User already exists with this email");
             return;
         }
-
+        const hashPassword = await bcrypt.hash(password, 10);
         // password will already be hashed in user model pre-save hook or manually before
         const created = await User.create({
             name,
             email,
-            password, // hashPassword() if not using pre-save middleware
+            password:hashPassword, // hashPassword() if not using pre-save middleware
             phone,
             role: roleDoc._id,
         });

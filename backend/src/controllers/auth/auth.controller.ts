@@ -196,13 +196,13 @@ const login = async (req: Request, res: Response): Promise<void> => {
             .select("+password")
             .populate<{ role: IRole }>("role");
         if (!user) {
-            apiError(res, 401, "Invalid credentials");
+            apiError(res, 401, "User not exists");
             return;
         }
 
         const isMatch = await bcrypt.compare(password, user.password);
         if (!isMatch) {
-            apiError(res, 401, "Invalid credentials");
+            apiError(res, 401, "Invalid credentials---205");
             return;
         }
 

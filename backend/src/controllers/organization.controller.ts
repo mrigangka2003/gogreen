@@ -114,7 +114,6 @@ const deleteSite = async (req: Request, res: Response) => {
         // const deletedSite = await Site.findByIdAndDelete(id);
 
         // if (!deletedSite) {
-        //     return apiError(res, 404, "Site not found");
         // }
 
         return apiResponse(res, 200, "Site deleted successfully", "");

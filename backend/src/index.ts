@@ -11,6 +11,7 @@ const app = express();
 const allowedOrigins = [
     "http://localhost:5173",
     "https://gogreenplus.in",
+    "https://localhost:5174", // this port is being used for the  mobile app
 ]
 
 app.use(
@@ -24,6 +25,9 @@ app.use(express.urlencoded({ extended: true }));
 app.use(cookieParser());
 
 app.use("/api/v1", router);
+
+//this is the same router as above only being used for the mobile
+app.use("/api/mobile/v1", router);
 
 app.get("/", (req: Request, res: Response) => {
     res.send("Everything is working");

@@ -51,7 +51,7 @@ const SuperCreateAdmin: React.FC = () => {
     const onSubmit = async (data: FormValues) => {
         try {
 
-            const res = await axiosInstance.post('/accounts/admin',data)
+            const res = await axiosInstance.post('/super/accounts/admin',data)
 
 
             if ((res.data as any).success) {
