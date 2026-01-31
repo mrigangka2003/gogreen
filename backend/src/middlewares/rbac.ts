@@ -62,7 +62,8 @@ export const requirePermissions = (...permissionNames: string[]) => {
             const permsInRole: string[] = Array.isArray(role.permissions)
                 ? role.permissions.map((p: any) => p.name).filter(Boolean)
                 : [];
-
+            console.log("Permission Namess",permissionNames)
+            console.log("Permissionssss",permsInRole)
             const missing = permissionNames.filter(
                 (p) => !permsInRole.includes(p)
             );

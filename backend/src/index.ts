@@ -11,9 +11,8 @@ const app = express();
 const allowedOrigins = [
     "http://localhost:5173",
     "https://gogreenplus.in",
-    "https://localhost:5174", // this port is being used for the  mobile app
+    "http://localhost:5174", // this port is being used for the  mobile app
 ]
-
 app.use(
     cors({
         origin: allowedOrigins,

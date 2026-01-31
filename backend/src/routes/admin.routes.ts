@@ -49,6 +49,21 @@ router.patch(
     adminController.updateAssignBooking
 );
 
+// 📌 Enhanced Task Assignment
+router.post(
+    "/bookings/assign-task",
+    authMiddleware,
+    requirePermissions("UPDATE_ASSIGN_BOOKING"),
+    adminController.assignTaskToEmployee
+);
+
+router.get(
+    "/employees/available",
+    authMiddleware,
+    requirePermissions("GET_ALL_ACCOUNTS"),
+    adminController.getAvailableEmployees
+);
+
 // 📌 Reviews
 router.get(
     "/reviews",

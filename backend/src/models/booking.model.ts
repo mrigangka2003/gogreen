@@ -2,7 +2,7 @@ import mongoose, { Schema, model, Document, Types } from "mongoose";
 
 export interface IBooking extends Document {
     userId: Types.ObjectId;
-    employeeId?: Types.ObjectId ;
+    employeeId?: Types.ObjectId;
     serviceType: string;
     address: string;
     phoneNumber: string;
@@ -38,6 +38,11 @@ const BookingSchema = new Schema<IBooking>(
             ref: "User",
             default: null,
             index: true,
+        },
+        serviceType: {
+            type: String,
+            required: true,
+            trim: true,
         },
         address: {
             type: String,

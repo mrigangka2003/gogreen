@@ -158,7 +158,7 @@ const createOrgEmp = async (req: Request, res: Response): Promise<void> => {
         const created = await User.create({
             name,
             email,
-            password:hashPassword, // hashPassword() if not using pre-save middleware
+            password: hashPassword, // hashPassword() if not using pre-save middleware
             phone,
             role: roleDoc._id,
         });
@@ -240,12 +240,189 @@ const deleteProfileSelf = async (
     }
 };
 
+/**
+ * Assign a task from booking table to an employee based on role
+ * Enhanced version with better validation and employee selection
+ */
+const assignTaskToEmployee = async (
+    req: Request,
+    res: Response
+): Promise<void> => {
+    try {
+        const { bookingId, employeeId } = req.body;
+
+        // Validate required fields
+        if (!bookingId) {
+            apiError(res, 400, "Booking ID is required");
+            return;
+        }
+
+        // Find the booking
+        const booking = await Booking.findById(bookingId)
+            .populate("userId", "name email phone")
+            .populate("employeeId", "name email phone");
+
+        if (!booking) {
+            apiError(res, 404, "Booking not found");
+            return;
+        }
+
+        // Check if booking is already assigned
+        if (booking.status === "assigned" || booking.status === "in_progress" || booking.status === "completed") {
+            apiError(res, 400, `Booking is already ${booking.status}. Cannot reassign.`);
+            return;
+        }
+
+        // Check if booking is cancelled
+        if (booking.status === "cancelled") {
+            apiError(res, 400, "Cannot assign a cancelled booking");
+            return;
+        }
+
+        // If employeeId is provided, validate and assign to specific employee
+        if (employeeId) {
+            const employee = await User.findById(employeeId).populate("role");
+
+            if (!employee) {
+                apiError(res, 404, "Employee not found");
+                return;
+            }
+
+            // Verify the user has employee role
+            const roleName = (employee.role as any)?.name;
+            if (roleName !== "emp") {
+                apiError(res, 400, "Selected user is not an employee. User role: " + roleName);
+                return;
+            }
+
+            // Check if employee is active
+            if (!employee.isActive) {
+                apiError(res, 400, "Selected employee is not active");
+                return;
+            }
+
+            // Assign the booking to the employee
+            booking.employeeId = employee._id as Types.ObjectId;
+            booking.status = "assigned";
+            booking.assignedAt = new Date();
+            await booking.save();
+
+            // Populate the updated booking
+            const updatedBooking = await Booking.findById(booking._id)
+                .populate("userId", "name email phone")
+                .populate("employeeId", "name email phone");
+
+            apiResponse(res, 200, "Task assigned to employee successfully", {
+                booking: updatedBooking,
+                assignedTo: {
+                    id: employee._id,
+                    name: employee.name,
+                    email: employee.email,
+                    phone: employee.phone,
+                },
+            });
+        } else {
+            // If no employeeId provided, return list of available employees
+            const empRole = await Role.findOne({ name: "emp" });
+
+            if (!empRole) {
+                apiError(res, 500, "Employee role not found in system");
+                return;
+            }
+
+            const availableEmployees = await User.find({
+                role: empRole._id,
+                isActive: true,
+            }).select("name email phone");
+
+            if (availableEmployees.length === 0) {
+                apiError(res, 404, "No active employees available");
+                return;
+            }
+
+            apiResponse(res, 200, "Please select an employee to assign", {
+                booking: {
+                    id: booking._id,
+                    serviceType: booking.serviceType,
+                    address: booking.address,
+                    date: booking.date,
+                    timeSlot: booking.timeSlot,
+                    status: booking.status,
+                },
+                availableEmployees,
+            });
+        }
+    } catch (err) {
+        apiError(res, 500, "Failed to assign task to employee", err);
+    }
+};
+
+/**
+ * Get all available employees for task assignment
+ */
+const getAvailableEmployees = async (
+    _req: Request,
+    res: Response
+): Promise<void> => {
+    try {
+        const empRole = await Role.findOne({ name: "emp" });
+
+        if (!empRole) {
+            apiError(res, 500, "Employee role not found in system");
+            return;
+        }
+
+        const employees = await User.find({
+            role: empRole._id,
+            isActive: true,
+        })
+            .select("name email phone address")
+            .populate("role", "name");
+
+        // Get task count for each employee
+        const employeesWithTaskCount = await Promise.all(
+            employees.map(async (emp) => {
+                const activeTasksCount = await Booking.countDocuments({
+                    employeeId: emp._id,
+                    status: { $in: ["assigned", "in_progress"] },
+                });
+
+                return {
+                    id: emp._id,
+                    name: emp.name,
+                    email: emp.email,
+                    phone: emp.phone,
+                    address: emp.address,
+                    activeTasksCount,
+                };
+            })
+        );
+
+        // Sort by active tasks count (least busy first)
+        employeesWithTaskCount.sort((a, b) => a.activeTasksCount - b.activeTasksCount);
+
+        apiResponse(res, 200, "Available employees fetched successfully", {
+            totalEmployees: employeesWithTaskCount.length,
+            employees: employeesWithTaskCount,
+        });
+    } catch (err) {
+        apiError(res, 500, "Failed to fetch available employees", err);
+    }
+};
+
+/* 
+*/
+
+
+
 export default {
     getAllAccounts,
     getBookingHistory,
     getAllBookings,
     deleteAccount,
     updateAssignBooking,
+    assignTaskToEmployee,
+    getAvailableEmployees,
     viewAllReviews,
     createOrgEmp,
     getProfileSelf,
