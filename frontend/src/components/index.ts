@@ -12,6 +12,7 @@ import Manufacturing from "./Home/Manufacturing";
 import AboutBanner from "./About/AboutBanner";
 import OurMission from "./About/OurMission";
 import Team from "./About/Team";
+import AwardsAndRecognition from "./About/AwardsAndRecognition";
 
 import ComingSoon from "./ComingSoon";
 import ScrollToTop from "./ScrollToTop";
@@ -41,6 +42,7 @@ export {
     AboutBanner,
     OurMission,
     Team,
+    AwardsAndRecognition,
     ComingSoon,
     ScrollToTop,
     ProtectedRoute,

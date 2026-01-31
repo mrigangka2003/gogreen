@@ -1,22 +1,26 @@
-import { Wind, Trash2, Factory } from "lucide-react";
+
+
+import doorToDoor from "../../assets/door_to_door.jpg"
+import EvVaccumCleaner from "../../assets/EV_vaccum_cleaner.png"
+import BioGasPlant from "../../assets/BioGasPlant.png"
 
 const Manufacturing = () => {
     const services = [
         {
-            icon: Wind,
+            img: EvVaccumCleaner,
             title: "EV Vacuum Cleaner",
             description: "Industrial and commercial vacuum cleaning solutions",
             color: "blue",
         },
         {
-            icon: Trash2,
+            img: doorToDoor,
             title: "Door-to-Door Garbage Collection",
             description:
                 "Comprehensive waste management and collection services",
             color: "green",
         },
         {
-            icon: Factory,
+            img: BioGasPlant,
             title: "Biogas Plant",
             description: "Complete biogas plant installation and maintenance",
             color: "orange",
@@ -47,7 +51,7 @@ const Manufacturing = () => {
 
             <div className="flex flex-wrap justify-center gap-6">
                 {services.map((service, index) => {
-                    const IconComponent = service.icon;
+                    const IconComponent = service.img;
                     return (
                         <div
                             key={index}
@@ -59,7 +63,7 @@ const Manufacturing = () => {
                                         service.color
                                     )}`}
                                 >
-                                    <IconComponent className="h-8 w-8" />
+                                    <img src={IconComponent} alt="" />
                                 </div>
                                 <h3 className="text-xl font-bold text-gray-900 mb-4 group-hover:text-green-600 transition-colors">
                                     {service.title}

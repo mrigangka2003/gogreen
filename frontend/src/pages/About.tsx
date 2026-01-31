@@ -1,12 +1,13 @@
-import { AboutBanner, OurMission,Team } from "../components";
+import { AboutBanner, OurMission, Team, AwardsAndRecognition } from "../components";
 
 const About = () => {
     return (
         <div>
-            <AboutBanner/>
-            <OurMission/>
+            <AboutBanner />
+            <OurMission />
+            <AwardsAndRecognition />
             <Testimonial />
-            <Team/>
+            <Team />
         </div>
     );
 };

@@ -1,4 +1,5 @@
 import React from "react";
+import {Link} from "react-router-dom"
 
 interface FooterProps {
     className?: string;
@@ -15,24 +16,14 @@ const Footer: React.FC<FooterProps> = ({ className = "" }) => {
                         </h2>
                         <ul className="text-gray-500 font-medium">
                             <li className="mb-4">
-                                <a href="#" className="hover:underline">
+                                <Link to="/about" className="hover:underline">
                                     About
-                                </a>
+                                </Link>
                             </li>
                             <li className="mb-4">
-                                <a href="#" className="hover:underline">
+                                <Link to="/careers" className="hover:underline">
                                     Careers
-                                </a>
-                            </li>
-                            <li className="mb-4">
-                                <a href="#" className="hover:underline">
-                                    Board Members
-                                </a>
-                            </li>
-                            <li className="mb-4">
-                                <a href="#" className="hover:underline">
-                                    Blog
-                                </a>
+                                </Link>
                             </li>
                         </ul>
                     </div>
@@ -42,12 +33,17 @@ const Footer: React.FC<FooterProps> = ({ className = "" }) => {
                         </h2>
                         <ul className="text-gray-500 font-medium">
                             <li className="mb-4">
-                                <a href="#" className="hover:underline">
+                                <a href="https://www.facebook.com/profile.php?id=61583702428569" className="hover:underline" target="_blank">
                                     Facebook
                                 </a>
                             </li>
                             <li className="mb-4">
-                                <a href="#" className="hover:underline">
+                                <a href="https://www.instagram.com/gogreenplus.in/" className="hover:underline" target="_blank">
+                                    Instagram
+                                </a>
+                            </li>
+                            <li className="mb-4">
+                                <a href="mailto:gogreenplus.in@email.com" className="hover:underline">
                                     Contact Us
                                 </a>
                             </li>
@@ -65,11 +61,6 @@ const Footer: React.FC<FooterProps> = ({ className = "" }) => {
                             </li>
                             <li className="mb-4">
                                 <a href="#" className="hover:underline">
-                                    Licensing
-                                </a>
-                            </li>
-                            <li className="mb-4">
-                                <a href="#" className="hover:underline">
                                     Terms & Conditions
                                 </a>
                             </li>
@@ -78,7 +69,7 @@ const Footer: React.FC<FooterProps> = ({ className = "" }) => {
                 </div>
                 <div className="px-4 py-6 bg-gray-100 md:flex md:items-center md:justify-between">
                     <span className="text-sm text-gray-500 sm:text-center">
-                        © 2025 <a href="#">Gogreen+</a>. All Rights Reserved.
+                        © 2025 <a href="#">Gogreenplus</a>. All Rights Reserved.
                     </span>
                     <div className="flex mt-4 sm:justify-center md:mt-0 space-x-5 rtl:space-x-reverse">
                         {/* Facebook */}

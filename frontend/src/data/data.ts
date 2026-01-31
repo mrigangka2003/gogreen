@@ -196,7 +196,7 @@ const itTeam :Array<Executive> = [
         image: mrigangkadatta, 
         linkedIn:
             "https://www.linkedin.com/in/mrigangkad",
-        about: "Just a Developer",
+        about: "Mrigangka Datta is a 23-year-old Software Developer currently working at a startup in Bangalore. He builds scalable web and backend systems, with a focus on clean architecture, reliability, and solving real-world engineering problems.",
     },
 ]
 

@@ -20,59 +20,59 @@ const Internships: React.FC = () => {
     const internships: Internship[] = [
         {
             id: 1,
-            title: "Frontend Developer Intern",
+            title: "Project Intern",
             company: "GoGreen Energy",
             location: "Agartala, Tripura",
             type: "Full-time",
             description:
-                "Assist in building and improving GoGreen’s web applications using React and TypeScript. Great learning opportunity for freshers passionate about clean technology.",
-            postedDate: "2 days ago",
-            stipend: "₹8,000 - ₹12,000/month",
+                "Tech Stack : Html,CSS,JS,React, Github,NodeJs or Springboot, MongoDB or Oracle Db",
+            postedDate: "January 2026",
+            stipend: "Not Disclosed",
         },
-        {
-            id: 2,
-            title: "Marketing Intern",
-            company: "GoGreen Energy",
-            location: "Udaipur, Tripura",
-            type: "Part-time",
-            description:
-                "Work with our marketing team to promote GoGreen’s eco-friendly solutions. Gain hands-on experience in social media, campaigns, and community engagement.",
-            postedDate: "1 week ago",
-            stipend: "₹5,000 - ₹8,000/month",
-        },
-        {
-            id: 3,
-            title: "HR Intern",
-            company: "GoGreen Energy",
-            location: "Remote (Tripura Region)",
-            type: "Internship",
-            description:
-                "Support our HR team in recruitment, onboarding, and employee engagement initiatives. A great opportunity to learn HR practices in a growing green energy company.",
-            postedDate: "3 days ago",
-            stipend: "₹6,000 - ₹9,000/month",
-        },
-        {
-            id: 4,
-            title: "Content Writing Intern",
-            company: "GoGreen Energy",
-            location: "Dharmanagar, Tripura",
-            type: "Part-time",
-            description:
-                "Help create blog posts, social media content, and articles to spread awareness about renewable energy and sustainable practices.",
-            postedDate: "5 days ago",
-            stipend: "₹4,000 - ₹7,000/month",
-        },
-        {
-            id: 5,
-            title: "Operations Intern",
-            company: "GoGreen Energy",
-            location: "Belonia, Tripura",
-            type: "Full-time",
-            description:
-                "Work closely with our operations team to manage EV fleet schedules, track resources, and ensure smooth field activities.",
-            postedDate: "1 day ago",
-            stipend: "₹7,000 - ₹10,000/month",
-        },
+        // {
+        //     id: 2,
+        //     title: "Marketing Intern",
+        //     company: "GoGreen Energy",
+        //     location: "Udaipur, Tripura",
+        //     type: "Part-time",
+        //     description:
+        //         "Work with our marketing team to promote GoGreen’s eco-friendly solutions. Gain hands-on experience in social media, campaigns, and community engagement.",
+        //     postedDate: "1 week ago",
+        //     stipend: "₹5,000 - ₹8,000/month",
+        // },
+        // {
+        //     id: 3,
+        //     title: "HR Intern",
+        //     company: "GoGreen Energy",
+        //     location: "Remote (Tripura Region)",
+        //     type: "Internship",
+        //     description:
+        //         "Support our HR team in recruitment, onboarding, and employee engagement initiatives. A great opportunity to learn HR practices in a growing green energy company.",
+        //     postedDate: "3 days ago",
+        //     stipend: "₹6,000 - ₹9,000/month",
+        // },
+        // {
+        //     id: 4,
+        //     title: "Content Writing Intern",
+        //     company: "GoGreen Energy",
+        //     location: "Dharmanagar, Tripura",
+        //     type: "Part-time",
+        //     description:
+        //         "Help create blog posts, social media content, and articles to spread awareness about renewable energy and sustainable practices.",
+        //     postedDate: "5 days ago",
+        //     stipend: "₹4,000 - ₹7,000/month",
+        // },
+        // {
+        //     id: 5,
+        //     title: "Operations Intern",
+        //     company: "GoGreen Energy",
+        //     location: "Belonia, Tripura",
+        //     type: "Full-time",
+        //     description:
+        //         "Work closely with our operations team to manage EV fleet schedules, track resources, and ensure smooth field activities.",
+        //     postedDate: "1 day ago",
+        //     stipend: "₹7,000 - ₹10,000/month",
+        // },
     ];
 
     const filteredInternships = internships.filter((internship) => {
