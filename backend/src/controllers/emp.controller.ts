@@ -1,6 +1,6 @@
 import { Request, Response } from "express";
 
-import { User,Booking,Review } from "../models";
+import { User, Booking, Review } from "../models";
 
 import { apiError, apiResponse } from "../helper";
 
@@ -17,9 +17,10 @@ const getAssignedBookings = async (
             return;
         }
 
-        const bookings = await Booking.find({ employeeId: req.user.id }).sort({
-            date: -1,
-        });
+        const bookings = await Booking.find({
+            "assignments.employeeId": req.user.id,
+            "assignments.status": { $ne: "removed" },
+        }).sort({ date: -1 });
         apiResponse(res, 200, "Assigned bookings fetched", bookings);
     } catch (err) {
         apiError(res, 500, "Failed to fetch assigned bookings", err);
@@ -42,7 +43,8 @@ const getAssignedBookingDetails = async (
         const { id } = req.params;
         const booking = await Booking.findOne({
             _id: id,
-            employeeId: req.user.id,
+            "assignments.employeeId": req.user.id,
+            "assignments.status": { $ne: "removed" },
         }).populate("userId");
 
         if (!booking) {
@@ -72,7 +74,8 @@ const getAssignedBookingReview = async (
         const { id } = req.params;
         const booking = await Booking.findOne({
             _id: id,
-            employeeId: req.user.id,
+            "assignments.employeeId": req.user.id,
+            "assignments.status": { $ne: "removed" },
         });
         if (!booking) {
             apiError(res, 404, "Booking not found or not assigned to you");
@@ -87,7 +90,7 @@ const getAssignedBookingReview = async (
 };
 
 /**
- * Update before-photo for assigned booking
+ * Update start-photo for assigned booking
  */
 const updateBeforePhoto = async (
     req: Request,
@@ -100,27 +103,39 @@ const updateBeforePhoto = async (
         }
 
         const { id } = req.params;
-        const { beforePhoto } = req.body;
+        const { beforePhoto } = req.body; // payload remains beforePhoto for compatibility with client
 
-        const booking = await Booking.findOneAndUpdate(
-            { _id: id, employeeId: req.user.id },
-            { beforePhoto },
-            { new: true }
-        );
+        const booking = await Booking.findOne({
+            _id: id,
+            "assignments.employeeId": req.user.id,
+            "assignments.status": { $ne: "removed" },
+        });
 
         if (!booking) {
             apiError(res, 404, "Booking not found or not assigned to you");
             return;
         }
 
-        apiResponse(res, 200, "Before photo updated", booking);
+        const assignment = booking.assignments.find(
+            (a: any) =>
+                a.employeeId.toString() === req.user?.id &&
+                a.status !== "removed"
+        );
+
+        if (assignment) {
+            assignment.startPhoto = beforePhoto;
+            booking.startPhoto = beforePhoto; // Sync top-level photo
+            await booking.save();
+        }
+
+        apiResponse(res, 200, "Start photo updated", booking);
     } catch (err) {
-        apiError(res, 500, "Failed to update before photo", err);
+        apiError(res, 500, "Failed to update start photo", err);
     }
 };
 
 /**
- * Update after-photo for assigned booking
+ * Update end-photo for assigned booking
  */
 const updateAfterPhoto = async (req: Request, res: Response): Promise<void> => {
     try {
@@ -130,27 +145,108 @@ const updateAfterPhoto = async (req: Request, res: Response): Promise<void> => {
         }
 
         const { id } = req.params;
-        const { afterPhoto } = req.body;
+        const { afterPhoto } = req.body; // payload remains afterPhoto for compatibility
 
-        const booking = await Booking.findOneAndUpdate(
-            { _id: id, employeeId: req.user.id },
-            { afterPhoto, status: "completed", completedAt: new Date() },
-            { new: true }
-        );
+        const booking = await Booking.findOne({
+            _id: id,
+            "assignments.employeeId": req.user.id,
+            "assignments.status": { $ne: "removed" },
+        });
 
         if (!booking) {
             apiError(res, 404, "Booking not found or not assigned to you");
             return;
         }
 
+        const assignment = booking.assignments.find(
+            (a: any) =>
+                a.employeeId.toString() === req.user?.id &&
+                a.status !== "removed"
+        );
+
+        if (assignment) {
+            assignment.endPhoto = afterPhoto;
+            assignment.status = "ended";
+            assignment.endTime = new Date();
+            booking.endPhoto = afterPhoto; // Sync top-level photo
+            await booking.save();
+        }
+
         apiResponse(
             res,
             200,
-            "After photo updated, booking marked completed",
+            "End photo updated, booking marked completed",
             booking
         );
     } catch (err) {
-        apiError(res, 500, "Failed to update after photo", err);
+        apiError(res, 500, "Failed to update end photo", err);
+    }
+};
+
+/**
+ * Update status for assigned booking
+ */
+const updateBookingStatus = async (
+    req: Request,
+    res: Response
+): Promise<void> => {
+    try {
+        if (!req.user) {
+            apiError(res, 401, "Unauthorized");
+            return;
+        }
+
+        const { id } = req.params;
+        const { status } = req.body;
+
+        const validStatuses = [
+            "pending",
+            "assigned",
+            "completed",
+            "cancelled",
+            "started",
+            "ended",
+        ];
+        if (!validStatuses.includes(status)) {
+            apiError(
+                res,
+                400,
+                "Invalid status. Must be one of: pending, assigned, completed, cancelled, started, ended"
+            );
+            return;
+        }
+
+        const booking = await Booking.findOne({
+            _id: id,
+            "assignments.employeeId": req.user.id,
+            "assignments.status": { $ne: "removed" },
+        });
+
+        if (!booking) {
+            apiError(res, 404, "Booking not found or not assigned to you");
+            return;
+        }
+
+        const assignment = booking.assignments.find(
+            (a: any) =>
+                a.employeeId.toString() === req.user?.id &&
+                a.status !== "removed"
+        );
+
+        if (assignment) {
+            assignment.status = status;
+            if (status === "ended" || status === "completed") {
+                assignment.endTime = new Date();
+            }
+            if (status === "started") {
+                assignment.startTime = new Date();
+            }
+            await booking.save();
+        }
+
+        apiResponse(res, 200, "Booking status updated", booking);
+    } catch (err) {
+        apiError(res, 500, "Failed to update booking status", err);
     }
 };
 
@@ -226,6 +322,7 @@ export default {
     getAssignedBookingReview,
     updateBeforePhoto,
     updateAfterPhoto,
+    updateBookingStatus,
     getProfileSelf,
     updateProfileSelf,
     deleteProfileSelf,

@@ -12,6 +12,11 @@ organizationRoutes.post(
     userController.createBooking
 );
 
-
+// Org can view their own bookings (reuses same controller - handles org role)
+organizationRoutes.get(
+    "/my-bookings",
+    authMiddleware,
+    userController.getMyBookings
+);
 
 export default organizationRoutes;

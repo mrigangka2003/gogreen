@@ -27,10 +27,10 @@ export const authMiddleware = async (
 ) => {
     try {
         const token =
-            (req as any).cookies?.token ||
             (req.header("Authorization")
                 ? req.header("Authorization")!.split(" ")[1]
-                : undefined);
+                : undefined) ||
+            (req as any).cookies?.token;
 
         if (!token) {
             apiError(res, 401, "Unauthorized: token missing");

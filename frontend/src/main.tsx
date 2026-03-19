@@ -31,19 +31,17 @@ import ProtectedRoute from "./components/ProtectedRoute.tsx";
 import DashboardLayout from "./components/Dashboard-layout/DashboardLayout.tsx";
 import { AdminDashboard, UserDashboard } from "./components/index.ts";
 
-const SuperAccounts = lazy(() => import("./pages/super/SuperAccounts.tsx"));
 const SuperAdminDashboard = lazy(() => import("./pages/super/SuperAdminDashboard.tsx"));
 const SuperReviews = lazy(() => import("./pages/super/SuperReviews.tsx"));
-const SuperCreateAdmin = lazy(() => import("./pages/super/SuperCreateAdmin.tsx"));
 
-//admin pages
-const AdminAccounts = lazy(()=>import("./pages/Admin/AdminAccounts.tsx"))
-const AddManagement = lazy(()=>import("./pages/Admin/AddManagement.tsx"))
+const UserManagement = lazy(() => import("./pages/Admin/UserManagement.tsx"));
 
-
-const AssignBooking = lazy(()=>import("./pages/AssignBooking.tsx"));
-const MyReviews = lazy(()=>import("./pages/MyReviews.tsx"));
+const AssignBooking = lazy(() => import("./pages/AssignBooking.tsx"));
+const BookingDetail = lazy(() => import("./pages/BookingDetail.tsx"));
+const MyReviews = lazy(() => import("./pages/MyReviews.tsx"));
 const MyProfile = lazy(() => import("./pages/MyProfile.tsx"));
+const CreateBookingAdmin = lazy(() => import("./pages/CreateBookingAdmin.tsx"));
+const ServicesManager = lazy(() => import("./pages/ServicesManager.tsx"));
 
 const router = createBrowserRouter([
     {
@@ -183,10 +181,12 @@ const router = createBrowserRouter([
         ),
         children: [
             { index: true, element: <AdminDashboard /> },
-            { path: "all-bookings", element: <BookNow /> },
-            { path: "accounts", element: <AdminAccounts /> },
+            { path: "all-bookings", element: <AssignBooking /> },
+            { path: "create-booking", element: <CreateBookingAdmin /> },
+            { path: "services", element: <ServicesManager /> },
+            { path: "booking/:id", element: <BookingDetail /> },
+            { path: "user-management", element: <UserManagement /> },
             { path: "all-reviews", element: <MyBookings /> },
-            { path: "add-management", element: <AddManagement /> },
             { path: "profile", element: <MyProfile /> },
         ],
     },
@@ -201,9 +201,11 @@ const router = createBrowserRouter([
         ),
         children: [
             { index: true, element: <SuperAdminDashboard /> },
-            { path: "accounts", element: <SuperAccounts /> },
+            { path: "user-management", element: <UserManagement /> },
             { path: "all-bookings", element: <AssignBooking /> },
-            { path: "create-admin", element: <SuperCreateAdmin /> },
+            { path: "create-booking", element: <CreateBookingAdmin /> },
+            { path: "services", element: <ServicesManager /> },
+            { path: "booking/:id", element: <BookingDetail /> },
             { path: "all-reviews", element: <SuperReviews /> },
             { path: "profile", element: <MyProfile /> },
         ],

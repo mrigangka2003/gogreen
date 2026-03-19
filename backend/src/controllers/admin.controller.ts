@@ -2,7 +2,7 @@ import { Request, Response } from "express";
 import { Types } from "mongoose";
 import bcrypt from "bcrypt";
 
-import { User, Booking, Review, Role } from "../models";
+import { User, Booking, Review, Role, Service } from "../models";
 import { apiError, apiResponse } from "../helper";
 
 /**
@@ -18,7 +18,98 @@ const getAllAccounts = async (_req: Request, res: Response): Promise<void> => {
 };
 
 /**
- * Get all bookings 
+ * Update an account (Admin can update Org/Emp)
+ */
+const updateAccount = async (req: Request, res: Response): Promise<void> => {
+    try {
+        const { id } = req.params;
+        const { name, email, phone, roleName } = req.body;
+
+        const user = await User.findById(id).populate("role");
+        if (!user) {
+            apiError(res, 404, "Account not found");
+            return;
+        }
+
+        // Admins can only update Org and Emp
+        const currentRole = (user.role as any)?.name;
+        if (currentRole === "super-admin" || currentRole === "admin") {
+            apiError(
+                res,
+                403,
+                "You do not have permission to update this account"
+            );
+            return;
+        }
+
+        if (name) user.name = name;
+        if (email) user.email = email;
+        if (phone !== undefined) user.phone = phone;
+
+        if (roleName) {
+            const roleDoc = await Role.findOne({ name: roleName });
+            if (!roleDoc) {
+                apiError(res, 400, "Invalid role specified");
+                return;
+            }
+            if (roleName !== "org" && roleName !== "emp") {
+                apiError(
+                    res,
+                    403,
+                    "Admins can only assign 'org' or 'emp' roles"
+                );
+                return;
+            }
+            user.role = roleDoc._id as Types.ObjectId;
+        }
+
+        await user.save();
+
+        apiResponse(res, 200, "Account updated successfully", {
+            id: user._id,
+            name: user.name,
+            email: user.email,
+            phone: user.phone,
+            isActive: user.isActive,
+        });
+    } catch (error: any) {
+        if (error.code === 11000) {
+            apiError(res, 400, "Email already exists");
+            return;
+        }
+        apiError(res, 500, error.message || "Failed to update account");
+    }
+};
+
+/**
+ * Update top-level booking photos manually (Admin only)
+ */
+const updateBookingPhotos = async (
+    req: Request,
+    res: Response
+): Promise<void> => {
+    try {
+        const { id } = req.params;
+        const { startPhoto, endPhoto } = req.body;
+
+        const booking = await Booking.findById(id);
+        if (!booking) {
+            apiError(res, 404, "Booking not found");
+            return;
+        }
+
+        if (startPhoto !== undefined) booking.startPhoto = startPhoto;
+        if (endPhoto !== undefined) booking.endPhoto = endPhoto;
+
+        await booking.save();
+        apiResponse(res, 200, "Booking photos updated successfully", booking);
+    } catch (err) {
+        apiError(res, 500, "Failed to update booking photos", err);
+    }
+};
+
+/**
+ * Get all bookings
  * Supports optional filters via query params
  */
 const getAllBookings = async (req: Request, res: Response): Promise<void> => {
@@ -30,7 +121,7 @@ const getAllBookings = async (req: Request, res: Response): Promise<void> => {
 
         if (status) filter.status = status;
         if (userId) filter.userId = userId;
-        if (employeeId) filter.employeeId = employeeId;
+        if (employeeId) filter["assignments.employeeId"] = employeeId;
 
         if (startDate || endDate) {
             filter.date = {};
@@ -41,7 +132,7 @@ const getAllBookings = async (req: Request, res: Response): Promise<void> => {
         // Sort newest → oldest using createdAt
         const bookings = await Booking.find(filter)
             .populate("userId", "name email phone")
-            .populate("employeeId", "name email phone")
+            .populate("assignments.employeeId", "name email phone")
             .sort({ createdAt: -1 }); // 👈 newest first
 
         apiResponse(res, 200, "Bookings fetched successfully", bookings);
@@ -93,7 +184,7 @@ const updateAssignBooking = async (
     res: Response
 ): Promise<void> => {
     try {
-        const { bookingId, employeeId } = req.body;
+        const { bookingId, employeeIds } = req.body;
 
         const booking = await Booking.findById(bookingId);
         if (!booking) {
@@ -101,15 +192,40 @@ const updateAssignBooking = async (
             return;
         }
 
-        const employee = await User.findById(employeeId).populate("role");
-        if (!employee || (employee.role as any).name !== "emp") {
-            apiError(res, 400, "Invalid employee ID");
-            return;
+        let empIdsArray: string[] = [];
+        if (Array.isArray(employeeIds)) {
+            empIdsArray = employeeIds;
+        } else if (req.body.employeeId) {
+            empIdsArray = [req.body.employeeId];
         }
 
-        booking.employeeId = employee._id as Types.ObjectId;
+        const employees = await User.find({
+            _id: { $in: empIdsArray },
+        }).populate("role");
+
+        for (const emp of employees) {
+            if ((emp.role as any).name !== "emp") {
+                apiError(res, 400, `Invalid employee ID: ${emp._id}`);
+                return;
+            }
+        }
+
+        const currentIds = (booking.assignments || [])
+            .filter((a: any) => a.status !== "removed")
+            .map((a: any) => a.employeeId.toString());
+
+        const newAssignments = empIdsArray
+            .filter((id) => !currentIds.includes(id))
+            .map((id) => ({
+                employeeId: new Types.ObjectId(id),
+                status: "assigned",
+                assignedAt: new Date(),
+            }));
+
+        if (!booking.assignments) booking.assignments = [];
+        booking.assignments.push(...(newAssignments as any));
+
         booking.status = "assigned";
-        booking.assignedAt = new Date();
         await booking.save();
 
         apiResponse(res, 200, "Booking assigned successfully", booking);
@@ -249,7 +365,7 @@ const assignTaskToEmployee = async (
     res: Response
 ): Promise<void> => {
     try {
-        const { bookingId, employeeId } = req.body;
+        const { bookingId, employeeIds } = req.body;
 
         // Validate required fields
         if (!bookingId) {
@@ -260,16 +376,10 @@ const assignTaskToEmployee = async (
         // Find the booking
         const booking = await Booking.findById(bookingId)
             .populate("userId", "name email phone")
-            .populate("employeeId", "name email phone");
+            .populate("assignments.employeeId", "name email phone");
 
         if (!booking) {
             apiError(res, 404, "Booking not found");
-            return;
-        }
-
-        // Check if booking is already assigned
-        if (booking.status === "assigned" || booking.status === "in_progress" || booking.status === "completed") {
-            apiError(res, 400, `Booking is already ${booking.status}. Cannot reassign.`);
             return;
         }
 
@@ -279,47 +389,106 @@ const assignTaskToEmployee = async (
             return;
         }
 
-        // If employeeId is provided, validate and assign to specific employee
-        if (employeeId) {
-            const employee = await User.findById(employeeId).populate("role");
+        // If employeeIds is provided, validate and assign to specific employees
+        let empIdsArray: string[] = [];
+        if (Array.isArray(employeeIds)) {
+            empIdsArray = employeeIds;
+        } else if (req.body.employeeId) {
+            empIdsArray = [req.body.employeeId];
+        }
 
-            if (!employee) {
-                apiError(res, 404, "Employee not found");
+        if (empIdsArray.length > 0) {
+            const employees = await User.find({
+                _id: { $in: empIdsArray },
+            }).populate("role");
+
+            if (employees.length !== empIdsArray.length) {
+                apiError(res, 404, "One or more employees not found");
                 return;
             }
 
-            // Verify the user has employee role
-            const roleName = (employee.role as any)?.name;
-            if (roleName !== "emp") {
-                apiError(res, 400, "Selected user is not an employee. User role: " + roleName);
-                return;
+            for (const employee of employees) {
+                // Verify the user has employee role
+                const roleName = (employee.role as any)?.name;
+                if (roleName !== "emp") {
+                    apiError(
+                        res,
+                        400,
+                        "Selected user is not an employee. User role: " +
+                            roleName
+                    );
+                    return;
+                }
+
+                // Check if employee is active
+                if (!employee.isActive) {
+                    apiError(
+                        res,
+                        400,
+                        `Employee ${employee.name} is not active`
+                    );
+                    return;
+                }
+
+                // Verify employee has 0 active jobs ($elemMatch ensures we check per-employee status, not across all assignments)
+                const activeTasksCount = await Booking.countDocuments({
+                    _id: { $ne: booking._id },
+                    assignments: {
+                        $elemMatch: {
+                            employeeId: employee._id,
+                            status: { $in: ["assigned", "started"] },
+                        },
+                    },
+                });
+
+                if (activeTasksCount > 0) {
+                    apiError(
+                        res,
+                        400,
+                        `Employee ${employee.name} already has an active job and cannot be assigned.`
+                    );
+                    return;
+                }
             }
 
-            // Check if employee is active
-            if (!employee.isActive) {
-                apiError(res, 400, "Selected employee is not active");
-                return;
-            }
+            // Append the new employees to the booking, preventing duplicates
+            const currentIds = (booking.assignments || [])
+                .filter((a: any) => a.status !== "removed")
+                .map((a: any) => a.employeeId.toString());
 
-            // Assign the booking to the employee
-            booking.employeeId = employee._id as Types.ObjectId;
+            const newAssignments = employees
+                .filter((e: any) => !currentIds.includes(e._id.toString()))
+                .map((e: any) => ({
+                    employeeId: e._id as Types.ObjectId,
+                    status: "assigned",
+                    assignedAt: new Date(),
+                }));
+
+            if (!booking.assignments) booking.assignments = [];
+            booking.assignments.push(...(newAssignments as any));
+
             booking.status = "assigned";
-            booking.assignedAt = new Date();
+
+            // Check if user sent allocatedTime (Timer feature)
+            if (req.body.allocatedTime !== undefined) {
+                booking.allocatedTime = Number(req.body.allocatedTime) || 0;
+            }
+
             await booking.save();
 
             // Populate the updated booking
             const updatedBooking = await Booking.findById(booking._id)
                 .populate("userId", "name email phone")
-                .populate("employeeId", "name email phone");
+                .populate("assignments.employeeId", "name email phone");
 
-            apiResponse(res, 200, "Task assigned to employee successfully", {
+            apiResponse(res, 200, "Task assigned to employees successfully", {
                 booking: updatedBooking,
-                assignedTo: {
-                    id: employee._id,
-                    name: employee.name,
-                    email: employee.email,
-                    phone: employee.phone,
-                },
+                assignedTo: employees.map((e) => ({
+                    id: e._id,
+                    name: e.name,
+                    email: e.email,
+                    phone: e.phone,
+                })),
             });
         } else {
             // If no employeeId provided, return list of available employees
@@ -358,6 +527,49 @@ const assignTaskToEmployee = async (
 };
 
 /**
+ * Remove an assigned employee from a booking
+ */
+const removeAssignedEmployee = async (
+    req: Request,
+    res: Response
+): Promise<void> => {
+    try {
+        const { bookingId, employeeId } = req.params;
+
+        const booking = await Booking.findById(bookingId);
+        if (!booking) {
+            apiError(res, 404, "Booking not found");
+            return;
+        }
+
+        if (!booking.assignments || booking.assignments.length === 0) {
+            apiError(res, 400, "No assignments found for this booking");
+            return;
+        }
+
+        // Find the specific assignment and mark as removed
+        const assignment = booking.assignments.find(
+            (a: any) =>
+                a.employeeId.toString() === employeeId && a.status !== "removed"
+        );
+
+        if (!assignment) {
+            apiError(res, 404, "Active employee assignment not found");
+            return;
+        }
+
+        assignment.status = "removed";
+        // The .pre('save') hook handles global status calculations!
+
+        await booking.save();
+
+        apiResponse(res, 200, "Employee removed successfully", booking);
+    } catch (err) {
+        apiError(res, 500, "Failed to remove assigned employee", err);
+    }
+};
+
+/**
  * Get all available employees for task assignment
  */
 const getAvailableEmployees = async (
@@ -383,8 +595,12 @@ const getAvailableEmployees = async (
         const employeesWithTaskCount = await Promise.all(
             employees.map(async (emp) => {
                 const activeTasksCount = await Booking.countDocuments({
-                    employeeId: emp._id,
-                    status: { $in: ["assigned", "in_progress"] },
+                    assignments: {
+                        $elemMatch: {
+                            employeeId: emp._id,
+                            status: { $in: ["assigned", "started"] },
+                        },
+                    },
                 });
 
                 return {
@@ -399,7 +615,9 @@ const getAvailableEmployees = async (
         );
 
         // Sort by active tasks count (least busy first)
-        employeesWithTaskCount.sort((a, b) => a.activeTasksCount - b.activeTasksCount);
+        employeesWithTaskCount.sort(
+            (a, b) => a.activeTasksCount - b.activeTasksCount
+        );
 
         apiResponse(res, 200, "Available employees fetched successfully", {
             totalEmployees: employeesWithTaskCount.length,
@@ -410,22 +628,310 @@ const getAvailableEmployees = async (
     }
 };
 
-/* 
-*/
+/**
+ * Update the status of a booking manually by Admin
+ * Uses findByIdAndUpdate to bypass the pre-save hook that auto-recalculates status.
+ */
+const updateBookingStatusAdmin = async (
+    req: Request,
+    res: Response
+): Promise<void> => {
+    try {
+        const { id } = req.params;
+        const { status, allocatedTime } = req.body;
 
+        const validStatuses = [
+            "pending",
+            "assigned",
+            "started",
+            "ended",
+            "cancelled",
+        ];
+        if (!validStatuses.includes(status)) {
+            apiError(
+                res,
+                400,
+                "Invalid status. Valid: pending, assigned, started, ended, cancelled"
+            );
+            return;
+        }
 
+        // Build the $set payload without touching the model's pre-save hook
+        const setFields: Record<string, any> = { status };
+
+        if (status === "started") setFields.timerStartedAt = new Date();
+        if (status === "ended") setFields.completedAt = new Date();
+        if (status === "cancelled") setFields.cancelledAt = new Date();
+        if (allocatedTime !== undefined)
+            setFields.allocatedTime = Number(allocatedTime);
+
+        // Determine what assignment status we should cascade to
+        const assignmentStatusMap: Record<string, string> = {
+            started: "started",
+            ended: "ended",
+            assigned: "assigned",
+            cancelled: "removed",
+            pending: "assigned", // pending means assignments should still be assigned
+        };
+        const asnStatus = assignmentStatusMap[status];
+
+        // Build arrayFilters-based update to only touch non-removed assignments
+        const updateQuery: Record<string, any> = { $set: setFields };
+
+        // Cascade to assignments using positional filtered operator
+        if (asnStatus) {
+            updateQuery.$set["assignments.$[active].status"] = asnStatus;
+            if (status === "started")
+                updateQuery.$set["assignments.$[active].startTime"] =
+                    new Date();
+            if (status === "ended")
+                updateQuery.$set["assignments.$[active].endTime"] = new Date();
+        }
+
+        const booking = await Booking.findByIdAndUpdate(id, updateQuery, {
+            new: true,
+            arrayFilters: [{ "active.status": { $ne: "removed" } }],
+        }).populate("assignments.employeeId", "name email phone");
+
+        if (!booking) {
+            apiError(res, 404, "Booking not found");
+            return;
+        }
+
+        apiResponse(res, 200, "Booking status updated successfully", booking);
+    } catch (err) {
+        apiError(res, 500, "Failed to update booking status", err);
+    }
+};
+
+/**
+ * Update an individual assignment's status
+ */
+const updateAssignmentStatus = async (
+    req: Request,
+    res: Response
+): Promise<void> => {
+    try {
+        const { bookingId, employeeId } = req.params;
+        const { status } = req.body;
+
+        const validStatuses = ["assigned", "started", "ended"];
+        if (!validStatuses.includes(status)) {
+            apiError(
+                res,
+                400,
+                "Invalid assignment status. Valid: assigned, started, ended"
+            );
+            return;
+        }
+
+        // Step 1: Update the specific assignment using findByIdAndUpdate
+        const timestampFields: Record<string, any> = {};
+        if (status === "started")
+            timestampFields["assignments.$[elem].startTime"] = new Date();
+        if (status === "ended")
+            timestampFields["assignments.$[elem].endTime"] = new Date();
+
+        const updatedBooking = await Booking.findByIdAndUpdate(
+            bookingId,
+            {
+                $set: {
+                    "assignments.$[elem].status": status,
+                    ...timestampFields,
+                },
+            },
+            {
+                new: true,
+                arrayFilters: [
+                    {
+                        "elem.employeeId": employeeId,
+                        "elem.status": { $ne: "removed" },
+                    },
+                ],
+            }
+        );
+
+        if (!updatedBooking) {
+            apiError(res, 404, "Booking or active assignment not found");
+            return;
+        }
+
+        // Step 2: Recalculate global status from DB state
+        const activeAssignments = (updatedBooking.assignments as any[]).filter(
+            (a: any) => a.status !== "removed"
+        );
+        let newBookingStatus = updatedBooking.status;
+
+        if (newBookingStatus !== "cancelled") {
+            if (activeAssignments.length === 0) {
+                newBookingStatus = "pending";
+            } else {
+                const allEnded = activeAssignments.every(
+                    (a: any) => a.status === "ended"
+                );
+                const anyStarted = activeAssignments.some(
+                    (a: any) => a.status === "started" || a.status === "ended"
+                );
+
+                if (allEnded) newBookingStatus = "ended";
+                else if (anyStarted) newBookingStatus = "started";
+                else newBookingStatus = "assigned";
+            }
+        }
+
+        // Step 3: Update booking status and timestamps if changed
+        const bookingUpdateFields: Record<string, any> = {};
+        if (newBookingStatus !== updatedBooking.status) {
+            bookingUpdateFields.status = newBookingStatus;
+        }
+
+        if (newBookingStatus === "started" && !updatedBooking.timerStartedAt) {
+            bookingUpdateFields.timerStartedAt = new Date();
+        }
+
+        if (newBookingStatus === "ended" && !updatedBooking.completedAt) {
+            bookingUpdateFields.completedAt = new Date();
+        }
+
+        let finalBooking = updatedBooking;
+        if (Object.keys(bookingUpdateFields).length > 0) {
+            finalBooking = await Booking.findByIdAndUpdate(
+                bookingId,
+                { $set: bookingUpdateFields },
+                { new: true }
+            ).populate("assignments.employeeId", "name email phone");
+        } else {
+            finalBooking = await Booking.populate(updatedBooking, {
+                path: "assignments.employeeId",
+                select: "name email phone",
+            });
+        }
+
+        apiResponse(res, 200, "Assignment status updated", {
+            booking: finalBooking,
+        });
+    } catch (err) {
+        apiError(res, 500, "Failed to update assignment status", err);
+    }
+};
+
+/**
+ * Create a booking (Admin / Super-Admin)
+ */
+const createBookingAdmin = async (
+    req: Request,
+    res: Response
+): Promise<void> => {
+    try {
+        if (!req.user) {
+            apiError(res, 401, "Unauthorized");
+            return;
+        }
+
+        const {
+            serviceId,
+            userId: targetUserId, // optional: assign booking to this account
+            address,
+            phoneNumber,
+            instruction,
+            date,
+            timeSlot,
+        } = req.body;
+
+        if (!address || !date || !timeSlot) {
+            apiError(res, 400, "Address, date and time slot are required");
+            return;
+        }
+
+        // Resolve service
+        if (!serviceId) {
+            apiError(res, 400, "serviceId is required");
+            return;
+        }
+        const service = await Service.findById(serviceId);
+        if (!service || !service.isActive) {
+            apiError(res, 400, "Service not found or inactive");
+            return;
+        }
+
+        // Use provided userId (assigned account) or fall back to admin's own id
+        const bookingUserId = targetUserId ?? req.user.id;
+
+        const booking = await Booking.create({
+            userId: bookingUserId,
+            serviceId: service._id,
+            serviceType: service.title, // denormalized for history
+            address,
+            phoneNumber,
+            instruction,
+            date,
+            timeSlot,
+        });
+
+        apiResponse(res, 201, "Booking created successfully", booking);
+    } catch (err) {
+        apiError(res, 500, "Failed to create booking", err);
+    }
+};
+
+/**
+ * Reassign an existing booking to a different user account
+ */
+const reassignBooking = async (req: Request, res: Response): Promise<void> => {
+    try {
+        if (!req.user) {
+            apiError(res, 401, "Unauthorized");
+            return;
+        }
+
+        const { id } = req.params;
+        const { userId: newUserId } = req.body;
+
+        if (!newUserId) {
+            apiError(res, 400, "userId is required");
+            return;
+        }
+
+        const newUser = await User.findById(newUserId);
+        if (!newUser) {
+            apiError(res, 404, "Target account not found");
+            return;
+        }
+
+        const booking = await Booking.findByIdAndUpdate(
+            id,
+            { userId: newUserId },
+            { new: true }
+        );
+        if (!booking) {
+            apiError(res, 404, "Booking not found");
+            return;
+        }
+
+        apiResponse(res, 200, "Booking reassigned successfully", booking);
+    } catch (err) {
+        apiError(res, 500, "Failed to reassign booking", err);
+    }
+};
 
 export default {
     getAllAccounts,
+    updateAccount,
     getBookingHistory,
     getAllBookings,
     deleteAccount,
     updateAssignBooking,
     assignTaskToEmployee,
     getAvailableEmployees,
+    updateBookingStatusAdmin,
+    updateAssignmentStatus,
     viewAllReviews,
     createOrgEmp,
     getProfileSelf,
     updateProfileSelf,
     deleteProfileSelf,
+    removeAssignedEmployee,
+    updateBookingPhotos,
+    createBookingAdmin,
+    reassignBooking,
 };

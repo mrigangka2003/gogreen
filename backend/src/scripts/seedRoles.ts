@@ -2,9 +2,9 @@
 import mongoose from "mongoose";
 import Permission from "../models/permission.model";
 import Role from "../models/role.model";
-import { MONGODB_URI } from "../constants";
+import { MONGODB_URI, DB_NAME } from "../constants";
 
-const MONGO = MONGODB_URI;
+const MONGO = `${MONGODB_URI}/${DB_NAME}`;
 
 /**
  * Permissions (unique codes) — taken from the list you provided.
@@ -46,10 +46,15 @@ const PERMISSIONS = [
         description: "Assign or update a booking assignment",
     },
     { name: "VIEW_ALL_REVIEWS", description: "View all reviews" },
+    { name: "VIEW_ALL_BOOKINGS", description: "View all bookings (admin/super-admin)" },
     { name: "CREATE_ORG_EMP", description: "Create org or emp accounts" },
     {
         name: "CREATE_ADMIN",
         description: "Create admin account (super-admin only)",
+    },
+    {
+        name: "MANAGE_SERVICES",
+        description: "Create, update, and delete services",
     },
 
     // Optional catch-all (not required if you use the explicit list above)
@@ -114,10 +119,12 @@ const ROLES: Array<{
             "DELETE_ACCOUNT",
             "UPDATE_ASSIGN_BOOKING",
             "VIEW_ALL_REVIEWS",
+            "VIEW_ALL_BOOKINGS",
             "GET_PROFILE_SELF",
             "UPDATE_PROFILE_SELF",
             "DELETE_PROFILE_SELF",
             "CREATE_ORG_EMP",
+            "MANAGE_SERVICES",
         ],
         description: "Admin user",
     },
@@ -130,10 +137,12 @@ const ROLES: Array<{
             "CREATE_ADMIN",
             "UPDATE_ASSIGN_BOOKING",
             "VIEW_ALL_REVIEWS",
+            "VIEW_ALL_BOOKINGS",
             "GET_PROFILE_SELF",
             "UPDATE_PROFILE_SELF",
             "DELETE_PROFILE_SELF",
             "CREATE_ORG_EMP",
+            "MANAGE_SERVICES",
         ],
         description: "Super admin",
     },

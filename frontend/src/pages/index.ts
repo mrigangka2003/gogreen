@@ -19,32 +19,29 @@ import MyProfile from "./MyProfile";
 import MyBookings from "./MyBookings";
 import MyReviews from "./MyReviews";
 
-import SuperAccounts from "./super/SuperAccounts";
-import SuperCreateAdmin from "./super/SuperCreateAdmin";
 import SuperReviews from "./super/SuperReviews";
 
-
+import UserManagement from "./Admin/UserManagement";
 
 export {
-    Home,
-    ProductsServices,
-    CorporateResponsibility,
-    CommunityImpact,
-    Media,
-    About,
-    MemberPage,
-    JobSearch,
-    Internships,
-    Events,
-    WorkingHere,
-    OurProcess,
-    Auth,
-    Dashboard,
-    BookNow,
-    MyBookings,
-    MyProfile,
-    SuperAccounts,
-    SuperCreateAdmin,
-    SuperReviews,
-    MyReviews
+  Home,
+  ProductsServices,
+  CorporateResponsibility,
+  CommunityImpact,
+  Media,
+  About,
+  MemberPage,
+  JobSearch,
+  Internships,
+  Events,
+  WorkingHere,
+  OurProcess,
+  Auth,
+  Dashboard,
+  BookNow,
+  MyBookings,
+  MyProfile,
+  SuperReviews,
+  MyReviews,
+  UserManagement,
 };

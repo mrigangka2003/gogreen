@@ -21,6 +21,7 @@ const SignIn = () => {
     } = useForm<FieldValues>();
 
     const setUser = useAuthStore((state) => state.setUser);
+    const setToken = useAuthStore((state) => state.setToken);
 
     const onSubmit = async (data: FieldValues) => {
         try {
@@ -30,8 +31,12 @@ const SignIn = () => {
             });
 
             //quick fix
-            const user: User = (response.data as any).data.user;
+            const resData = (response.data as any).data;
+            const user: User = resData.user;
             setUser(user);
+            if (resData.token) {
+                setToken(resData.token);
+            }
             navigate("/dashboard");
         } catch (error: any) {
             toast.error(error.response?.data?.message || "Login failed");
