@@ -441,6 +441,7 @@ export default function CreateBookingAdmin() {
                 address: finalAddress,
             };
             if (assignedAccount) payload.userId = assignedAccount._id;
+            if (photoPreview) payload.referencePhoto = photoPreview;
 
             const res = await axiosInstance.post(`${baseEndpoint}/bookings`, payload);
             if ((res.data as any).success) {

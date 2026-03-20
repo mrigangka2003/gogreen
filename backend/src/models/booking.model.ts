@@ -2,7 +2,7 @@ import mongoose, { Schema, model, Document, Types } from "mongoose";
 
 export interface IAssignment {
     employeeId: Types.ObjectId;
-    status: "assigned" | "started" | "ended" | "removed";
+    status: "assigned" | "started" | "completed" | "removed";
     assignedAt: Date;
     startTime?: Date;
     endTime?: Date;
@@ -28,6 +28,7 @@ export interface IBooking extends Document {
     address: string;
     phoneNumber: string;
     instruction?: string;
+    referencePhoto?: string;
     startPhoto?: string;
     endPhoto?: string;
     date: Date;
@@ -37,8 +38,7 @@ export interface IBooking extends Document {
         | "assigned"
         | "completed"
         | "cancelled"
-        | "started"
-        | "ended";
+        | "started";
     amount?: number;
     paymentStatus?: "pending" | "paid" | "refunded";
     assignedAt?: Date;
@@ -49,9 +49,6 @@ export interface IBooking extends Document {
     isActive: boolean;
     createdAt: Date;
     updatedAt: Date;
-
-    // instance methods
-    markCompleted(): Promise<IBooking>;
 }
 
 const AssignmentSchema = new Schema<IAssignment>({
@@ -62,7 +59,7 @@ const AssignmentSchema = new Schema<IAssignment>({
     },
     status: {
         type: String,
-        enum: ["assigned", "started", "ended", "removed"],
+        enum: ["assigned", "started", "completed", "removed"],
         default: "assigned",
     },
     assignedAt: { type: Date, default: Date.now },
@@ -116,6 +113,10 @@ const BookingSchema = new Schema<IBooking>(
             trim: true,
             default: "",
         },
+        referencePhoto: {
+            type: String,
+            default: "",
+        },
         startPhoto: {
             type: String,
             default: "",
@@ -141,7 +142,6 @@ const BookingSchema = new Schema<IBooking>(
                 "completed",
                 "cancelled",
                 "started",
-                "ended",
             ],
             default: "pending",
             index: true,
@@ -170,8 +170,7 @@ BookingSchema.pre<IBooking>("save", function (next) {
     // Don't recalculate if status was explicitly set to a terminal/admin state
     if (
         this.status === "cancelled" ||
-        this.status === "completed" ||
-        this.status === "ended"
+        this.status === "completed"
     ) {
         next();
         return;
@@ -184,13 +183,14 @@ BookingSchema.pre<IBooking>("save", function (next) {
     if (activeAssignments.length === 0) {
         this.status = "pending";
     } else {
-        const allEnded = activeAssignments.every((a) => a.status === "ended");
+        const allCompleted = activeAssignments.every((a) => a.status === "completed");
         const anyStarted = activeAssignments.some(
-            (a) => a.status === "started" || a.status === "ended"
+            (a) => a.status === "started" || a.status === "completed"
         );
 
-        if (allEnded) {
-            this.status = "ended";
+        if (allCompleted) {
+            this.status = "completed";
+            if (!this.completedAt) this.completedAt = new Date();
         } else if (anyStarted) {
             this.status = "started";
         } else {

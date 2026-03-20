@@ -12,14 +12,20 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.getMyBookings = void 0;
 const models_1 = require("../models");
 const helper_1 = require("../helper");
+const uploadPhoto_1 = require("../utils/uploadPhoto");
 /**
  * Create a booking (self/org)
  */
 const createBooking = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
-        const { serviceId, address, phoneNumber, instruction, date, timeSlot, } = req.body;
         if (!req.user) {
             (0, helper_1.apiError)(res, 401, "Unauthorized");
+            return;
+        }
+        // Validate required fields
+        const { serviceId, address, phoneNumber, instruction, date, timeSlot, referencePhoto, } = req.body;
+        if (!address || !phoneNumber || !date) {
+            (0, helper_1.apiError)(res, 400, "Address, phone number, and date are required");
             return;
         }
         // Resolve service
@@ -32,13 +38,25 @@ const createBooking = (req, res) => __awaiter(void 0, void 0, void 0, function* 
             (0, helper_1.apiError)(res, 400, "Service not found or inactive");
             return;
         }
+        // Upload reference photo if provided
+        let referencePhotoUrl = "";
+        if (referencePhoto) {
+            try {
+                referencePhotoUrl = yield (0, uploadPhoto_1.uploadToCloudinary)(referencePhoto, "gogreen/reference-photos");
+            }
+            catch (uploadErr) {
+                (0, helper_1.apiError)(res, 500, "Failed to upload reference photo", uploadErr);
+                return;
+            }
+        }
         const booking = yield models_1.Booking.create({
             userId: req.user.id,
             serviceId: service._id,
-            serviceType: service.title, // denormalized for history
+            serviceType: service.title,
             address,
             phoneNumber,
             instruction,
+            referencePhoto: referencePhotoUrl,
             date,
             timeSlot,
         });
@@ -67,7 +85,27 @@ const updateBooking = (req, res) => __awaiter(void 0, void 0, void 0, function* 
             (0, helper_1.apiError)(res, 400, "Only pending bookings can be updated");
             return;
         }
-        Object.assign(booking, req.body);
+        // Only allow updating safe fields
+        const { address, phoneNumber, instruction, date, timeSlot, referencePhoto } = req.body;
+        if (address !== undefined)
+            booking.address = address;
+        if (phoneNumber !== undefined)
+            booking.phoneNumber = phoneNumber;
+        if (instruction !== undefined)
+            booking.instruction = instruction;
+        if (date !== undefined)
+            booking.date = date;
+        if (timeSlot !== undefined)
+            booking.timeSlot = timeSlot;
+        if (referencePhoto) {
+            try {
+                booking.referencePhoto = yield (0, uploadPhoto_1.uploadToCloudinary)(referencePhoto, "gogreen/reference-photos");
+            }
+            catch (uploadErr) {
+                (0, helper_1.apiError)(res, 500, "Failed to upload reference photo", uploadErr);
+                return;
+            }
+        }
         yield booking.save();
         (0, helper_1.apiResponse)(res, 200, "Booking updated successfully", booking);
     }
@@ -97,6 +135,12 @@ const createReviewSelf = (req, res) => __awaiter(void 0, void 0, void 0, functio
             (0, helper_1.apiError)(res, 400, "Cannot review until booking is completed");
             return;
         }
+        // Prevent duplicate reviews
+        const existingReview = yield models_1.Review.findOne({ bookingId, userId: req.user.id });
+        if (existingReview) {
+            (0, helper_1.apiError)(res, 409, "You have already reviewed this booking");
+            return;
+        }
         const review = yield models_1.Review.create({
             bookingId,
             userId: req.user.id,
@@ -124,7 +168,12 @@ const updateReviewSelf = (req, res) => __awaiter(void 0, void 0, void 0, functio
             (0, helper_1.apiError)(res, 404, "Review not found");
             return;
         }
-        Object.assign(review, req.body);
+        // Only allow updating safe fields (not bookingId, userId, _id)
+        const { rating, feedback } = req.body;
+        if (rating !== undefined)
+            review.rating = rating;
+        if (feedback !== undefined)
+            review.feedback = feedback;
         yield review.save();
         (0, helper_1.apiResponse)(res, 200, "Review updated successfully", review);
     }

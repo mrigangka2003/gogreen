@@ -35,6 +35,9 @@ const SuperAdminDashboard = lazy(() => import("./pages/super/SuperAdminDashboard
 const SuperReviews = lazy(() => import("./pages/super/SuperReviews.tsx"));
 
 const UserManagement = lazy(() => import("./pages/Admin/UserManagement.tsx"));
+const EmployeeManagement = lazy(() => import("./pages/Admin/EmployeeManagement.tsx"));
+const EmployeeDetail = lazy(() => import("./pages/Admin/EmployeeDetail.tsx"));
+const AccountEdit = lazy(() => import("./pages/Admin/AccountEdit.tsx"));
 
 const AssignBooking = lazy(() => import("./pages/AssignBooking.tsx"));
 const BookingDetail = lazy(() => import("./pages/BookingDetail.tsx"));
@@ -186,6 +189,9 @@ const router = createBrowserRouter([
             { path: "services", element: <ServicesManager /> },
             { path: "booking/:id", element: <BookingDetail /> },
             { path: "user-management", element: <UserManagement /> },
+            { path: "employee-management", element: <EmployeeManagement /> },
+            { path: "employee/:id", element: <EmployeeDetail /> },
+            { path: "account/:id", element: <AccountEdit /> },
             { path: "all-reviews", element: <MyBookings /> },
             { path: "profile", element: <MyProfile /> },
         ],
@@ -206,6 +212,9 @@ const router = createBrowserRouter([
             { path: "create-booking", element: <CreateBookingAdmin /> },
             { path: "services", element: <ServicesManager /> },
             { path: "booking/:id", element: <BookingDetail /> },
+            { path: "employee-management", element: <EmployeeManagement /> },
+            { path: "employee/:id", element: <EmployeeDetail /> },
+            { path: "account/:id", element: <AccountEdit /> },
             { path: "all-reviews", element: <SuperReviews /> },
             { path: "profile", element: <MyProfile /> },
         ],

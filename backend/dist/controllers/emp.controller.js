@@ -21,8 +21,12 @@ const getAssignedBookings = (req, res) => __awaiter(void 0, void 0, void 0, func
             return;
         }
         const bookings = yield models_1.Booking.find({
-            "assignments.employeeId": req.user.id,
-            "assignments.status": { $ne: "removed" },
+            assignments: {
+                $elemMatch: {
+                    employeeId: req.user.id,
+                    status: { $ne: "removed" },
+                },
+            },
         }).sort({ date: -1 });
         (0, helper_1.apiResponse)(res, 200, "Assigned bookings fetched", bookings);
     }
@@ -42,9 +46,13 @@ const getAssignedBookingDetails = (req, res) => __awaiter(void 0, void 0, void 0
         const { id } = req.params;
         const booking = yield models_1.Booking.findOne({
             _id: id,
-            "assignments.employeeId": req.user.id,
-            "assignments.status": { $ne: "removed" },
-        }).populate("userId");
+            assignments: {
+                $elemMatch: {
+                    employeeId: req.user.id,
+                    status: { $ne: "removed" },
+                },
+            },
+        }).populate("userId", "name email phone");
         if (!booking) {
             (0, helper_1.apiError)(res, 404, "Booking not found or not assigned to you");
             return;
@@ -67,8 +75,12 @@ const getAssignedBookingReview = (req, res) => __awaiter(void 0, void 0, void 0,
         const { id } = req.params;
         const booking = yield models_1.Booking.findOne({
             _id: id,
-            "assignments.employeeId": req.user.id,
-            "assignments.status": { $ne: "removed" },
+            assignments: {
+                $elemMatch: {
+                    employeeId: req.user.id,
+                    status: { $ne: "removed" },
+                },
+            },
         });
         if (!booking) {
             (0, helper_1.apiError)(res, 404, "Booking not found or not assigned to you");
@@ -94,8 +106,12 @@ const updateBeforePhoto = (req, res) => __awaiter(void 0, void 0, void 0, functi
         const { beforePhoto } = req.body; // payload remains beforePhoto for compatibility with client
         const booking = yield models_1.Booking.findOne({
             _id: id,
-            "assignments.employeeId": req.user.id,
-            "assignments.status": { $ne: "removed" },
+            assignments: {
+                $elemMatch: {
+                    employeeId: req.user.id,
+                    status: { $ne: "removed" },
+                },
+            },
         });
         if (!booking) {
             (0, helper_1.apiError)(res, 404, "Booking not found or not assigned to you");
@@ -106,11 +122,13 @@ const updateBeforePhoto = (req, res) => __awaiter(void 0, void 0, void 0, functi
             return a.employeeId.toString() === ((_a = req.user) === null || _a === void 0 ? void 0 : _a.id) &&
                 a.status !== "removed";
         });
-        if (assignment) {
-            assignment.startPhoto = beforePhoto;
-            booking.startPhoto = beforePhoto; // Sync top-level photo
-            yield booking.save();
+        if (!assignment) {
+            (0, helper_1.apiError)(res, 404, "Active assignment not found for this employee");
+            return;
         }
+        assignment.startPhoto = beforePhoto;
+        booking.startPhoto = beforePhoto; // Sync top-level photo
+        yield booking.save();
         (0, helper_1.apiResponse)(res, 200, "Start photo updated", booking);
     }
     catch (err) {
@@ -130,8 +148,12 @@ const updateAfterPhoto = (req, res) => __awaiter(void 0, void 0, void 0, functio
         const { afterPhoto } = req.body; // payload remains afterPhoto for compatibility
         const booking = yield models_1.Booking.findOne({
             _id: id,
-            "assignments.employeeId": req.user.id,
-            "assignments.status": { $ne: "removed" },
+            assignments: {
+                $elemMatch: {
+                    employeeId: req.user.id,
+                    status: { $ne: "removed" },
+                },
+            },
         });
         if (!booking) {
             (0, helper_1.apiError)(res, 404, "Booking not found or not assigned to you");
@@ -142,13 +164,15 @@ const updateAfterPhoto = (req, res) => __awaiter(void 0, void 0, void 0, functio
             return a.employeeId.toString() === ((_a = req.user) === null || _a === void 0 ? void 0 : _a.id) &&
                 a.status !== "removed";
         });
-        if (assignment) {
-            assignment.endPhoto = afterPhoto;
-            assignment.status = "ended";
-            assignment.endTime = new Date();
-            booking.endPhoto = afterPhoto; // Sync top-level photo
-            yield booking.save();
+        if (!assignment) {
+            (0, helper_1.apiError)(res, 404, "Active assignment not found for this employee");
+            return;
         }
+        assignment.endPhoto = afterPhoto;
+        assignment.status = "completed";
+        assignment.endTime = new Date();
+        booking.endPhoto = afterPhoto; // Sync top-level photo
+        yield booking.save();
         (0, helper_1.apiResponse)(res, 200, "End photo updated, booking marked completed", booking);
     }
     catch (err) {
@@ -167,21 +191,21 @@ const updateBookingStatus = (req, res) => __awaiter(void 0, void 0, void 0, func
         const { id } = req.params;
         const { status } = req.body;
         const validStatuses = [
-            "pending",
-            "assigned",
-            "completed",
-            "cancelled",
             "started",
-            "ended",
+            "completed",
         ];
         if (!validStatuses.includes(status)) {
-            (0, helper_1.apiError)(res, 400, "Invalid status. Must be one of: pending, assigned, completed, cancelled, started, ended");
+            (0, helper_1.apiError)(res, 400, "Invalid status. Must be one of: started, completed");
             return;
         }
         const booking = yield models_1.Booking.findOne({
             _id: id,
-            "assignments.employeeId": req.user.id,
-            "assignments.status": { $ne: "removed" },
+            assignments: {
+                $elemMatch: {
+                    employeeId: req.user.id,
+                    status: { $ne: "removed" },
+                },
+            },
         });
         if (!booking) {
             (0, helper_1.apiError)(res, 404, "Booking not found or not assigned to you");
@@ -192,16 +216,18 @@ const updateBookingStatus = (req, res) => __awaiter(void 0, void 0, void 0, func
             return a.employeeId.toString() === ((_a = req.user) === null || _a === void 0 ? void 0 : _a.id) &&
                 a.status !== "removed";
         });
-        if (assignment) {
-            assignment.status = status;
-            if (status === "ended" || status === "completed") {
-                assignment.endTime = new Date();
-            }
-            if (status === "started") {
-                assignment.startTime = new Date();
-            }
-            yield booking.save();
+        if (!assignment) {
+            (0, helper_1.apiError)(res, 404, "Active assignment not found for this employee");
+            return;
         }
+        assignment.status = status;
+        if (status === "completed") {
+            assignment.endTime = new Date();
+        }
+        if (status === "started") {
+            assignment.startTime = new Date();
+        }
+        yield booking.save();
         (0, helper_1.apiResponse)(res, 200, "Booking status updated", booking);
     }
     catch (err) {

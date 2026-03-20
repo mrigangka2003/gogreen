@@ -31,7 +31,6 @@ function statusStyle(s: string) {
         pending: "bg-amber-50 text-amber-700 border-amber-200",
         assigned: "bg-blue-50 text-blue-700 border-blue-200",
         started: "bg-purple-50 text-purple-700 border-purple-200",
-        ended: "bg-indigo-50 text-indigo-700 border-indigo-200",
         completed: "bg-green-50 text-green-700 border-green-200",
         cancelled: "bg-red-50 text-red-700 border-red-200",
     };
@@ -42,7 +41,6 @@ function statusDot(s: string) {
         pending: "bg-amber-500 animate-pulse",
         assigned: "bg-blue-500",
         started: "bg-purple-500 animate-pulse",
-        ended: "bg-indigo-500",
         completed: "bg-green-500",
         cancelled: "bg-red-500",
     };
@@ -52,7 +50,7 @@ function asgnBadge(s: string) {
     const m: Record<string, string> = {
         assigned: "bg-blue-100 text-blue-700",
         started: "bg-purple-100 text-purple-700",
-        ended: "bg-indigo-100 text-indigo-700",
+        completed: "bg-green-100 text-green-700",
         removed: "bg-red-100 text-red-400",
     };
     return m[s] ?? "bg-gray-100 text-gray-600";
@@ -304,7 +302,7 @@ function EmployeeProgressCard({ asgn, onStatusChange }: {
                                         <option value="">Select new status...</option>
                                         <option value="assigned">Assigned</option>
                                         <option value="started">Started</option>
-                                        <option value="ended">Ended</option>
+                                        <option value="completed">Completed</option>
                                     </select>
                                 </div>
                                 <div className="flex gap-2">
@@ -605,6 +603,14 @@ export default function BookingDetail() {
                                 <p className="text-sm text-gray-700 bg-amber-50/80 border border-amber-100 rounded-xl p-3.5 leading-relaxed">{booking.instruction}</p>
                             </div>
                         )}
+                        {(booking as any).referencePhoto && (
+                            <div className="mt-5 pt-4 border-t border-gray-100">
+                                <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-2 flex items-center gap-1.5"><Camera className="w-3 h-3" /> Reference Photo</p>
+                                <a href={(booking as any).referencePhoto} target="_blank" rel="noopener noreferrer">
+                                    <img src={(booking as any).referencePhoto} alt="Reference" className="w-full max-h-64 object-cover rounded-xl border border-gray-100 hover:opacity-90 transition-opacity cursor-pointer" />
+                                </a>
+                            </div>
+                        )}
                     </div>
                 </Card>
 
@@ -645,7 +651,7 @@ export default function BookingDetail() {
                                 <option value="pending">Pending</option>
                                 <option value="assigned">Assigned</option>
                                 <option value="started">Started</option>
-                                <option value="ended">Ended</option>
+                                <option value="completed">Completed</option>
                                 <option value="cancelled">Cancelled</option>
                             </select>
                             {(newStatus === "started" || confirmStatus === "started") && (

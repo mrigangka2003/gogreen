@@ -18,8 +18,12 @@ const getAssignedBookings = async (
         }
 
         const bookings = await Booking.find({
-            "assignments.employeeId": req.user.id,
-            "assignments.status": { $ne: "removed" },
+            assignments: {
+                $elemMatch: {
+                    employeeId: req.user.id,
+                    status: { $ne: "removed" },
+                },
+            },
         }).sort({ date: -1 });
         apiResponse(res, 200, "Assigned bookings fetched", bookings);
     } catch (err) {
@@ -43,9 +47,13 @@ const getAssignedBookingDetails = async (
         const { id } = req.params;
         const booking = await Booking.findOne({
             _id: id,
-            "assignments.employeeId": req.user.id,
-            "assignments.status": { $ne: "removed" },
-        }).populate("userId");
+            assignments: {
+                $elemMatch: {
+                    employeeId: req.user.id,
+                    status: { $ne: "removed" },
+                },
+            },
+        }).populate("userId", "name email phone");
 
         if (!booking) {
             apiError(res, 404, "Booking not found or not assigned to you");
@@ -74,8 +82,12 @@ const getAssignedBookingReview = async (
         const { id } = req.params;
         const booking = await Booking.findOne({
             _id: id,
-            "assignments.employeeId": req.user.id,
-            "assignments.status": { $ne: "removed" },
+            assignments: {
+                $elemMatch: {
+                    employeeId: req.user.id,
+                    status: { $ne: "removed" },
+                },
+            },
         });
         if (!booking) {
             apiError(res, 404, "Booking not found or not assigned to you");
@@ -107,8 +119,12 @@ const updateBeforePhoto = async (
 
         const booking = await Booking.findOne({
             _id: id,
-            "assignments.employeeId": req.user.id,
-            "assignments.status": { $ne: "removed" },
+            assignments: {
+                $elemMatch: {
+                    employeeId: req.user.id,
+                    status: { $ne: "removed" },
+                },
+            },
         });
 
         if (!booking) {
@@ -122,11 +138,14 @@ const updateBeforePhoto = async (
                 a.status !== "removed"
         );
 
-        if (assignment) {
-            assignment.startPhoto = beforePhoto;
-            booking.startPhoto = beforePhoto; // Sync top-level photo
-            await booking.save();
+        if (!assignment) {
+            apiError(res, 404, "Active assignment not found for this employee");
+            return;
         }
+
+        assignment.startPhoto = beforePhoto;
+        booking.startPhoto = beforePhoto; // Sync top-level photo
+        await booking.save();
 
         apiResponse(res, 200, "Start photo updated", booking);
     } catch (err) {
@@ -149,8 +168,12 @@ const updateAfterPhoto = async (req: Request, res: Response): Promise<void> => {
 
         const booking = await Booking.findOne({
             _id: id,
-            "assignments.employeeId": req.user.id,
-            "assignments.status": { $ne: "removed" },
+            assignments: {
+                $elemMatch: {
+                    employeeId: req.user.id,
+                    status: { $ne: "removed" },
+                },
+            },
         });
 
         if (!booking) {
@@ -164,13 +187,16 @@ const updateAfterPhoto = async (req: Request, res: Response): Promise<void> => {
                 a.status !== "removed"
         );
 
-        if (assignment) {
-            assignment.endPhoto = afterPhoto;
-            assignment.status = "ended";
-            assignment.endTime = new Date();
-            booking.endPhoto = afterPhoto; // Sync top-level photo
-            await booking.save();
+        if (!assignment) {
+            apiError(res, 404, "Active assignment not found for this employee");
+            return;
         }
+
+        assignment.endPhoto = afterPhoto;
+        assignment.status = "completed";
+        assignment.endTime = new Date();
+        booking.endPhoto = afterPhoto; // Sync top-level photo
+        await booking.save();
 
         apiResponse(
             res,
@@ -200,26 +226,26 @@ const updateBookingStatus = async (
         const { status } = req.body;
 
         const validStatuses = [
-            "pending",
-            "assigned",
-            "completed",
-            "cancelled",
             "started",
-            "ended",
+            "completed",
         ];
         if (!validStatuses.includes(status)) {
             apiError(
                 res,
                 400,
-                "Invalid status. Must be one of: pending, assigned, completed, cancelled, started, ended"
+                "Invalid status. Must be one of: started, completed"
             );
             return;
         }
 
         const booking = await Booking.findOne({
             _id: id,
-            "assignments.employeeId": req.user.id,
-            "assignments.status": { $ne: "removed" },
+            assignments: {
+                $elemMatch: {
+                    employeeId: req.user.id,
+                    status: { $ne: "removed" },
+                },
+            },
         });
 
         if (!booking) {
@@ -233,16 +259,19 @@ const updateBookingStatus = async (
                 a.status !== "removed"
         );
 
-        if (assignment) {
-            assignment.status = status;
-            if (status === "ended" || status === "completed") {
-                assignment.endTime = new Date();
-            }
-            if (status === "started") {
-                assignment.startTime = new Date();
-            }
-            await booking.save();
+        if (!assignment) {
+            apiError(res, 404, "Active assignment not found for this employee");
+            return;
         }
+
+        assignment.status = status;
+        if (status === "completed") {
+            assignment.endTime = new Date();
+        }
+        if (status === "started") {
+            assignment.startTime = new Date();
+        }
+        await booking.save();
 
         apiResponse(res, 200, "Booking status updated", booking);
     } catch (err) {

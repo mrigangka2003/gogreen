@@ -28,6 +28,7 @@ router.patch("/bookings/:id/reassign", auth_1.authMiddleware, (0, rbac_1.require
 // 📌 Per-assignment status update
 router.patch("/bookings/:bookingId/assignments/:employeeId/status", auth_1.authMiddleware, (0, rbac_1.requirePermissions)("UPDATE_ASSIGN_BOOKING"), admin_controller_1.default.updateAssignmentStatus);
 router.get("/employees/available", auth_1.authMiddleware, (0, rbac_1.requirePermissions)("GET_ALL_ACCOUNTS"), admin_controller_1.default.getAvailableEmployees);
+router.get("/employees/:id", auth_1.authMiddleware, (0, rbac_1.requirePermissions)("GET_ALL_ACCOUNTS"), admin_controller_1.default.getEmployeeDetail);
 // 📌 Reviews
 router.get("/reviews", auth_1.authMiddleware, (0, rbac_1.requirePermissions)("VIEW_ALL_REVIEWS"), admin_controller_1.default.viewAllReviews);
 // 📌 Profile

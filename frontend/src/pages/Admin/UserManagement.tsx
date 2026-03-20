@@ -1,5 +1,6 @@
 import React, { useEffect, useMemo, useState } from "react";
 import { useForm } from "react-hook-form";
+import { useNavigate } from "react-router-dom";
 import { RefreshCw, Users, Shield, Building2, UserPlus, X, Edit2, Trash2, ShieldCheck } from "lucide-react";
 import axiosInstance from "../../api";
 import { Notification } from "../../components";
@@ -28,8 +29,10 @@ const TAB_TYPES = [
 
 const UserManagement: React.FC = () => {
     const { user } = useAuthStore();
+    const navigate = useNavigate();
     const currentUserRole = user?.role;
     const isSuperAdmin = currentUserRole === "super-admin";
+    const basePath = isSuperAdmin ? "/dashboard/super-admin" : "/dashboard/admin";
 
     // "Admins" tab is only visible to super-admin. If admin, default to "emp" or "org".
     const [activeTab, setActiveTab] = useState<string>(isSuperAdmin ? "super-admin" : "org");
@@ -102,9 +105,7 @@ const UserManagement: React.FC = () => {
     };
 
     const handleEditClick = (acc: Account) => {
-        setModalMode("edit");
-        setSelectedAccount(acc);
-        setShowModal(true);
+        navigate(`${basePath}/account/${acc.id}`);
     };
 
     const filteredAccounts = useMemo(() => {

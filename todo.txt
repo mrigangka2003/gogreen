@@ -1,3 +1,6 @@
 error in the admin.controller line 798 
-audit the status changing logic
 the org booking details page sitll shows the employee name, make ti show the id only
+
+now can analyze the feed structure that is used in the frontends and add a feature in the backend 
+
+admins and super admins, users and orgs will be able to publish feeds in the admin and super admin dashboard, add a page to view feeds and edit them for all details, and a page to create feeds

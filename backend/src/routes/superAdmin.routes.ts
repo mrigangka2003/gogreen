@@ -138,6 +138,13 @@ router.get(
     adminController.getAvailableEmployees
 );
 
+router.get(
+    "/employees/:id",
+    authMiddleware,
+    requirePermissions("GET_ALL_ACCOUNTS"),
+    adminController.getEmployeeDetail
+);
+
 // 📌 Reviews
 router.get(
     "/reviews",

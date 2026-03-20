@@ -9,7 +9,7 @@ const AssignmentSchema = new mongoose_1.Schema({
     },
     status: {
         type: String,
-        enum: ["assigned", "started", "ended", "removed"],
+        enum: ["assigned", "started", "completed", "removed"],
         default: "assigned",
     },
     assignedAt: { type: Date, default: Date.now },
@@ -61,6 +61,10 @@ const BookingSchema = new mongoose_1.Schema({
         trim: true,
         default: "",
     },
+    referencePhoto: {
+        type: String,
+        default: "",
+    },
     startPhoto: {
         type: String,
         default: "",
@@ -86,7 +90,6 @@ const BookingSchema = new mongoose_1.Schema({
             "completed",
             "cancelled",
             "started",
-            "ended",
         ],
         default: "pending",
         index: true,
@@ -110,8 +113,7 @@ BookingSchema.index({ userId: 1, status: 1, date: -1 });
 BookingSchema.pre("save", function (next) {
     // Don't recalculate if status was explicitly set to a terminal/admin state
     if (this.status === "cancelled" ||
-        this.status === "completed" ||
-        this.status === "ended") {
+        this.status === "completed") {
         next();
         return;
     }
@@ -120,10 +122,12 @@ BookingSchema.pre("save", function (next) {
         this.status = "pending";
     }
     else {
-        const allEnded = activeAssignments.every((a) => a.status === "ended");
-        const anyStarted = activeAssignments.some((a) => a.status === "started" || a.status === "ended");
-        if (allEnded) {
-            this.status = "ended";
+        const allCompleted = activeAssignments.every((a) => a.status === "completed");
+        const anyStarted = activeAssignments.some((a) => a.status === "started" || a.status === "completed");
+        if (allCompleted) {
+            this.status = "completed";
+            if (!this.completedAt)
+                this.completedAt = new Date();
         }
         else if (anyStarted) {
             this.status = "started";

@@ -1,6 +1,7 @@
 import express, { Request, Response } from "express";
 import cookieParser from "cookie-parser";
 import cors from "cors";
+import morgan from "morgan";
 
 import { PORT } from "./constants";
 import connectDB from "./config/db";
@@ -39,9 +40,10 @@ app.use(
         credentials: true,
     })
 );
-app.use(express.json());
-app.use(express.urlencoded({ extended: true }));
+app.use(express.json({ limit: "10mb" }));
+app.use(express.urlencoded({ extended: true, limit: "10mb" }));
 app.use(cookieParser());
+app.use(morgan("dev"));
 
 app.use("/api/v1", router);
 

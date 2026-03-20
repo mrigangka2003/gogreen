@@ -34,6 +34,7 @@ export type Booking = {
   }[];
   startPhoto?: string;
   endPhoto?: string;
+  referencePhoto?: string;
   completedAt?: string;
   createdAt?: string;
   allocatedTime?: number;

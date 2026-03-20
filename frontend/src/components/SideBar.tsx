@@ -8,6 +8,7 @@ import {
     Star,
     User,
     Users,
+    UserCog,
     Menu,
     X,
     LogOut,
@@ -56,6 +57,11 @@ const sidebarMap: Record<UserRole, SideBarItem[]> = {
             path: "user-management",
             icon: <Users size={20} />,
         },
+        {
+            title: "Employees",
+            path: "employee-management",
+            icon: <UserCog size={20} />,
+        },
         { title: "Services", path: "services", icon: <Sparkles size={20} /> },
         { title: "Reviews", path: "all-reviews", icon: <Star size={20} /> },
         { title: "Profile", path: "profile", icon: <User size={20} /> },
@@ -93,6 +99,11 @@ const sidebarMap: Record<UserRole, SideBarItem[]> = {
             title: "User Management",
             path: "user-management",
             icon: <Users size={20} />,
+        },
+        {
+            title: "Employees",
+            path: "employee-management",
+            icon: <UserCog size={20} />,
         },
         {
             title: "Bookings",
@@ -181,7 +192,7 @@ const Sidebar = ({
                 </div>
 
                 {/* nav */}
-                <nav className="flex flex-col gap-2 p-6 overflow-y-auto">
+                <nav className="flex flex-col gap-2 p-6 overflow-y-auto no-scrollbar">
                     {items.map((item, idx) => (
                         <NavLink
                             key={`${item.path}-${idx}`}

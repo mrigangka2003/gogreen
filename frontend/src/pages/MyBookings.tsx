@@ -65,7 +65,6 @@ const statusColors: Record<string, string> = {
     pending: "bg-amber-100 text-amber-700 border-amber-200",
     assigned: "bg-blue-100 text-blue-700 border-blue-200",
     started: "bg-purple-100 text-purple-700 border-purple-200",
-    ended: "bg-indigo-100 text-indigo-700 border-indigo-200",
     completed: "bg-green-100 text-green-700 border-green-200",
     cancelled: "bg-red-100 text-red-700 border-red-200",
 };
@@ -110,7 +109,7 @@ function AssignmentRow({ asgn, index }: { asgn: Assignment; index: number }) {
     const asnColors: Record<string, string> = {
         assigned: "bg-blue-100 text-blue-700",
         started: "bg-purple-100 text-purple-700",
-        ended: "bg-indigo-100 text-indigo-700",
+        completed: "bg-green-100 text-green-700",
     };
     const cls = asnColors[asgn.status] ?? "bg-gray-100 text-gray-600";
 

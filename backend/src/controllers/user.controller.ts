@@ -1,12 +1,19 @@
 import { Request, Response } from "express";
 import { User, Booking, Review, Service } from "../models";
 import { apiError, apiResponse } from "../helper";
+import { uploadToCloudinary } from "../utils/uploadPhoto";
 
 /**
  * Create a booking (self/org)
  */
 const createBooking = async (req: Request, res: Response): Promise<void> => {
     try {
+        if (!req.user) {
+            apiError(res, 401, "Unauthorized");
+            return;
+        }
+
+        // Validate required fields
         const {
             serviceId,
             address,
@@ -14,10 +21,11 @@ const createBooking = async (req: Request, res: Response): Promise<void> => {
             instruction,
             date,
             timeSlot,
+            referencePhoto,
         } = req.body;
 
-        if (!req.user) {
-            apiError(res, 401, "Unauthorized");
+        if (!address || !phoneNumber || !date) {
+            apiError(res, 400, "Address, phone number, and date are required");
             return;
         }
 
@@ -32,13 +40,25 @@ const createBooking = async (req: Request, res: Response): Promise<void> => {
             return;
         }
 
+        // Upload reference photo if provided
+        let referencePhotoUrl = "";
+        if (referencePhoto) {
+            try {
+                referencePhotoUrl = await uploadToCloudinary(referencePhoto, "gogreen/reference-photos");
+            } catch (uploadErr) {
+                apiError(res, 500, "Failed to upload reference photo", uploadErr);
+                return;
+            }
+        }
+
         const booking = await Booking.create({
             userId: req.user.id,
             serviceId: service._id,
-            serviceType: service.title, // denormalized for history
+            serviceType: service.title,
             address,
             phoneNumber,
             instruction,
+            referencePhoto: referencePhotoUrl,
             date,
             timeSlot,
         });
@@ -72,7 +92,21 @@ const updateBooking = async (req: Request, res: Response): Promise<void> => {
             return;
         }
 
-        Object.assign(booking, req.body);
+        // Only allow updating safe fields
+        const { address, phoneNumber, instruction, date, timeSlot, referencePhoto } = req.body;
+        if (address !== undefined) booking.address = address;
+        if (phoneNumber !== undefined) booking.phoneNumber = phoneNumber;
+        if (instruction !== undefined) booking.instruction = instruction;
+        if (date !== undefined) booking.date = date;
+        if (timeSlot !== undefined) booking.timeSlot = timeSlot;
+        if (referencePhoto) {
+            try {
+                booking.referencePhoto = await uploadToCloudinary(referencePhoto, "gogreen/reference-photos");
+            } catch (uploadErr) {
+                apiError(res, 500, "Failed to upload reference photo", uploadErr);
+                return;
+            }
+        }
         await booking.save();
 
         apiResponse(res, 200, "Booking updated successfully", booking);
@@ -107,6 +141,13 @@ const createReviewSelf = async (req: Request, res: Response): Promise<void> => {
             return;
         }
 
+        // Prevent duplicate reviews
+        const existingReview = await Review.findOne({ bookingId, userId: req.user.id });
+        if (existingReview) {
+            apiError(res, 409, "You have already reviewed this booking");
+            return;
+        }
+
         const review = await Review.create({
             bookingId,
             userId: req.user.id,
@@ -138,7 +179,10 @@ const updateReviewSelf = async (req: Request, res: Response): Promise<void> => {
             return;
         }
 
-        Object.assign(review, req.body);
+        // Only allow updating safe fields (not bookingId, userId, _id)
+        const { rating, feedback } = req.body;
+        if (rating !== undefined) review.rating = rating;
+        if (feedback !== undefined) review.feedback = feedback;
         await review.save();
 
         apiResponse(res, 200, "Review updated successfully", review);

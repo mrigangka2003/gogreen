@@ -26,14 +26,14 @@ type Booking = {
     createdAt?: string;
 };
 
-type StatusTab = "all" | "pending" | "assigned" | "started" | "ended";
+type StatusTab = "all" | "pending" | "assigned" | "started" | "completed";
 
 const STATUS_TABS: { key: StatusTab; label: string }[] = [
     { key: "all", label: "All" },
     { key: "pending", label: "Pending" },
     { key: "assigned", label: "Assigned" },
     { key: "started", label: "Started" },
-    { key: "ended", label: "Completed" },
+    { key: "completed", label: "Completed" },
 ];
 
 const statusColor = (s: string) => {
@@ -41,7 +41,7 @@ const statusColor = (s: string) => {
         case "pending": return "bg-amber-100 text-amber-800";
         case "assigned": return "bg-blue-100 text-blue-800";
         case "started": return "bg-cyan-100 text-cyan-800";
-        case "ended": case "completed": return "bg-green-100 text-green-800";
+        case "completed": return "bg-green-100 text-green-800";
         default: return "bg-gray-100 text-gray-800";
     }
 };

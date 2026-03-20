@@ -16,6 +16,7 @@ const mongoose_1 = require("mongoose");
 const bcrypt_1 = __importDefault(require("bcrypt"));
 const models_1 = require("../models");
 const helper_1 = require("../helper");
+const uploadPhoto_1 = require("../utils/uploadPhoto");
 /**
  * Get all accounts (users/orgs/emps)
  */
@@ -179,6 +180,11 @@ const updateAssignBooking = (req, res) => __awaiter(void 0, void 0, void 0, func
             (0, helper_1.apiError)(res, 404, "Booking not found");
             return;
         }
+        // Prevent assigning cancelled bookings
+        if (booking.status === "cancelled") {
+            (0, helper_1.apiError)(res, 400, "Cannot assign a cancelled booking");
+            return;
+        }
         let empIdsArray = [];
         if (Array.isArray(employeeIds)) {
             empIdsArray = employeeIds;
@@ -186,12 +192,24 @@ const updateAssignBooking = (req, res) => __awaiter(void 0, void 0, void 0, func
         else if (req.body.employeeId) {
             empIdsArray = [req.body.employeeId];
         }
+        if (empIdsArray.length === 0) {
+            (0, helper_1.apiError)(res, 400, "At least one employee ID is required");
+            return;
+        }
         const employees = yield models_1.User.find({
             _id: { $in: empIdsArray },
         }).populate("role");
+        if (employees.length !== empIdsArray.length) {
+            (0, helper_1.apiError)(res, 404, "One or more employees not found");
+            return;
+        }
         for (const emp of employees) {
             if (emp.role.name !== "emp") {
                 (0, helper_1.apiError)(res, 400, `Invalid employee ID: ${emp._id}`);
+                return;
+            }
+            if (!emp.isActive) {
+                (0, helper_1.apiError)(res, 400, `Employee ${emp.name} is not active`);
                 return;
             }
         }
@@ -209,6 +227,7 @@ const updateAssignBooking = (req, res) => __awaiter(void 0, void 0, void 0, func
             booking.assignments = [];
         booking.assignments.push(...newAssignments);
         booking.status = "assigned";
+        booking.assignedAt = new Date();
         yield booking.save();
         (0, helper_1.apiResponse)(res, 200, "Booking assigned successfully", booking);
     }
@@ -408,6 +427,7 @@ const assignTaskToEmployee = (req, res) => __awaiter(void 0, void 0, void 0, fun
                 booking.assignments = [];
             booking.assignments.push(...newAssignments);
             booking.status = "assigned";
+            booking.assignedAt = new Date();
             // Check if user sent allocatedTime (Timer feature)
             if (req.body.allocatedTime !== undefined) {
                 booking.allocatedTime = Number(req.body.allocatedTime) || 0;
@@ -543,16 +563,22 @@ const updateBookingStatusAdmin = (req, res) => __awaiter(void 0, void 0, void 0,
     try {
         const { id } = req.params;
         const { status, allocatedTime } = req.body;
-        const validStatuses = ["pending", "assigned", "started", "ended", "cancelled"];
+        const validStatuses = [
+            "pending",
+            "assigned",
+            "started",
+            "completed",
+            "cancelled",
+        ];
         if (!validStatuses.includes(status)) {
-            (0, helper_1.apiError)(res, 400, "Invalid status. Valid: pending, assigned, started, ended, cancelled");
+            (0, helper_1.apiError)(res, 400, "Invalid status. Valid: pending, assigned, started, completed, cancelled");
             return;
         }
         // Build the $set payload without touching the model's pre-save hook
         const setFields = { status };
         if (status === "started")
             setFields.timerStartedAt = new Date();
-        if (status === "ended")
+        if (status === "completed")
             setFields.completedAt = new Date();
         if (status === "cancelled")
             setFields.cancelledAt = new Date();
@@ -561,10 +587,10 @@ const updateBookingStatusAdmin = (req, res) => __awaiter(void 0, void 0, void 0,
         // Determine what assignment status we should cascade to
         const assignmentStatusMap = {
             started: "started",
-            ended: "ended",
+            completed: "completed",
             assigned: "assigned",
             cancelled: "removed",
-            pending: "assigned", // pending means assignments should still be assigned
+            pending: "removed", // pending means previous assignments should be removed
         };
         const asnStatus = assignmentStatusMap[status];
         // Build arrayFilters-based update to only touch non-removed assignments
@@ -573,8 +599,9 @@ const updateBookingStatusAdmin = (req, res) => __awaiter(void 0, void 0, void 0,
         if (asnStatus) {
             updateQuery.$set["assignments.$[active].status"] = asnStatus;
             if (status === "started")
-                updateQuery.$set["assignments.$[active].startTime"] = new Date();
-            if (status === "ended")
+                updateQuery.$set["assignments.$[active].startTime"] =
+                    new Date();
+            if (status === "completed")
                 updateQuery.$set["assignments.$[active].endTime"] = new Date();
         }
         const booking = yield models_1.Booking.findByIdAndUpdate(id, updateQuery, {
@@ -598,22 +625,27 @@ const updateAssignmentStatus = (req, res) => __awaiter(void 0, void 0, void 0, f
     try {
         const { bookingId, employeeId } = req.params;
         const { status } = req.body;
-        const validStatuses = ["assigned", "started", "ended"];
+        const validStatuses = ["assigned", "started", "completed"];
         if (!validStatuses.includes(status)) {
-            (0, helper_1.apiError)(res, 400, "Invalid assignment status. Valid: assigned, started, ended");
+            (0, helper_1.apiError)(res, 400, "Invalid assignment status. Valid: assigned, started, completed");
             return;
         }
         // Step 1: Update the specific assignment using findByIdAndUpdate
         const timestampFields = {};
         if (status === "started")
             timestampFields["assignments.$[elem].startTime"] = new Date();
-        if (status === "ended")
+        if (status === "completed")
             timestampFields["assignments.$[elem].endTime"] = new Date();
         const updatedBooking = yield models_1.Booking.findByIdAndUpdate(bookingId, {
-            $set: Object.assign({ "assignments.$[elem].status": status }, timestampFields)
+            $set: Object.assign({ "assignments.$[elem].status": status }, timestampFields),
         }, {
             new: true,
-            arrayFilters: [{ "elem.employeeId": employeeId, "elem.status": { $ne: "removed" } }]
+            arrayFilters: [
+                {
+                    "elem.employeeId": employeeId,
+                    "elem.status": { $ne: "removed" },
+                },
+            ],
         });
         if (!updatedBooking) {
             (0, helper_1.apiError)(res, 404, "Booking or active assignment not found");
@@ -627,10 +659,10 @@ const updateAssignmentStatus = (req, res) => __awaiter(void 0, void 0, void 0, f
                 newBookingStatus = "pending";
             }
             else {
-                const allEnded = activeAssignments.every((a) => a.status === "ended");
-                const anyStarted = activeAssignments.some((a) => a.status === "started" || a.status === "ended");
-                if (allEnded)
-                    newBookingStatus = "ended";
+                const allCompleted = activeAssignments.every((a) => a.status === "completed");
+                const anyStarted = activeAssignments.some((a) => a.status === "started" || a.status === "completed");
+                if (allCompleted)
+                    newBookingStatus = "completed";
                 else if (anyStarted)
                     newBookingStatus = "started";
                 else
@@ -645,19 +677,22 @@ const updateAssignmentStatus = (req, res) => __awaiter(void 0, void 0, void 0, f
         if (newBookingStatus === "started" && !updatedBooking.timerStartedAt) {
             bookingUpdateFields.timerStartedAt = new Date();
         }
-        if (newBookingStatus === "ended" && !updatedBooking.completedAt) {
+        if (newBookingStatus === "completed" && !updatedBooking.completedAt) {
             bookingUpdateFields.completedAt = new Date();
         }
         let finalBooking = updatedBooking;
         if (Object.keys(bookingUpdateFields).length > 0) {
-            const fb = yield models_1.Booking.findByIdAndUpdate(bookingId, { $set: bookingUpdateFields }, { new: true }).populate("assignments.employeeId", "name email phone");
-            if (fb)
-                finalBooking = fb;
+            finalBooking = (yield models_1.Booking.findByIdAndUpdate(bookingId, { $set: bookingUpdateFields }, { new: true }).populate("assignments.employeeId", "name email phone")) || updatedBooking;
         }
         else {
-            finalBooking = yield models_1.Booking.populate(updatedBooking, { path: "assignments.employeeId", select: "name email phone" });
+            finalBooking = yield models_1.Booking.populate(updatedBooking, {
+                path: "assignments.employeeId",
+                select: "name email phone",
+            });
         }
-        (0, helper_1.apiResponse)(res, 200, "Assignment status updated", { booking: finalBooking });
+        (0, helper_1.apiResponse)(res, 200, "Assignment status updated", {
+            booking: finalBooking,
+        });
     }
     catch (err) {
         (0, helper_1.apiError)(res, 500, "Failed to update assignment status", err);
@@ -673,9 +708,9 @@ const createBookingAdmin = (req, res) => __awaiter(void 0, void 0, void 0, funct
             return;
         }
         const { serviceId, userId: targetUserId, // optional: assign booking to this account
-        address, phoneNumber, instruction, date, timeSlot, } = req.body;
-        if (!address || !date || !timeSlot) {
-            (0, helper_1.apiError)(res, 400, "Address, date and time slot are required");
+        address, phoneNumber, instruction, date, timeSlot, referencePhoto, } = req.body;
+        if (!address || !phoneNumber || !date || !timeSlot) {
+            (0, helper_1.apiError)(res, 400, "Address, phone number, date and time slot are required");
             return;
         }
         // Resolve service
@@ -688,15 +723,27 @@ const createBookingAdmin = (req, res) => __awaiter(void 0, void 0, void 0, funct
             (0, helper_1.apiError)(res, 400, "Service not found or inactive");
             return;
         }
+        // Upload reference photo if provided
+        let referencePhotoUrl = "";
+        if (referencePhoto) {
+            try {
+                referencePhotoUrl = yield (0, uploadPhoto_1.uploadToCloudinary)(referencePhoto, "gogreen/reference-photos");
+            }
+            catch (uploadErr) {
+                (0, helper_1.apiError)(res, 500, "Failed to upload reference photo", uploadErr);
+                return;
+            }
+        }
         // Use provided userId (assigned account) or fall back to admin's own id
         const bookingUserId = targetUserId !== null && targetUserId !== void 0 ? targetUserId : req.user.id;
         const booking = yield models_1.Booking.create({
             userId: bookingUserId,
             serviceId: service._id,
-            serviceType: service.title, // denormalized for history
+            serviceType: service.title,
             address,
             phoneNumber,
             instruction,
+            referencePhoto: referencePhotoUrl,
             date,
             timeSlot,
         });
@@ -737,6 +784,66 @@ const reassignBooking = (req, res) => __awaiter(void 0, void 0, void 0, function
         (0, helper_1.apiError)(res, 500, "Failed to reassign booking", err);
     }
 });
+/**
+ * Get a single employee's detail with current and past assignments
+ */
+const getEmployeeDetail = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    var _a;
+    try {
+        const { id } = req.params;
+        const employee = yield models_1.User.findById(id)
+            .select("-password")
+            .populate("role", "name");
+        if (!employee) {
+            (0, helper_1.apiError)(res, 404, "Employee not found");
+            return;
+        }
+        if (((_a = employee.role) === null || _a === void 0 ? void 0 : _a.name) !== "emp") {
+            (0, helper_1.apiError)(res, 400, "User is not an employee");
+            return;
+        }
+        // Current active assignments
+        const activeBookings = yield models_1.Booking.find({
+            assignments: {
+                $elemMatch: {
+                    employeeId: employee._id,
+                    status: { $in: ["assigned", "started"] },
+                },
+            },
+        })
+            .populate("userId", "name email phone")
+            .populate("assignments.employeeId", "name email phone")
+            .sort({ date: -1 });
+        // Past assignments (completed/removed bookings)
+        const pastBookings = yield models_1.Booking.find({
+            assignments: {
+                $elemMatch: {
+                    employeeId: employee._id,
+                    status: { $in: ["completed", "removed"] },
+                },
+            },
+        })
+            .populate("userId", "name email phone")
+            .populate("assignments.employeeId", "name email phone")
+            .sort({ date: -1 });
+        (0, helper_1.apiResponse)(res, 200, "Employee detail fetched successfully", {
+            employee: {
+                id: employee._id,
+                name: employee.name,
+                email: employee.email,
+                phone: employee.phone,
+                address: employee.address,
+                isActive: employee.isActive,
+                createdAt: employee.createdAt,
+            },
+            activeBookings,
+            pastBookings,
+        });
+    }
+    catch (err) {
+        (0, helper_1.apiError)(res, 500, "Failed to fetch employee detail", err);
+    }
+});
 exports.default = {
     getAllAccounts,
     updateAccount,
@@ -757,4 +864,5 @@ exports.default = {
     updateBookingPhotos,
     createBookingAdmin,
     reassignBooking,
+    getEmployeeDetail,
 };

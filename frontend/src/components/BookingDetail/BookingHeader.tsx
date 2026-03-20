@@ -92,7 +92,7 @@ export default function BookingHeader({
                                     <option value="">Select a status...</option>
                                     <option value="assigned">Assigned</option>
                                     <option value="started">Started</option>
-                                    <option value="ended">Ended/Completed</option>
+                                    <option value="completed">Completed</option>
                                     <option value="cancelled">Cancelled</option>
                                 </select>
                             </div>
