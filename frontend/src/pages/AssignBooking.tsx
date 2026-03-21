@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuthStore } from "../stores/auth";
 import axiosInstance from "../api";
@@ -57,30 +57,49 @@ const AssignBookings = () => {
     const isSuperAdmin = user?.role === "super-admin";
     const basePath = isSuperAdmin ? "/dashboard/super-admin" : "/dashboard/admin";
 
-    useEffect(() => {
+    const REFRESH_INTERVAL = 30; // seconds
+    const [countdown, setCountdown] = useState(REFRESH_INTERVAL);
+    const countdownRef = useRef(REFRESH_INTERVAL);
+
+    const fetchBookings = useCallback(async () => {
         if (!user) return;
-
         const endpoint = isSuperAdmin ? "super/bookings" : "admin/bookings";
-
-        const fetchBookings = async () => {
-            try {
-                setLoading(true);
-                const { data } = await axiosInstance.get<{
-                    success: boolean;
-                    data: Booking[];
-                }>(endpoint);
-                if (data?.success) {
-                    setBookings(data.data);
-                }
-            } catch (err) {
-                console.error("Error fetching bookings:", err);
-            } finally {
-                setLoading(false);
+        try {
+            setLoading(true);
+            const { data } = await axiosInstance.get<{
+                success: boolean;
+                data: Booking[];
+            }>(endpoint);
+            if (data?.success) {
+                setBookings(data.data);
             }
-        };
-
-        fetchBookings();
+        } catch (err) {
+            console.error("Error fetching bookings:", err);
+        } finally {
+            setLoading(false);
+        }
+        countdownRef.current = REFRESH_INTERVAL;
+        setCountdown(REFRESH_INTERVAL);
     }, [user, isSuperAdmin]);
+
+    useEffect(() => {
+        fetchBookings();
+    }, [fetchBookings]);
+
+    // Auto-refresh countdown — only when there are non-completed bookings
+    const hasActiveBookings = bookings.some(b => b.status?.toLowerCase() !== "completed");
+
+    useEffect(() => {
+        if (!hasActiveBookings) return;
+        const timer = setInterval(() => {
+            countdownRef.current -= 1;
+            setCountdown(countdownRef.current);
+            if (countdownRef.current <= 0) {
+                fetchBookings();
+            }
+        }, 1000);
+        return () => clearInterval(timer);
+    }, [fetchBookings, hasActiveBookings]);
 
     const filteredBookings = bookings.filter((b) => {
         const matchesTab = activeTab === "all" || b.status?.toLowerCase() === activeTab;
@@ -129,11 +148,14 @@ const AssignBookings = () => {
                         <span>Create Booking</span>
                     </button>
                     <button
-                        onClick={() => window.location.reload()}
+                        onClick={fetchBookings}
                         className="flex items-center gap-2 px-4 py-2 bg-white border border-gray-200 rounded-lg text-sm font-medium text-gray-600 hover:bg-gray-50 transition-colors"
                     >
-                        <RefreshCw className="h-4 w-4" />
-                        Refresh
+                        <RefreshCw className={`h-4 w-4 ${loading ? 'animate-spin' : ''}`} />
+                        {hasActiveBookings
+                            ? <span className="tabular-nums text-xs font-bold text-gray-400 min-w-[20px] text-center">{countdown}s</span>
+                            : <span className="text-xs font-medium">Refresh</span>
+                        }
                     </button>
                 </div>
             </div>

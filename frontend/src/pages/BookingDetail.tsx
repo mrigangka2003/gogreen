@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import React, { useEffect, useState, useCallback, useRef } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { useAuthStore } from "../stores/auth";
 import axiosInstance from "../api";
@@ -7,6 +7,7 @@ import {
     Users, Search, X, Check, Loader2, Navigation,
     Timer, Play, Square, Camera, AlertCircle, CheckCircle2, XCircle,
     TrendingUp, CreditCard, Activity, Zap, RefreshCw, ChevronDown, ChevronUp,
+    Trash2, Upload, ExternalLink,
 } from "lucide-react";
 import AssignEmployeeModal from "../components/AssignEmployeeModal";
 import { Booking, AvailableEmployee } from "../types/booking";
@@ -100,6 +101,31 @@ function Thumb({ url, label }: { url?: string; label: string }) {
         </>
     );
 }
+
+function VideoThumb({ url, label }: { url?: string; label: string }) {
+    const [open, setOpen] = useState(false);
+    if (!url) return null;
+    return (
+        <>
+            <button onClick={() => setOpen(true)}
+                className="relative h-16 w-16 rounded-xl overflow-hidden border border-purple-200 shadow-sm shrink-0 hover:scale-105 transition-transform bg-black">
+                <video src={url} className="w-full h-full object-cover" muted preload="metadata" />
+                <div className="absolute inset-0 flex items-center justify-center">
+                    <div className="w-6 h-6 rounded-full bg-white/80 flex items-center justify-center">
+                        <Play className="w-3 h-3 text-purple-600 ml-0.5" />
+                    </div>
+                </div>
+                <div className="absolute bottom-0 inset-x-0 bg-purple-900/60 text-[8px] text-white text-center font-semibold py-0.5">{label}</div>
+            </button>
+            {open && (
+                <div className="fixed inset-0 z-[500] bg-black/80 flex items-center justify-center p-4" onClick={() => setOpen(false)}>
+                    <video src={url} controls autoPlay className="max-w-2xl max-h-[85vh] rounded-2xl shadow-2xl" />
+                    <button className="absolute top-4 right-4 p-2 bg-white/20 rounded-xl text-white"><X className="w-5 h-5" /></button>
+                </div>
+            )}
+        </>
+    );
+}
 function PhotoBig({ url, label, placeholder }: { url?: string; label: string; placeholder?: string }) {
     const [open, setOpen] = useState(false);
     if (!url) return (
@@ -136,15 +162,19 @@ function InfoRow({ icon, label, value, multiline }: { icon: React.ReactNode; lab
 }
 
 // ─── Employee Progress Card ───────────────────────────────────────────────────
-function EmployeeProgressCard({ asgn, onStatusChange }: {
+function EmployeeProgressCard({ asgn, onStatusChange, onPhotoChange }: {
     asgn: any;
     onStatusChange?: (employeeId: string, status: string) => Promise<void>;
+    onPhotoChange?: (employeeId: string, type: "startPhoto" | "endPhoto", value: string) => Promise<void>;
 }) {
     const [expanded, setExpanded] = useState(false);
     const [modalOpen, setModalOpen] = useState(false);
     const [pendingStatus, setPendingStatus] = useState("");
     const [confirmStatus, setConfirmStatus] = useState<string | null>(null);
     const [saving, setSaving] = useState(false);
+    const [editingPhoto, setEditingPhoto] = useState(false);
+    const photoInputRef = React.useRef<HTMLInputElement>(null);
+    const [photoEditTarget, setPhotoEditTarget] = useState<"startPhoto" | "endPhoto" | null>(null);
 
     const emp = asgn.employeeId as any;
     const dur = duration(asgn.startTime, asgn.endTime);
@@ -203,10 +233,12 @@ function EmployeeProgressCard({ asgn, onStatusChange }: {
                         )}
                     </div>
                 </div>
-                {/* Thumb photos */}
-                <div className="flex items-center gap-2 shrink-0">
+                {/* Thumb photos & videos */}
+                <div className="flex items-center gap-2 shrink-0 flex-wrap">
                     <Thumb url={asgn.startPhoto} label="Start" />
+                    <VideoThumb url={(asgn as any).startVideo} label="Start 🎥" />
                     <Thumb url={asgn.endPhoto} label="End" />
+                    <VideoThumb url={(asgn as any).endVideo} label="End 🎥" />
                 </div>
                 {/* Expand toggle */}
                 <button onClick={() => setExpanded(e => !e)}
@@ -229,16 +261,69 @@ function EmployeeProgressCard({ asgn, onStatusChange }: {
                         {dur && <InfoRow icon={<Timer className="w-3 h-3" />} label="Duration" value={dur} />}
                     </div>
 
-                    {/* Full size photos */}
-                    {(asgn.startPhoto || asgn.endPhoto) && (
-                        <div>
-                            <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-2">Photos</p>
-                            <div className="grid grid-cols-2 gap-3">
+                    {/* Full size photos with edit/remove controls */}
+                    <div>
+                        <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-2">Photos</p>
+                        <div className="grid grid-cols-2 gap-3">
+                            <div>
                                 <PhotoBig url={asgn.startPhoto} label="Start Photo" placeholder="No start photo" />
+                                {(asgn as any).startVideo && (
+                                    <video src={(asgn as any).startVideo} controls className="w-full max-h-48 rounded-xl border border-gray-100 mt-2 bg-black" />
+                                )}
+                                {onPhotoChange && (
+                                    <div className="flex gap-1.5 mt-1.5">
+                                        <button onClick={() => { setPhotoEditTarget("startPhoto"); photoInputRef.current?.click(); }}
+                                            className="flex-1 flex items-center justify-center gap-1 py-1.5 rounded-lg bg-blue-50 text-blue-600 text-[10px] font-bold hover:bg-blue-100 transition-colors">
+                                            <Upload className="w-3 h-3" /> {asgn.startPhoto ? "Replace" : "Upload"}
+                                        </button>
+                                        {asgn.startPhoto && (
+                                            <button onClick={() => onPhotoChange(emp?._id, "startPhoto", "")}
+                                                className="flex items-center justify-center gap-1 px-2.5 py-1.5 rounded-lg bg-red-50 text-red-500 text-[10px] font-bold hover:bg-red-100 transition-colors">
+                                                <Trash2 className="w-3 h-3" />
+                                            </button>
+                                        )}
+                                    </div>
+                                )}
+                            </div>
+                            <div>
                                 <PhotoBig url={asgn.endPhoto} label="End Photo" placeholder="No end photo" />
+                                {(asgn as any).endVideo && (
+                                    <video src={(asgn as any).endVideo} controls className="w-full max-h-48 rounded-xl border border-gray-100 mt-2 bg-black" />
+                                )}
+                                {onPhotoChange && (
+                                    <div className="flex gap-1.5 mt-1.5">
+                                        <button onClick={() => { setPhotoEditTarget("endPhoto"); photoInputRef.current?.click(); }}
+                                            className="flex-1 flex items-center justify-center gap-1 py-1.5 rounded-lg bg-blue-50 text-blue-600 text-[10px] font-bold hover:bg-blue-100 transition-colors">
+                                            <Upload className="w-3 h-3" /> {asgn.endPhoto ? "Replace" : "Upload"}
+                                        </button>
+                                        {asgn.endPhoto && (
+                                            <button onClick={() => onPhotoChange(emp?._id, "endPhoto", "")}
+                                                className="flex items-center justify-center gap-1 px-2.5 py-1.5 rounded-lg bg-red-50 text-red-500 text-[10px] font-bold hover:bg-red-100 transition-colors">
+                                                <Trash2 className="w-3 h-3" />
+                                            </button>
+                                        )}
+                                    </div>
+                                )}
                             </div>
                         </div>
-                    )}
+                        {/* Hidden file input for photo replacement */}
+                        <input ref={photoInputRef} type="file" accept="image/*" className="hidden" onChange={async (e) => {
+                            const file = e.target.files?.[0];
+                            if (!file || !photoEditTarget || !onPhotoChange) return;
+                            setEditingPhoto(true);
+                            try {
+                                const reader = new FileReader();
+                                reader.onload = async () => {
+                                    await onPhotoChange(emp?._id, photoEditTarget, reader.result as string);
+                                    setPhotoEditTarget(null);
+                                    setEditingPhoto(false);
+                                };
+                                reader.readAsDataURL(file);
+                            } catch { setEditingPhoto(false); }
+                            if (photoInputRef.current) photoInputRef.current.value = "";
+                        }} />
+                        {editingPhoto && <p className="text-[10px] text-blue-500 font-medium mt-1 animate-pulse">Uploading photo...</p>}
+                    </div>
 
                     {/* Location maps */}
                     {(startLat || endLat) && (
@@ -253,6 +338,16 @@ function EmployeeProgressCard({ asgn, onStatusChange }: {
                                         <div className="p-3">
                                             <p className="text-xs font-mono text-gray-400">{startLat?.toFixed(5)}, {startLng?.toFixed(5)}</p>
                                             {asgn.startLocation?.timestamp && <p className="text-[10px] text-gray-400 mt-0.5">{fmt(asgn.startLocation.timestamp)}</p>}
+                                            <div className="flex gap-1.5 mt-2">
+                                                <a href={`https://www.google.com/maps?q=${startLat},${startLng}`} target="_blank" rel="noopener noreferrer"
+                                                    className="flex items-center gap-1 px-2 py-1 rounded-lg bg-blue-50 text-blue-600 text-[9px] font-bold hover:bg-blue-100 transition-colors">
+                                                    <ExternalLink className="w-2.5 h-2.5" /> Google Maps
+                                                </a>
+                                                <a href={`https://www.openstreetmap.org/?mlat=${startLat}&mlon=${startLng}#map=17/${startLat}/${startLng}`} target="_blank" rel="noopener noreferrer"
+                                                    className="flex items-center gap-1 px-2 py-1 rounded-lg bg-green-50 text-green-600 text-[9px] font-bold hover:bg-green-100 transition-colors">
+                                                    <MapPin className="w-2.5 h-2.5" /> Open Map
+                                                </a>
+                                            </div>
                                         </div>
                                     </div>
                                 )}
@@ -262,6 +357,16 @@ function EmployeeProgressCard({ asgn, onStatusChange }: {
                                         <div className="p-3">
                                             <p className="text-xs font-mono text-gray-400">{endLat?.toFixed(5)}, {endLng?.toFixed(5)}</p>
                                             {asgn.endLocation?.timestamp && <p className="text-[10px] text-gray-400 mt-0.5">{fmt(asgn.endLocation.timestamp)}</p>}
+                                            <div className="flex gap-1.5 mt-2">
+                                                <a href={`https://www.google.com/maps?q=${endLat},${endLng}`} target="_blank" rel="noopener noreferrer"
+                                                    className="flex items-center gap-1 px-2 py-1 rounded-lg bg-blue-50 text-blue-600 text-[9px] font-bold hover:bg-blue-100 transition-colors">
+                                                    <ExternalLink className="w-2.5 h-2.5" /> Google Maps
+                                                </a>
+                                                <a href={`https://www.openstreetmap.org/?mlat=${endLat}&mlon=${endLng}#map=17/${endLat}/${endLng}`} target="_blank" rel="noopener noreferrer"
+                                                    className="flex items-center gap-1 px-2 py-1 rounded-lg bg-green-50 text-green-600 text-[9px] font-bold hover:bg-green-100 transition-colors">
+                                                    <MapPin className="w-2.5 h-2.5" /> Open Map
+                                                </a>
+                                            </div>
                                         </div>
                                     </div>
                                 )}
@@ -443,13 +548,34 @@ export default function BookingDetail() {
     const [reassigning, setReassigning] = useState(false);
     const [reassignNotif, setReassignNotif] = useState<string | null>(null);
 
-    const refreshBooking = async () => {
+    const refreshBooking = useCallback(async () => {
         const { data } = await axiosInstance.get<{ success: boolean; data: Booking[] }>(`${rolePrefix}/bookings`);
         if (data?.success) {
             const found = data.data.find((b) => b._id === id);
             if (found) { setBooking(found); setNewStatus(found.status.toLowerCase()); }
         }
-    };
+    }, [id, rolePrefix]);
+
+    // Auto-refresh
+    const REFRESH_INTERVAL = 30;
+    const [countdown, setCountdown] = useState(REFRESH_INTERVAL);
+    const countdownRef = useRef(REFRESH_INTERVAL);
+
+    const isCompleted = booking?.status?.toLowerCase() === "completed";
+
+    useEffect(() => {
+        if (isCompleted) return;
+        const timer = setInterval(() => {
+            countdownRef.current -= 1;
+            setCountdown(countdownRef.current);
+            if (countdownRef.current <= 0) {
+                refreshBooking();
+                countdownRef.current = REFRESH_INTERVAL;
+                setCountdown(REFRESH_INTERVAL);
+            }
+        }, 1000);
+        return () => clearInterval(timer);
+    }, [refreshBooking, isCompleted]);
 
     useEffect(() => {
         if (!id || !user) return;
@@ -520,6 +646,17 @@ export default function BookingDetail() {
         } catch (err: any) { alert(err?.response?.data?.message || "Failed to update photo"); }
     };
 
+    const handleAssignmentPhotoChange = async (employeeId: string, type: "startPhoto" | "endPhoto", value: string) => {
+        if (!id) return;
+        try {
+            await axiosInstance.patch(`${rolePrefix}/bookings/${id}/photos`, {
+                assignmentEmployeeId: employeeId,
+                [type]: value,
+            });
+            await refreshBooking();
+        } catch (err: any) { alert(err?.response?.data?.message || "Failed to update assignment photo"); }
+    };
+
     const handleReassign = async (acc: AccountOption) => {
         if (!id) return;
         setReassigning(true);
@@ -566,6 +703,14 @@ export default function BookingDetail() {
                     <span className={`w-1.5 h-1.5 rounded-full ${statusDot(booking.status)}`} />
                     {booking.status}
                 </div>
+                <button onClick={() => { refreshBooking(); countdownRef.current = REFRESH_INTERVAL; setCountdown(REFRESH_INTERVAL); }}
+                    className="group flex items-center gap-2 px-3.5 py-2 rounded-xl bg-gradient-to-r from-gray-50 to-white border border-gray-200 text-gray-500 hover:border-green-200 hover:shadow-md transition-all shrink-0 shadow-sm cursor-pointer">
+                    <RefreshCw className={`h-3.5 w-3.5 text-gray-400 group-hover:text-[#38B000] transition-colors ${loading ? 'animate-spin' : ''}`} />
+                    {!isCompleted
+                        ? <span className="tabular-nums text-xs font-bold text-gray-400 group-hover:text-[#38B000] transition-colors">{countdown}s</span>
+                        : <span className="text-xs font-semibold text-gray-400 group-hover:text-[#38B000] transition-colors">Refresh</span>
+                    }
+                </button>
             </div>
 
             {/* ── ROW 1: Quick stat chips ────────────────────────────── */}
@@ -730,6 +875,7 @@ export default function BookingDetail() {
                             key={(asgn.employeeId as any)?._id ?? i}
                             asgn={asgn}
                             onStatusChange={handleAssignmentStatusChange}
+                            onPhotoChange={handleAssignmentPhotoChange}
                         />
                     ))}
                 </div>
@@ -803,23 +949,63 @@ export default function BookingDetail() {
                 <CardHead
                     icon={<Camera className="w-3.5 h-3.5 text-[#38B000]" />}
                     title="Final Job Photos"
-                    action={
-                        <div className="flex gap-2">
-                            <button onClick={() => { const u = prompt("Start photo URL:"); if (u) handleUpdatePhoto("startPhoto", u); }}
-                                className="px-2.5 py-1.5 rounded-lg bg-purple-50 text-purple-600 text-xs font-bold hover:bg-purple-100 transition-colors">+ Start</button>
-                            <button onClick={() => { const u = prompt("End photo URL:"); if (u) handleUpdatePhoto("endPhoto", u); }}
-                                className="px-2.5 py-1.5 rounded-lg bg-green-50 text-[#38B000] text-xs font-bold hover:bg-green-100 transition-colors">+ End</button>
-                        </div>
-                    }
                 />
                 <div className="p-5 grid grid-cols-2 gap-5 bg-gradient-to-br from-gray-50/30 to-white">
                     <div>
                         <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-3 flex items-center gap-1.5"><Play className="w-3 h-3 text-purple-400" /> Job Start Photo</p>
                         <PhotoBig url={booking.startPhoto} label="Job Start" placeholder="Not uploaded" />
+                        {(booking as any).startVideo && (
+                            <div className="mt-2">
+                                <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-1.5 flex items-center gap-1">🎥 Start Video</p>
+                                <video src={(booking as any).startVideo} controls className="w-full max-h-48 rounded-xl border border-gray-100 bg-black" />
+                            </div>
+                        )}
+                        <div className="flex gap-1.5 mt-2">
+                            <label className="flex-1 flex items-center justify-center gap-1 py-1.5 rounded-lg bg-purple-50 text-purple-600 text-[10px] font-bold hover:bg-purple-100 transition-colors cursor-pointer">
+                                <Upload className="w-3 h-3" /> {booking.startPhoto ? "Replace" : "Upload"}
+                                <input type="file" accept="image/*" className="hidden" onChange={async (e) => {
+                                    const file = e.target.files?.[0];
+                                    if (!file) return;
+                                    const reader = new FileReader();
+                                    reader.onload = async () => { await handleUpdatePhoto("startPhoto", reader.result as string); };
+                                    reader.readAsDataURL(file);
+                                }} />
+                            </label>
+                            {booking.startPhoto && (
+                                <button onClick={() => handleUpdatePhoto("startPhoto", "")}
+                                    className="flex items-center justify-center gap-1 px-2.5 py-1.5 rounded-lg bg-red-50 text-red-500 text-[10px] font-bold hover:bg-red-100 transition-colors">
+                                    <Trash2 className="w-3 h-3" /> Remove
+                                </button>
+                            )}
+                        </div>
                     </div>
                     <div>
                         <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-3 flex items-center gap-1.5"><CheckCircle2 className="w-3 h-3 text-green-400" /> Job End Photo</p>
                         <PhotoBig url={booking.endPhoto} label="Job End" placeholder="Not uploaded" />
+                        {(booking as any).endVideo && (
+                            <div className="mt-2">
+                                <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-1.5 flex items-center gap-1">🎥 End Video</p>
+                                <video src={(booking as any).endVideo} controls className="w-full max-h-48 rounded-xl border border-gray-100 bg-black" />
+                            </div>
+                        )}
+                        <div className="flex gap-1.5 mt-2">
+                            <label className="flex-1 flex items-center justify-center gap-1 py-1.5 rounded-lg bg-green-50 text-[#38B000] text-[10px] font-bold hover:bg-green-100 transition-colors cursor-pointer">
+                                <Upload className="w-3 h-3" /> {booking.endPhoto ? "Replace" : "Upload"}
+                                <input type="file" accept="image/*" className="hidden" onChange={async (e) => {
+                                    const file = e.target.files?.[0];
+                                    if (!file) return;
+                                    const reader = new FileReader();
+                                    reader.onload = async () => { await handleUpdatePhoto("endPhoto", reader.result as string); };
+                                    reader.readAsDataURL(file);
+                                }} />
+                            </label>
+                            {booking.endPhoto && (
+                                <button onClick={() => handleUpdatePhoto("endPhoto", "")}
+                                    className="flex items-center justify-center gap-1 px-2.5 py-1.5 rounded-lg bg-red-50 text-red-500 text-[10px] font-bold hover:bg-red-100 transition-colors">
+                                    <Trash2 className="w-3 h-3" /> Remove
+                                </button>
+                            )}
+                        </div>
                     </div>
                 </div>
             </Card>

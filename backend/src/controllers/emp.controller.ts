@@ -3,6 +3,7 @@ import { Request, Response } from "express";
 import { User, Booking, Review } from "../models";
 
 import { apiError, apiResponse } from "../helper";
+import { uploadToCloudinary, uploadVideoToCloudinary } from "../utils/uploadPhoto";
 
 /**
  * Get all bookings assigned to the employee
@@ -103,6 +104,7 @@ const getAssignedBookingReview = async (
 
 /**
  * Update start-photo for assigned booking
+ * Accepts base64 photo + geolocation, uploads to Cloudinary
  */
 const updateBeforePhoto = async (
     req: Request,
@@ -115,7 +117,17 @@ const updateBeforePhoto = async (
         }
 
         const { id } = req.params;
-        const { beforePhoto } = req.body; // payload remains beforePhoto for compatibility with client
+        const { photo, video, location } = req.body;
+
+        if (!photo && !video) {
+            apiError(res, 400, "Photo or video is required");
+            return;
+        }
+
+        if (!location || typeof location.lat !== "number" || typeof location.lng !== "number") {
+            apiError(res, 400, "Geolocation (lat, lng) is required");
+            return;
+        }
 
         const booking = await Booking.findOne({
             _id: id,
@@ -143,8 +155,40 @@ const updateBeforePhoto = async (
             return;
         }
 
-        assignment.startPhoto = beforePhoto;
-        booking.startPhoto = beforePhoto; // Sync top-level photo
+        // Upload photo to Cloudinary if provided
+        let photoUrl = "";
+        if (photo) {
+            photoUrl = await uploadToCloudinary(photo, "gogreen/start-photos");
+            assignment.startPhoto = photoUrl;
+        }
+
+        // Upload video to Cloudinary if provided
+        let videoUrl = "";
+        if (video) {
+            videoUrl = await uploadVideoToCloudinary(video, "gogreen/start-videos");
+            (assignment as any).startVideo = videoUrl;
+        }
+
+        assignment.startLocation = {
+            lat: location.lat,
+            lng: location.lng,
+            timestamp: new Date(),
+        };
+
+        // Set booking-level start photo/video if this is the first employee to upload
+        const hasExistingStartPhoto = booking.assignments.some(
+            (a: any) =>
+                a.startPhoto &&
+                a.status !== "removed" &&
+                a.employeeId.toString() !== req.user?.id
+        );
+        if (photoUrl && (!hasExistingStartPhoto || !booking.startPhoto)) {
+            booking.startPhoto = photoUrl;
+        }
+        if (videoUrl && !(booking as any).startVideo) {
+            (booking as any).startVideo = videoUrl;
+        }
+
         await booking.save();
 
         apiResponse(res, 200, "Start photo updated", booking);
@@ -155,6 +199,7 @@ const updateBeforePhoto = async (
 
 /**
  * Update end-photo for assigned booking
+ * Accepts base64 photo + geolocation, uploads to Cloudinary
  */
 const updateAfterPhoto = async (req: Request, res: Response): Promise<void> => {
     try {
@@ -164,7 +209,17 @@ const updateAfterPhoto = async (req: Request, res: Response): Promise<void> => {
         }
 
         const { id } = req.params;
-        const { afterPhoto } = req.body; // payload remains afterPhoto for compatibility
+        const { photo, video, location } = req.body;
+
+        if (!photo && !video) {
+            apiError(res, 400, "Photo or video is required");
+            return;
+        }
+
+        if (!location || typeof location.lat !== "number" || typeof location.lng !== "number") {
+            apiError(res, 400, "Geolocation (lat, lng) is required");
+            return;
+        }
 
         const booking = await Booking.findOne({
             _id: id,
@@ -192,18 +247,43 @@ const updateAfterPhoto = async (req: Request, res: Response): Promise<void> => {
             return;
         }
 
-        assignment.endPhoto = afterPhoto;
-        assignment.status = "completed";
-        assignment.endTime = new Date();
-        booking.endPhoto = afterPhoto; // Sync top-level photo
+        // Upload photo to Cloudinary if provided
+        let photoUrl = "";
+        if (photo) {
+            photoUrl = await uploadToCloudinary(photo, "gogreen/end-photos");
+            assignment.endPhoto = photoUrl;
+        }
+
+        // Upload video to Cloudinary if provided
+        let videoUrl = "";
+        if (video) {
+            videoUrl = await uploadVideoToCloudinary(video, "gogreen/end-videos");
+            (assignment as any).endVideo = videoUrl;
+        }
+
+        assignment.endLocation = {
+            lat: location.lat,
+            lng: location.lng,
+            timestamp: new Date(),
+        };
+
+        // Set booking-level end photo/video if this is the first employee to upload
+        const hasExistingEndPhoto = booking.assignments.some(
+            (a: any) =>
+                a.endPhoto &&
+                a.status !== "removed" &&
+                a.employeeId.toString() !== req.user?.id
+        );
+        if (photoUrl && (!hasExistingEndPhoto || !booking.endPhoto)) {
+            booking.endPhoto = photoUrl;
+        }
+        if (videoUrl && !(booking as any).endVideo) {
+            (booking as any).endVideo = videoUrl;
+        }
+
         await booking.save();
 
-        apiResponse(
-            res,
-            200,
-            "End photo updated, booking marked completed",
-            booking
-        );
+        apiResponse(res, 200, "End photo updated", booking);
     } catch (err) {
         apiError(res, 500, "Failed to update end photo", err);
     }
@@ -261,6 +341,24 @@ const updateBookingStatus = async (
 
         if (!assignment) {
             apiError(res, 404, "Active assignment not found for this employee");
+            return;
+        }
+
+        // Enforce media requirements (photo or video)
+        if (status === "started" && !assignment.startPhoto && !(assignment as any).startVideo) {
+            apiError(
+                res,
+                400,
+                "You must upload a start photo or video before starting the task"
+            );
+            return;
+        }
+        if (status === "completed" && !assignment.endPhoto && !(assignment as any).endVideo) {
+            apiError(
+                res,
+                400,
+                "You must upload an end photo or video before completing the task"
+            );
             return;
         }
 

@@ -89,16 +89,45 @@ const updateAccount = (req, res) => __awaiter(void 0, void 0, void 0, function* 
 const updateBookingPhotos = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
         const { id } = req.params;
-        const { startPhoto, endPhoto } = req.body;
+        const { startPhoto, endPhoto, assignmentEmployeeId } = req.body;
         const booking = yield models_1.Booking.findById(id);
         if (!booking) {
             (0, helper_1.apiError)(res, 404, "Booking not found");
             return;
         }
-        if (startPhoto !== undefined)
-            booking.startPhoto = startPhoto;
-        if (endPhoto !== undefined)
-            booking.endPhoto = endPhoto;
+        // Helper: upload base64 or use URL directly, empty string = remove
+        const resolvePhoto = (photo, folder) => __awaiter(void 0, void 0, void 0, function* () {
+            if (photo === undefined)
+                return undefined;
+            if (photo === "")
+                return "";
+            if (photo.startsWith("data:")) {
+                return yield (0, uploadPhoto_1.uploadToCloudinary)(photo, folder);
+            }
+            return photo;
+        });
+        if (assignmentEmployeeId) {
+            const assignment = booking.assignments.find((a) => a.employeeId.toString() === assignmentEmployeeId &&
+                a.status !== "removed");
+            if (!assignment) {
+                (0, helper_1.apiError)(res, 404, "Active assignment not found for this employee");
+                return;
+            }
+            const resolvedStart = yield resolvePhoto(startPhoto, "gogreen/start-photos");
+            const resolvedEnd = yield resolvePhoto(endPhoto, "gogreen/end-photos");
+            if (resolvedStart !== undefined)
+                assignment.startPhoto = resolvedStart;
+            if (resolvedEnd !== undefined)
+                assignment.endPhoto = resolvedEnd;
+        }
+        else {
+            const resolvedStart = yield resolvePhoto(startPhoto, "gogreen/start-photos");
+            const resolvedEnd = yield resolvePhoto(endPhoto, "gogreen/end-photos");
+            if (resolvedStart !== undefined)
+                booking.startPhoto = resolvedStart;
+            if (resolvedEnd !== undefined)
+                booking.endPhoto = resolvedEnd;
+        }
         yield booking.save();
         (0, helper_1.apiResponse)(res, 200, "Booking photos updated successfully", booking);
     }

@@ -11,6 +11,7 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 Object.defineProperty(exports, "__esModule", { value: true });
 const models_1 = require("../models");
 const helper_1 = require("../helper");
+const uploadPhoto_1 = require("../utils/uploadPhoto");
 /**
  * Get all bookings assigned to the employee
  */
@@ -95,6 +96,7 @@ const getAssignedBookingReview = (req, res) => __awaiter(void 0, void 0, void 0,
 });
 /**
  * Update start-photo for assigned booking
+ * Accepts base64 photo + geolocation, uploads to Cloudinary
  */
 const updateBeforePhoto = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
@@ -103,7 +105,15 @@ const updateBeforePhoto = (req, res) => __awaiter(void 0, void 0, void 0, functi
             return;
         }
         const { id } = req.params;
-        const { beforePhoto } = req.body; // payload remains beforePhoto for compatibility with client
+        const { photo, location } = req.body;
+        if (!photo) {
+            (0, helper_1.apiError)(res, 400, "Photo is required");
+            return;
+        }
+        if (!location || typeof location.lat !== "number" || typeof location.lng !== "number") {
+            (0, helper_1.apiError)(res, 400, "Geolocation (lat, lng) is required");
+            return;
+        }
         const booking = yield models_1.Booking.findOne({
             _id: id,
             assignments: {
@@ -126,8 +136,24 @@ const updateBeforePhoto = (req, res) => __awaiter(void 0, void 0, void 0, functi
             (0, helper_1.apiError)(res, 404, "Active assignment not found for this employee");
             return;
         }
-        assignment.startPhoto = beforePhoto;
-        booking.startPhoto = beforePhoto; // Sync top-level photo
+        // Upload to Cloudinary
+        const photoUrl = yield (0, uploadPhoto_1.uploadToCloudinary)(photo, "gogreen/start-photos");
+        assignment.startPhoto = photoUrl;
+        assignment.startLocation = {
+            lat: location.lat,
+            lng: location.lng,
+            timestamp: new Date(),
+        };
+        // Set booking-level start photo if this is the first employee to upload
+        const hasExistingStartPhoto = booking.assignments.some((a) => {
+            var _a;
+            return a.startPhoto &&
+                a.status !== "removed" &&
+                a.employeeId.toString() !== ((_a = req.user) === null || _a === void 0 ? void 0 : _a.id);
+        });
+        if (!hasExistingStartPhoto || !booking.startPhoto) {
+            booking.startPhoto = photoUrl;
+        }
         yield booking.save();
         (0, helper_1.apiResponse)(res, 200, "Start photo updated", booking);
     }
@@ -137,6 +163,7 @@ const updateBeforePhoto = (req, res) => __awaiter(void 0, void 0, void 0, functi
 });
 /**
  * Update end-photo for assigned booking
+ * Accepts base64 photo + geolocation, uploads to Cloudinary
  */
 const updateAfterPhoto = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
@@ -145,7 +172,15 @@ const updateAfterPhoto = (req, res) => __awaiter(void 0, void 0, void 0, functio
             return;
         }
         const { id } = req.params;
-        const { afterPhoto } = req.body; // payload remains afterPhoto for compatibility
+        const { photo, location } = req.body;
+        if (!photo) {
+            (0, helper_1.apiError)(res, 400, "Photo is required");
+            return;
+        }
+        if (!location || typeof location.lat !== "number" || typeof location.lng !== "number") {
+            (0, helper_1.apiError)(res, 400, "Geolocation (lat, lng) is required");
+            return;
+        }
         const booking = yield models_1.Booking.findOne({
             _id: id,
             assignments: {
@@ -168,12 +203,26 @@ const updateAfterPhoto = (req, res) => __awaiter(void 0, void 0, void 0, functio
             (0, helper_1.apiError)(res, 404, "Active assignment not found for this employee");
             return;
         }
-        assignment.endPhoto = afterPhoto;
-        assignment.status = "completed";
-        assignment.endTime = new Date();
-        booking.endPhoto = afterPhoto; // Sync top-level photo
+        // Upload to Cloudinary
+        const photoUrl = yield (0, uploadPhoto_1.uploadToCloudinary)(photo, "gogreen/end-photos");
+        assignment.endPhoto = photoUrl;
+        assignment.endLocation = {
+            lat: location.lat,
+            lng: location.lng,
+            timestamp: new Date(),
+        };
+        // Set booking-level end photo if this is the first employee to upload
+        const hasExistingEndPhoto = booking.assignments.some((a) => {
+            var _a;
+            return a.endPhoto &&
+                a.status !== "removed" &&
+                a.employeeId.toString() !== ((_a = req.user) === null || _a === void 0 ? void 0 : _a.id);
+        });
+        if (!hasExistingEndPhoto || !booking.endPhoto) {
+            booking.endPhoto = photoUrl;
+        }
         yield booking.save();
-        (0, helper_1.apiResponse)(res, 200, "End photo updated, booking marked completed", booking);
+        (0, helper_1.apiResponse)(res, 200, "End photo updated", booking);
     }
     catch (err) {
         (0, helper_1.apiError)(res, 500, "Failed to update end photo", err);
@@ -218,6 +267,15 @@ const updateBookingStatus = (req, res) => __awaiter(void 0, void 0, void 0, func
         });
         if (!assignment) {
             (0, helper_1.apiError)(res, 404, "Active assignment not found for this employee");
+            return;
+        }
+        // Enforce photo requirements
+        if (status === "started" && !assignment.startPhoto) {
+            (0, helper_1.apiError)(res, 400, "You must upload a start photo before starting the task");
+            return;
+        }
+        if (status === "completed" && !assignment.endPhoto) {
+            (0, helper_1.apiError)(res, 400, "You must upload an end photo before completing the task");
             return;
         }
         assignment.status = status;

@@ -8,6 +8,8 @@ export interface IAssignment {
     endTime?: Date;
     startPhoto?: string;
     endPhoto?: string;
+    startVideo?: string;
+    endVideo?: string;
     startLocation?: {
         lat: number;
         lng: number;
@@ -31,6 +33,8 @@ export interface IBooking extends Document {
     referencePhoto?: string;
     startPhoto?: string;
     endPhoto?: string;
+    startVideo?: string;
+    endVideo?: string;
     date: Date;
     timeSlot?: string;
     status:
@@ -67,6 +71,8 @@ const AssignmentSchema = new Schema<IAssignment>({
     endTime: { type: Date },
     startPhoto: { type: String, default: "" },
     endPhoto: { type: String, default: "" },
+    startVideo: { type: String, default: "" },
+    endVideo: { type: String, default: "" },
     startLocation: {
         lat: Number,
         lng: Number,
@@ -122,6 +128,14 @@ const BookingSchema = new Schema<IBooking>(
             default: "",
         },
         endPhoto: {
+            type: String,
+            default: "",
+        },
+        startVideo: {
+            type: String,
+            default: "",
+        },
+        endVideo: {
             type: String,
             default: "",
         },

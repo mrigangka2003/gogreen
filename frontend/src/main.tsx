@@ -35,6 +35,7 @@ const SuperAdminDashboard = lazy(() => import("./pages/super/SuperAdminDashboard
 const SuperReviews = lazy(() => import("./pages/super/SuperReviews.tsx"));
 
 const UserManagement = lazy(() => import("./pages/Admin/UserManagement.tsx"));
+const AccountDetail = lazy(() => import("./pages/Admin/AccountDetail.tsx"));
 const EmployeeManagement = lazy(() => import("./pages/Admin/EmployeeManagement.tsx"));
 const EmployeeDetail = lazy(() => import("./pages/Admin/EmployeeDetail.tsx"));
 const AccountEdit = lazy(() => import("./pages/Admin/AccountEdit.tsx"));
@@ -45,6 +46,10 @@ const MyReviews = lazy(() => import("./pages/MyReviews.tsx"));
 const MyProfile = lazy(() => import("./pages/MyProfile.tsx"));
 const CreateBookingAdmin = lazy(() => import("./pages/CreateBookingAdmin.tsx"));
 const ServicesManager = lazy(() => import("./pages/ServicesManager.tsx"));
+const ChatAdmin = lazy(() => import("./pages/Admin/ChatAdmin.tsx"));
+const UserChat = lazy(() => import("./pages/UserChat.tsx"));
+const CreateFeed = lazy(() => import("./pages/Admin/CreateFeed.tsx"));
+const ManageFeeds = lazy(() => import("./pages/Admin/ManageFeeds.tsx"));
 
 const router = createBrowserRouter([
     {
@@ -137,6 +142,7 @@ const router = createBrowserRouter([
             { path: "book-now", element: <BookNow /> },
             { path: "my-bookings", element: <MyBookings /> },
             { path: "my-reviews", element: <MyReviews /> },
+            { path: "chat", element: <UserChat /> },
             { path: "profile", element: <MyProfile /> },
         ],
     },
@@ -155,6 +161,7 @@ const router = createBrowserRouter([
             { path: "book-now", element: <BookNow /> },
             { path: "my-bookings", element: <MyBookings /> },
             { path: "my-reviews", element: <MyReviews /> },
+            { path: "chat", element: <UserChat /> },
             { path: "profile", element: <MyProfile /> },
         ],
     },
@@ -170,6 +177,7 @@ const router = createBrowserRouter([
             { index: true, element: <UserDashboard /> },
             { path: "book-now", element: <BookNow /> },
             { path: "my-bookings", element: <MyBookings /> },
+            { path: "chat", element: <UserChat /> },
             { path: "profile", element: <MyProfile /> },
         ],
     },
@@ -192,7 +200,11 @@ const router = createBrowserRouter([
             { path: "employee-management", element: <EmployeeManagement /> },
             { path: "employee/:id", element: <EmployeeDetail /> },
             { path: "account/:id", element: <AccountEdit /> },
+            { path: "account-detail/:id", element: <AccountDetail /> },
             { path: "all-reviews", element: <MyBookings /> },
+            { path: "manage-feeds", element: <ManageFeeds /> },
+            { path: "create-feed", element: <CreateFeed /> },
+            { path: "chat", element: <ChatAdmin /> },
             { path: "profile", element: <MyProfile /> },
         ],
     },
@@ -215,7 +227,11 @@ const router = createBrowserRouter([
             { path: "employee-management", element: <EmployeeManagement /> },
             { path: "employee/:id", element: <EmployeeDetail /> },
             { path: "account/:id", element: <AccountEdit /> },
+            { path: "account-detail/:id", element: <AccountDetail /> },
             { path: "all-reviews", element: <SuperReviews /> },
+            { path: "manage-feeds", element: <ManageFeeds /> },
+            { path: "create-feed", element: <CreateFeed /> },
+            { path: "chat", element: <ChatAdmin /> },
             { path: "profile", element: <MyProfile /> },
         ],
     },

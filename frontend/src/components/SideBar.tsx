@@ -13,6 +13,8 @@ import {
     X,
     LogOut,
     Sparkles,
+    MessageCircle,
+    Newspaper,
 } from "lucide-react";
 import { useAuthStore } from "../stores/auth";
 
@@ -34,6 +36,7 @@ const sidebarMap: Record<UserRole, SideBarItem[]> = {
             icon: <CalendarCheck size={20} />,
         },
         { title: "Reviews", path: "my-reviews", icon: <Star size={20} /> },
+        { title: "Chat Support", path: "chat", icon: <MessageCircle size={20} /> },
         { title: "Profile", path: "profile", icon: <User size={20} /> },
     ],
     admin: [
@@ -64,6 +67,8 @@ const sidebarMap: Record<UserRole, SideBarItem[]> = {
         },
         { title: "Services", path: "services", icon: <Sparkles size={20} /> },
         { title: "Reviews", path: "all-reviews", icon: <Star size={20} /> },
+        { title: "Feeds", path: "manage-feeds", icon: <Newspaper size={20} /> },
+        { title: "Chat Support", path: "chat", icon: <MessageCircle size={20} /> },
         { title: "Profile", path: "profile", icon: <User size={20} /> },
     ],
     org: [
@@ -74,6 +79,7 @@ const sidebarMap: Record<UserRole, SideBarItem[]> = {
             icon: <CalendarCheck size={20} />,
         },
         { title: "Reviews", path: "my-reviews", icon: <Star size={20} /> },
+        { title: "Chat Support", path: "chat", icon: <MessageCircle size={20} /> },
         { title: "Profile", path: "profile", icon: <User size={20} /> },
     ],
     emp: [
@@ -87,6 +93,7 @@ const sidebarMap: Record<UserRole, SideBarItem[]> = {
             path: "tasks/in-progress",
             icon: <ClipboardList size={20} />,
         },
+        { title: "Chat Support", path: "chat", icon: <MessageCircle size={20} /> },
         { title: "Profile", path: "profile", icon: <User size={20} /> },
     ],
     "super-admin": [
@@ -117,6 +124,8 @@ const sidebarMap: Record<UserRole, SideBarItem[]> = {
         },
         { title: "Services", path: "services", icon: <Sparkles size={20} /> },
         { title: "All Reviews", path: "all-reviews", icon: <Star size={20} /> },
+        { title: "Feeds", path: "manage-feeds", icon: <Newspaper size={20} /> },
+        { title: "Chat Support", path: "chat", icon: <MessageCircle size={20} /> },
         { title: "Profile", path: "profile", icon: <User size={20} /> },
     ],
 };
@@ -216,15 +225,6 @@ const Sidebar = ({
 
                 {/* footer */}
                 <div className="mt-auto p-6 border-t border-gray-100">
-                    <div className="rounded-2xl p-4 mb-3 border bg-white/60 border-gray-100 backdrop-blur-sm">
-                        <p className="text-xs font-medium text-gray-600">
-                            Need help?
-                        </p>
-                        <p className="text-sm font-semibold text-gray-800">
-                            Contact Support
-                        </p>
-                    </div>
-
                     <button
                         onClick={handleLogout}
                         aria-label="Logout"

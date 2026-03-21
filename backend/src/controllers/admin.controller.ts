@@ -91,7 +91,7 @@ const updateBookingPhotos = async (
 ): Promise<void> => {
     try {
         const { id } = req.params;
-        const { startPhoto, endPhoto } = req.body;
+        const { startPhoto, endPhoto, assignmentEmployeeId } = req.body;
 
         const booking = await Booking.findById(id);
         if (!booking) {
@@ -99,8 +99,36 @@ const updateBookingPhotos = async (
             return;
         }
 
-        if (startPhoto !== undefined) booking.startPhoto = startPhoto;
-        if (endPhoto !== undefined) booking.endPhoto = endPhoto;
+        // Helper: upload base64 or use URL directly, empty string = remove
+        const resolvePhoto = async (photo: string | undefined, folder: string): Promise<string | undefined> => {
+            if (photo === undefined) return undefined;
+            if (photo === "") return "";
+            if (photo.startsWith("data:")) {
+                return await uploadToCloudinary(photo, folder);
+            }
+            return photo;
+        };
+
+        if (assignmentEmployeeId) {
+            const assignment = booking.assignments.find(
+                (a: any) =>
+                    a.employeeId.toString() === assignmentEmployeeId &&
+                    a.status !== "removed"
+            );
+            if (!assignment) {
+                apiError(res, 404, "Active assignment not found for this employee");
+                return;
+            }
+            const resolvedStart = await resolvePhoto(startPhoto, "gogreen/start-photos");
+            const resolvedEnd = await resolvePhoto(endPhoto, "gogreen/end-photos");
+            if (resolvedStart !== undefined) assignment.startPhoto = resolvedStart;
+            if (resolvedEnd !== undefined) assignment.endPhoto = resolvedEnd;
+        } else {
+            const resolvedStart = await resolvePhoto(startPhoto, "gogreen/start-photos");
+            const resolvedEnd = await resolvePhoto(endPhoto, "gogreen/end-photos");
+            if (resolvedStart !== undefined) booking.startPhoto = resolvedStart;
+            if (resolvedEnd !== undefined) booking.endPhoto = resolvedEnd;
+        }
 
         await booking.save();
         apiResponse(res, 200, "Booking photos updated successfully", booking);
