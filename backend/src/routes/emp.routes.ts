@@ -42,6 +42,14 @@ router.patch(
     empController.updateAfterPhoto
 );
 
+// 📌 Status
+router.patch(
+    "/bookings/:id/status",
+    authMiddleware,
+    requirePermissions("GET_ASSIGNED_BOOKING"), // Reusing an existing employee permission
+    empController.updateBookingStatus
+);
+
 // 📌 Profile
 router.get(
     "/profile",

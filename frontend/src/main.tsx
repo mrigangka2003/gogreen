@@ -31,19 +31,25 @@ import ProtectedRoute from "./components/ProtectedRoute.tsx";
 import DashboardLayout from "./components/Dashboard-layout/DashboardLayout.tsx";
 import { AdminDashboard, UserDashboard } from "./components/index.ts";
 
-const SuperAccounts = lazy(() => import("./pages/super/SuperAccounts.tsx"));
 const SuperAdminDashboard = lazy(() => import("./pages/super/SuperAdminDashboard.tsx"));
 const SuperReviews = lazy(() => import("./pages/super/SuperReviews.tsx"));
-const SuperCreateAdmin = lazy(() => import("./pages/super/SuperCreateAdmin.tsx"));
 
-//admin pages
-const AdminAccounts = lazy(()=>import("./pages/Admin/AdminAccounts.tsx"))
-const AddManagement = lazy(()=>import("./pages/Admin/AddManagement.tsx"))
+const UserManagement = lazy(() => import("./pages/Admin/UserManagement.tsx"));
+const AccountDetail = lazy(() => import("./pages/Admin/AccountDetail.tsx"));
+const EmployeeManagement = lazy(() => import("./pages/Admin/EmployeeManagement.tsx"));
+const EmployeeDetail = lazy(() => import("./pages/Admin/EmployeeDetail.tsx"));
+const AccountEdit = lazy(() => import("./pages/Admin/AccountEdit.tsx"));
 
-
-const AssignBooking = lazy(()=>import("./pages/AssignBooking.tsx"));
-const MyReviews = lazy(()=>import("./pages/MyReviews.tsx"));
+const AssignBooking = lazy(() => import("./pages/AssignBooking.tsx"));
+const BookingDetail = lazy(() => import("./pages/BookingDetail.tsx"));
+const MyReviews = lazy(() => import("./pages/MyReviews.tsx"));
 const MyProfile = lazy(() => import("./pages/MyProfile.tsx"));
+const CreateBookingAdmin = lazy(() => import("./pages/CreateBookingAdmin.tsx"));
+const ServicesManager = lazy(() => import("./pages/ServicesManager.tsx"));
+const ChatAdmin = lazy(() => import("./pages/Admin/ChatAdmin.tsx"));
+const UserChat = lazy(() => import("./pages/UserChat.tsx"));
+const CreateFeed = lazy(() => import("./pages/Admin/CreateFeed.tsx"));
+const ManageFeeds = lazy(() => import("./pages/Admin/ManageFeeds.tsx"));
 
 const router = createBrowserRouter([
     {
@@ -136,6 +142,7 @@ const router = createBrowserRouter([
             { path: "book-now", element: <BookNow /> },
             { path: "my-bookings", element: <MyBookings /> },
             { path: "my-reviews", element: <MyReviews /> },
+            { path: "chat", element: <UserChat /> },
             { path: "profile", element: <MyProfile /> },
         ],
     },
@@ -154,6 +161,7 @@ const router = createBrowserRouter([
             { path: "book-now", element: <BookNow /> },
             { path: "my-bookings", element: <MyBookings /> },
             { path: "my-reviews", element: <MyReviews /> },
+            { path: "chat", element: <UserChat /> },
             { path: "profile", element: <MyProfile /> },
         ],
     },
@@ -169,6 +177,7 @@ const router = createBrowserRouter([
             { index: true, element: <UserDashboard /> },
             { path: "book-now", element: <BookNow /> },
             { path: "my-bookings", element: <MyBookings /> },
+            { path: "chat", element: <UserChat /> },
             { path: "profile", element: <MyProfile /> },
         ],
     },
@@ -183,10 +192,19 @@ const router = createBrowserRouter([
         ),
         children: [
             { index: true, element: <AdminDashboard /> },
-            { path: "all-bookings", element: <BookNow /> },
-            { path: "accounts", element: <AdminAccounts /> },
+            { path: "all-bookings", element: <AssignBooking /> },
+            { path: "create-booking", element: <CreateBookingAdmin /> },
+            { path: "services", element: <ServicesManager /> },
+            { path: "booking/:id", element: <BookingDetail /> },
+            { path: "user-management", element: <UserManagement /> },
+            { path: "employee-management", element: <EmployeeManagement /> },
+            { path: "employee/:id", element: <EmployeeDetail /> },
+            { path: "account/:id", element: <AccountEdit /> },
+            { path: "account-detail/:id", element: <AccountDetail /> },
             { path: "all-reviews", element: <MyBookings /> },
-            { path: "add-management", element: <AddManagement /> },
+            { path: "manage-feeds", element: <ManageFeeds /> },
+            { path: "create-feed", element: <CreateFeed /> },
+            { path: "chat", element: <ChatAdmin /> },
             { path: "profile", element: <MyProfile /> },
         ],
     },
@@ -201,10 +219,19 @@ const router = createBrowserRouter([
         ),
         children: [
             { index: true, element: <SuperAdminDashboard /> },
-            { path: "accounts", element: <SuperAccounts /> },
+            { path: "user-management", element: <UserManagement /> },
             { path: "all-bookings", element: <AssignBooking /> },
-            { path: "create-admin", element: <SuperCreateAdmin /> },
+            { path: "create-booking", element: <CreateBookingAdmin /> },
+            { path: "services", element: <ServicesManager /> },
+            { path: "booking/:id", element: <BookingDetail /> },
+            { path: "employee-management", element: <EmployeeManagement /> },
+            { path: "employee/:id", element: <EmployeeDetail /> },
+            { path: "account/:id", element: <AccountEdit /> },
+            { path: "account-detail/:id", element: <AccountDetail /> },
             { path: "all-reviews", element: <SuperReviews /> },
+            { path: "manage-feeds", element: <ManageFeeds /> },
+            { path: "create-feed", element: <CreateFeed /> },
+            { path: "chat", element: <ChatAdmin /> },
             { path: "profile", element: <MyProfile /> },
         ],
     },

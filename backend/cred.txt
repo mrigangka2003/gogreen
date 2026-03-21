@@ -1,0 +1,79 @@
+super admin
+{
+
+  "_id": "69a85ba3f7608a1249664975",
+  "name": "Super Admin",
+  "email": "super@admin.com",
+  "password": "password123",
+  "role": "super-admin"
+}
+org
+{
+    "_id": "69a835e66cd396d98dfedc74",
+    "email": "amc@mail.com",
+    "password": "amc@1389", 
+}
+emp
+{
+    "_id": "69a836a26cd396d98dfedc8b",
+   "email": "bmc@mail.com",
+  "password": "bmc@1389", 
+}
+user
+{
+    "_id": "69a837586cd396d98dfedc9c",
+    "email": "cmc@mail.com",
+    "password": "cmc@1389", 
+}
+
+created task
+{
+    "success": true,
+    "message": "Booking created successfully",
+    "data": {
+        "userId": "69a85ba3f7608a1249664975",
+        "employeeId": null,
+        "serviceType": "maintenance",
+        "address": "123 Business Rd, Tech Park",
+        "phoneNumber": "9876543210",
+        "instruction": "Fix the AC units on the 4th floor.",
+        "beforePhoto": "",
+        "afterPhoto": "",
+        "date": "2026-03-08T09:00:00.000Z",
+        "timeSlot": "Morning",
+        "status": "pending",
+        "amount": 0,
+        "paymentStatus": "pending",
+        "isActive": true,
+        "_id": "69a9693817d5602f9bbc524e",
+        "createdAt": "2026-03-05T11:30:00.268Z",
+        "updatedAt": "2026-03-05T11:30:00.268Z",
+        "__v": 0
+    }
+}
+assigned task
+{
+    "success": true,
+    "message": "Booking assigned successfully",
+    "data": {
+        "_id": "69a9693817d5602f9bbc524e",
+        "userId": "69a85ba3f7608a1249664975",
+        "employeeId": "69a836a26cd396d98dfedc8b",
+        "serviceType": "maintenance",
+        "address": "123 Business Rd, Tech Park",
+        "phoneNumber": "9876543210",
+        "instruction": "Fix the AC units on the 4th floor.",
+        "beforePhoto": "",
+        "afterPhoto": "",
+        "date": "2026-03-08T09:00:00.000Z",
+        "timeSlot": "Morning",
+        "status": "assigned",
+        "amount": 0,
+        "paymentStatus": "pending",
+        "isActive": true,
+        "createdAt": "2026-03-05T11:30:00.268Z",
+        "updatedAt": "2026-03-05T11:46:30.754Z",
+        "__v": 0,
+        "assignedAt": "2026-03-05T11:46:30.661Z"
+    }
+}

@@ -1,8 +1,9 @@
 import { Request, Response } from "express";
 
-import { User,Booking,Review } from "../models";
+import { User, Booking, Review } from "../models";
 
 import { apiError, apiResponse } from "../helper";
+import { uploadToCloudinary, uploadVideoToCloudinary } from "../utils/uploadPhoto";
 
 /**
  * Get all bookings assigned to the employee
@@ -17,9 +18,14 @@ const getAssignedBookings = async (
             return;
         }
 
-        const bookings = await Booking.find({ employeeId: req.user.id }).sort({
-            date: -1,
-        });
+        const bookings = await Booking.find({
+            assignments: {
+                $elemMatch: {
+                    employeeId: req.user.id,
+                    status: { $ne: "removed" },
+                },
+            },
+        }).sort({ date: -1 });
         apiResponse(res, 200, "Assigned bookings fetched", bookings);
     } catch (err) {
         apiError(res, 500, "Failed to fetch assigned bookings", err);
@@ -42,8 +48,13 @@ const getAssignedBookingDetails = async (
         const { id } = req.params;
         const booking = await Booking.findOne({
             _id: id,
-            employeeId: req.user.id,
-        }).populate("userId");
+            assignments: {
+                $elemMatch: {
+                    employeeId: req.user.id,
+                    status: { $ne: "removed" },
+                },
+            },
+        }).populate("userId", "name email phone");
 
         if (!booking) {
             apiError(res, 404, "Booking not found or not assigned to you");
@@ -72,7 +83,12 @@ const getAssignedBookingReview = async (
         const { id } = req.params;
         const booking = await Booking.findOne({
             _id: id,
-            employeeId: req.user.id,
+            assignments: {
+                $elemMatch: {
+                    employeeId: req.user.id,
+                    status: { $ne: "removed" },
+                },
+            },
         });
         if (!booking) {
             apiError(res, 404, "Booking not found or not assigned to you");
@@ -87,7 +103,8 @@ const getAssignedBookingReview = async (
 };
 
 /**
- * Update before-photo for assigned booking
+ * Update start-photo for assigned booking
+ * Accepts base64 photo + geolocation, uploads to Cloudinary
  */
 const updateBeforePhoto = async (
     req: Request,
@@ -100,27 +117,89 @@ const updateBeforePhoto = async (
         }
 
         const { id } = req.params;
-        const { beforePhoto } = req.body;
+        const { photo, video, location } = req.body;
 
-        const booking = await Booking.findOneAndUpdate(
-            { _id: id, employeeId: req.user.id },
-            { beforePhoto },
-            { new: true }
-        );
+        if (!photo && !video) {
+            apiError(res, 400, "Photo or video is required");
+            return;
+        }
+
+        if (!location || typeof location.lat !== "number" || typeof location.lng !== "number") {
+            apiError(res, 400, "Geolocation (lat, lng) is required");
+            return;
+        }
+
+        const booking = await Booking.findOne({
+            _id: id,
+            assignments: {
+                $elemMatch: {
+                    employeeId: req.user.id,
+                    status: { $ne: "removed" },
+                },
+            },
+        });
 
         if (!booking) {
             apiError(res, 404, "Booking not found or not assigned to you");
             return;
         }
 
-        apiResponse(res, 200, "Before photo updated", booking);
+        const assignment = booking.assignments.find(
+            (a: any) =>
+                a.employeeId.toString() === req.user?.id &&
+                a.status !== "removed"
+        );
+
+        if (!assignment) {
+            apiError(res, 404, "Active assignment not found for this employee");
+            return;
+        }
+
+        // Upload photo to Cloudinary if provided
+        let photoUrl = "";
+        if (photo) {
+            photoUrl = await uploadToCloudinary(photo, "gogreen/start-photos");
+            assignment.startPhoto = photoUrl;
+        }
+
+        // Upload video to Cloudinary if provided
+        let videoUrl = "";
+        if (video) {
+            videoUrl = await uploadVideoToCloudinary(video, "gogreen/start-videos");
+            (assignment as any).startVideo = videoUrl;
+        }
+
+        assignment.startLocation = {
+            lat: location.lat,
+            lng: location.lng,
+            timestamp: new Date(),
+        };
+
+        // Set booking-level start photo/video if this is the first employee to upload
+        const hasExistingStartPhoto = booking.assignments.some(
+            (a: any) =>
+                a.startPhoto &&
+                a.status !== "removed" &&
+                a.employeeId.toString() !== req.user?.id
+        );
+        if (photoUrl && (!hasExistingStartPhoto || !booking.startPhoto)) {
+            booking.startPhoto = photoUrl;
+        }
+        if (videoUrl && !(booking as any).startVideo) {
+            (booking as any).startVideo = videoUrl;
+        }
+
+        await booking.save();
+
+        apiResponse(res, 200, "Start photo updated", booking);
     } catch (err) {
-        apiError(res, 500, "Failed to update before photo", err);
+        apiError(res, 500, "Failed to update start photo", err);
     }
 };
 
 /**
- * Update after-photo for assigned booking
+ * Update end-photo for assigned booking
+ * Accepts base64 photo + geolocation, uploads to Cloudinary
  */
 const updateAfterPhoto = async (req: Request, res: Response): Promise<void> => {
     try {
@@ -130,27 +209,171 @@ const updateAfterPhoto = async (req: Request, res: Response): Promise<void> => {
         }
 
         const { id } = req.params;
-        const { afterPhoto } = req.body;
+        const { photo, video, location } = req.body;
 
-        const booking = await Booking.findOneAndUpdate(
-            { _id: id, employeeId: req.user.id },
-            { afterPhoto, status: "completed", completedAt: new Date() },
-            { new: true }
-        );
+        if (!photo && !video) {
+            apiError(res, 400, "Photo or video is required");
+            return;
+        }
+
+        if (!location || typeof location.lat !== "number" || typeof location.lng !== "number") {
+            apiError(res, 400, "Geolocation (lat, lng) is required");
+            return;
+        }
+
+        const booking = await Booking.findOne({
+            _id: id,
+            assignments: {
+                $elemMatch: {
+                    employeeId: req.user.id,
+                    status: { $ne: "removed" },
+                },
+            },
+        });
 
         if (!booking) {
             apiError(res, 404, "Booking not found or not assigned to you");
             return;
         }
 
-        apiResponse(
-            res,
-            200,
-            "After photo updated, booking marked completed",
-            booking
+        const assignment = booking.assignments.find(
+            (a: any) =>
+                a.employeeId.toString() === req.user?.id &&
+                a.status !== "removed"
         );
+
+        if (!assignment) {
+            apiError(res, 404, "Active assignment not found for this employee");
+            return;
+        }
+
+        // Upload photo to Cloudinary if provided
+        let photoUrl = "";
+        if (photo) {
+            photoUrl = await uploadToCloudinary(photo, "gogreen/end-photos");
+            assignment.endPhoto = photoUrl;
+        }
+
+        // Upload video to Cloudinary if provided
+        let videoUrl = "";
+        if (video) {
+            videoUrl = await uploadVideoToCloudinary(video, "gogreen/end-videos");
+            (assignment as any).endVideo = videoUrl;
+        }
+
+        assignment.endLocation = {
+            lat: location.lat,
+            lng: location.lng,
+            timestamp: new Date(),
+        };
+
+        // Set booking-level end photo/video if this is the first employee to upload
+        const hasExistingEndPhoto = booking.assignments.some(
+            (a: any) =>
+                a.endPhoto &&
+                a.status !== "removed" &&
+                a.employeeId.toString() !== req.user?.id
+        );
+        if (photoUrl && (!hasExistingEndPhoto || !booking.endPhoto)) {
+            booking.endPhoto = photoUrl;
+        }
+        if (videoUrl && !(booking as any).endVideo) {
+            (booking as any).endVideo = videoUrl;
+        }
+
+        await booking.save();
+
+        apiResponse(res, 200, "End photo updated", booking);
     } catch (err) {
-        apiError(res, 500, "Failed to update after photo", err);
+        apiError(res, 500, "Failed to update end photo", err);
+    }
+};
+
+/**
+ * Update status for assigned booking
+ */
+const updateBookingStatus = async (
+    req: Request,
+    res: Response
+): Promise<void> => {
+    try {
+        if (!req.user) {
+            apiError(res, 401, "Unauthorized");
+            return;
+        }
+
+        const { id } = req.params;
+        const { status } = req.body;
+
+        const validStatuses = [
+            "started",
+            "completed",
+        ];
+        if (!validStatuses.includes(status)) {
+            apiError(
+                res,
+                400,
+                "Invalid status. Must be one of: started, completed"
+            );
+            return;
+        }
+
+        const booking = await Booking.findOne({
+            _id: id,
+            assignments: {
+                $elemMatch: {
+                    employeeId: req.user.id,
+                    status: { $ne: "removed" },
+                },
+            },
+        });
+
+        if (!booking) {
+            apiError(res, 404, "Booking not found or not assigned to you");
+            return;
+        }
+
+        const assignment = booking.assignments.find(
+            (a: any) =>
+                a.employeeId.toString() === req.user?.id &&
+                a.status !== "removed"
+        );
+
+        if (!assignment) {
+            apiError(res, 404, "Active assignment not found for this employee");
+            return;
+        }
+
+        // Enforce media requirements (photo or video)
+        if (status === "started" && !assignment.startPhoto && !(assignment as any).startVideo) {
+            apiError(
+                res,
+                400,
+                "You must upload a start photo or video before starting the task"
+            );
+            return;
+        }
+        if (status === "completed" && !assignment.endPhoto && !(assignment as any).endVideo) {
+            apiError(
+                res,
+                400,
+                "You must upload an end photo or video before completing the task"
+            );
+            return;
+        }
+
+        assignment.status = status;
+        if (status === "completed") {
+            assignment.endTime = new Date();
+        }
+        if (status === "started") {
+            assignment.startTime = new Date();
+        }
+        await booking.save();
+
+        apiResponse(res, 200, "Booking status updated", booking);
+    } catch (err) {
+        apiError(res, 500, "Failed to update booking status", err);
     }
 };
 
@@ -226,6 +449,7 @@ export default {
     getAssignedBookingReview,
     updateBeforePhoto,
     updateAfterPhoto,
+    updateBookingStatus,
     getProfileSelf,
     updateProfileSelf,
     deleteProfileSelf,

@@ -1,30 +1,64 @@
 import { Request, Response } from "express";
-import { User,Booking,Review } from "../models";
+import { User, Booking, Review, Service } from "../models";
 import { apiError, apiResponse } from "../helper";
+import { uploadToCloudinary } from "../utils/uploadPhoto";
 
 /**
  * Create a booking (self/org)
  */
 const createBooking = async (req: Request, res: Response): Promise<void> => {
     try {
-        const {
-            address,
-            phoneNumber,
-            instruction,
-            date,
-            timeSlot,
-        } = req.body;
-
         if (!req.user) {
             apiError(res, 401, "Unauthorized");
             return;
         }
 
-        const booking = await Booking.create({
-            userId: req.user.id,
+        // Validate required fields
+        const {
+            serviceId,
             address,
             phoneNumber,
             instruction,
+            date,
+            timeSlot,
+            referencePhoto,
+        } = req.body;
+
+        if (!address || !phoneNumber || !date) {
+            apiError(res, 400, "Address, phone number, and date are required");
+            return;
+        }
+
+        // Resolve service
+        if (!serviceId) {
+            apiError(res, 400, "serviceId is required");
+            return;
+        }
+        const service = await Service.findById(serviceId);
+        if (!service || !service.isActive) {
+            apiError(res, 400, "Service not found or inactive");
+            return;
+        }
+
+        // Upload reference photo if provided
+        let referencePhotoUrl = "";
+        if (referencePhoto) {
+            try {
+                referencePhotoUrl = await uploadToCloudinary(referencePhoto, "gogreen/reference-photos");
+            } catch (uploadErr) {
+                apiError(res, 500, "Failed to upload reference photo", uploadErr);
+                return;
+            }
+        }
+
+        const booking = await Booking.create({
+            userId: req.user.id,
+            serviceId: service._id,
+            serviceType: service.title,
+            address,
+            phoneNumber,
+            instruction,
+            referencePhoto: referencePhotoUrl,
             date,
             timeSlot,
         });
@@ -58,7 +92,21 @@ const updateBooking = async (req: Request, res: Response): Promise<void> => {
             return;
         }
 
-        Object.assign(booking, req.body);
+        // Only allow updating safe fields
+        const { address, phoneNumber, instruction, date, timeSlot, referencePhoto } = req.body;
+        if (address !== undefined) booking.address = address;
+        if (phoneNumber !== undefined) booking.phoneNumber = phoneNumber;
+        if (instruction !== undefined) booking.instruction = instruction;
+        if (date !== undefined) booking.date = date;
+        if (timeSlot !== undefined) booking.timeSlot = timeSlot;
+        if (referencePhoto) {
+            try {
+                booking.referencePhoto = await uploadToCloudinary(referencePhoto, "gogreen/reference-photos");
+            } catch (uploadErr) {
+                apiError(res, 500, "Failed to upload reference photo", uploadErr);
+                return;
+            }
+        }
         await booking.save();
 
         apiResponse(res, 200, "Booking updated successfully", booking);
@@ -93,6 +141,13 @@ const createReviewSelf = async (req: Request, res: Response): Promise<void> => {
             return;
         }
 
+        // Prevent duplicate reviews
+        const existingReview = await Review.findOne({ bookingId, userId: req.user.id });
+        if (existingReview) {
+            apiError(res, 409, "You have already reviewed this booking");
+            return;
+        }
+
         const review = await Review.create({
             bookingId,
             userId: req.user.id,
@@ -124,7 +179,10 @@ const updateReviewSelf = async (req: Request, res: Response): Promise<void> => {
             return;
         }
 
-        Object.assign(review, req.body);
+        // Only allow updating safe fields (not bookingId, userId, _id)
+        const { rating, feedback } = req.body;
+        if (rating !== undefined) review.rating = rating;
+        if (feedback !== undefined) review.feedback = feedback;
         await review.save();
 
         apiResponse(res, 200, "Review updated successfully", review);
@@ -227,9 +285,13 @@ const deleteProfileSelf = async (
     }
 };
 
-export const getMyBookings = async (req: Request, res: Response): Promise<void> => {
+export const getMyBookings = async (
+    req: Request,
+    res: Response
+): Promise<void> => {
     try {
-        if (!req.user) {                 // same guard you use above
+        if (!req.user) {
+            // same guard you use above
             apiError(res, 401, "Unauthorized");
             return;
         }
@@ -240,16 +302,16 @@ export const getMyBookings = async (req: Request, res: Response): Promise<void> 
             return;
         }
 
-        const page  = Number(req.query.page)  || 1;
+        const page = Number(req.query.page) || 1;
         const limit = Number(req.query.limit) || 20;
-        const skip  = (page - 1) * limit;
+        const skip = (page - 1) * limit;
 
         const filter: any = { userId, isActive: true };
         if (req.query.status) filter.status = req.query.status;
 
         const [bookings, total] = await Promise.all([
             Booking.find(filter)
-                .populate("employeeId", "name phone")
+                .populate("assignments.employeeId", "name phone")
                 .populate("review")
                 .sort({ createdAt: -1 })
                 .skip(skip)
@@ -263,12 +325,16 @@ export const getMyBookings = async (req: Request, res: Response): Promise<void> 
         //     return;
         // }
 
-        apiResponse(res, 200, "Bookings fetched", { bookings, total, page, pages: Math.ceil(total / limit) });
+        apiResponse(res, 200, "Bookings fetched", {
+            bookings,
+            total,
+            page,
+            pages: Math.ceil(total / limit),
+        });
     } catch (err) {
         apiError(res, 500, "Failed to fetch bookings", err);
     }
 };
-
 
 export default {
     createBooking,
@@ -279,5 +345,5 @@ export default {
     getProfileSelf,
     updateProfileSelf,
     deleteProfileSelf,
-    getMyBookings
+    getMyBookings,
 };

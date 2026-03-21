@@ -3,6 +3,8 @@ import User from "./user.model";
 import Permission from "./permission.model";
 import Review from "./review.model";
 import Role from "./role.model";
+import Service from "./service.model";
+import Feed from "./feed.model";
 
 
 export {
@@ -10,5 +12,7 @@ export {
     User,
     Permission,
     Review,
-    Role
+    Role,
+    Service,
+    Feed
 }

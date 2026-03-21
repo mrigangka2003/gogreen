@@ -5,6 +5,8 @@ import userRoutes from "./user.routes";
 import empRoutes from "./emp.routes";
 import adminRoutes from "./admin.routes";
 import superRoutes from "./superAdmin.routes";
+import chatRoutes from "./chat.routes";
+import feedRoutes from "./feed.routes";
 
 // Auth controllers
 import authController, { adminRegister } from "../controllers/auth/auth.controller";
@@ -43,5 +45,15 @@ router.use("/admin", adminRoutes);
  * Super Admin routes
  */
 router.use("/super", superRoutes);
+
+/**
+ *  Chat routes (audio upload)
+ */
+router.use("/chat", chatRoutes);
+
+/**
+ *  Feed routes
+ */
+router.use("/feeds", feedRoutes);
 
 export default router;
