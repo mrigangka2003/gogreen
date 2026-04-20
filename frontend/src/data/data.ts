@@ -1,3 +1,5 @@
+//Advisors images
+
 import k_dev from "../assets/team/adv_k_dev.jpeg";
 import mk_deb from "../assets/team/dr_mk_deb.jpeg";
 import dr_s_das from "../assets/team/Dr_s_das.png";
@@ -8,14 +10,22 @@ import a_saha from "../assets/team/Mr.A.Saha.jpg";
 import a_ghosh from "../assets/team/ms_a_ghosh.jpg";
 import manik_chakraborty from "../assets/team/manik_chakraborty.jpeg"
 
+//CEO and Director images
 import samik_das from "../assets/team/samik_das_ceo.jpg";
 import bilash_chandra_roy from "../assets/team/bilash_chandra_roy.png";
 
+//developer images
 import debaprasad from "../assets/team/debaprasad_paul.jpeg";
 import mrigangkadatta from "../assets/team/mrigangkadatta.jpeg"
 
+
+//services images
 import EvVaccumCleaner from "../assets/EV_vaccum_cleaner.png"
 import doorToDoor from "../assets/door_to_door.jpg"
+import BioCNG from "../assets/BIOCNG.jpg"
+import BioGas from "../assets/Biogas1.jpg"
+import OWC from "../assets/OWC.jpg"
+import owcHowItWorks from "../assets/owc-machine-how-it-works.jpg"
 
 interface Advisors {
     id: string;
@@ -34,7 +44,7 @@ interface Executive {
     linkedIn?: string;
     googleScholar?: string;
     about: string;
-    email?:string
+    email?: string
 }
 
 interface ProductAndServices {
@@ -42,11 +52,16 @@ interface ProductAndServices {
     description: string;
     image: string;
     reversed?: boolean;
+    features?: string[];
+    benefits?: string[];
+    specifications?: Record<string, string>;
+    extraImages?:string[];
+    gallery?: string[];
 }
 
 const services: Array<ProductAndServices> = [
     {
-        title: "EV Vacuum Cleaner",
+        title: "Litter Picker",
         description:
             "A fully electric vacuum cleaner engineered for large-scale outdoor cleaning tasks. Features high-powered suction with zero emissions, making it ideal for urban and industrial zones. Operates silently and efficiently, promoting sustainable public sanitation.",
         image: EvVaccumCleaner,
@@ -59,11 +74,69 @@ const services: Array<ProductAndServices> = [
         reversed: true,
     },
     {
-        title: "Bio Gas Plant",
+        title: "Biogas Plant",
         description:
-            "A sustainable solution that converts organic waste into clean biogas and nutrient-rich slurry. Helps manage waste efficiently while generating renewable energy for households or small industries. Reduces carbon footprint and promotes circular energy use.",
-        image: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSQ7ro-8HC-BrZRYMdWYE6r2AYN8H80u-Jokw&s",
+            "Go Green Plus delivers advanced smart biogas systems that convert organic waste into clean, renewable energy and nutrient-rich fertilizer. Engineered for performance, compliance, and scalability, these systems enable decentralized waste management while reducing landfill dependency and operational costs. Designed for Indian conditions, our biogas plants align with SWM Rules 2026 and CPCB guidelines, ensuring efficient, compliant, and long-term sustainable waste processing.",
+        image: BioGas,
+        features: [
+            "Fully automated and modular biogas systems",
+            "Compliant with SWM Rules 2026 & CPCB guidelines",
+            "Efficient anaerobic digestion for maximum gas yield",
+            "Handles diverse organic waste streams (food, agro, dairy)",
+            "Decentralized waste processing capability",
+            "Low operational cost with high efficiency",
+            "Scalable design for small to large applications"
+        ],
+        benefits: [
+            "Reduces landfill dependency and waste volume significantly",
+            "Generates clean biogas for cooking, heating, or power",
+            "Produces high-quality organic fertilizer (bio-slurry)",
+            "Cuts waste handling and fuel costs",
+            "Supports ESG goals and carbon footprint reduction",
+            "Enables access to subsidies, carbon credits, and approvals",
+            "Creates a self-sustaining waste-to-energy ecosystem"
+        ]
     },
+    {
+        title: "BioCNG Plant",
+        description:
+            "Go Green Plus delivers high-performance BioCNG (CBG) plants that convert organic waste into purified methane-rich fuel (>90%). Designed for large-scale industrial and municipal applications, these systems transform waste into a commercially viable energy source. Our BioCNG solutions support national initiatives like SATAT and GOBAR-DHAN while enabling organizations to reduce fuel dependency, generate revenue, and meet Net Zero targets.",
+        image: BioCNG, 
+        features: [
+            "Plant capacity ranging from 5 to 500 TPD",
+            "Advanced anaerobic digestion with high gas yield",
+            "High-efficiency gas purification (>90% methane)",
+            "Automated, low-maintenance operations",
+            "Patented VPAS technology for maximum output and minimal downtime",
+            "Compatible with multiple feedstocks (agri waste, dung, food waste)",
+            "Scalable infrastructure for industrial and municipal deployment"
+        ],
+        benefits: [
+            "Produces BioCNG as a direct substitute for CNG and LPG",
+            "Significantly reduces fuel and energy costs",
+            "Creates new revenue streams from waste-to-fuel conversion",
+            "Supports compliance with sustainability and ESG goals",
+            "Backed by government initiatives like SATAT and GOBAR-DHAN",
+            "Reduces greenhouse gas emissions and landfill dependency",
+            "Enables long-term energy independence"
+        ]
+    },
+    {
+        title: "OWC",
+        description:
+            "At Go Green Plus, we engineer advanced Organic Waste Composting (OWC) Machines that convert daily organic waste into nutrient-rich compost quickly, hygienically, and efficiently.Designed for Indian conditions and compliance standards, sy stems enable institutions to manage waste at source while reducing environmental impact. From residential societies to municipalities and large commercia facilities, our OWC solutions deliver fast processing (24 to 72) hours with odor-free operation and minimal manual intervention.",
+        image: OWC,
+        features:[
+            "Smart. Efficient. Compliant.",
+            "Converts organic waste into compost within 24 to 72 hours",
+            "Fully enclosed system ensures hygienic and smell-free processing.",
+            "Compliant with SWM Rules 2026 & CPCB guidelines.",
+            "Reduces waste volume by up to 80 to 90 percent",
+            "Low power consumption with optimized operating cost.",
+            "User-friendly automated control system"
+        ],
+        extraImages: [owcHowItWorks],
+    }
 ];
 
 const futureInnovations: Array<ProductAndServices> = [
@@ -145,11 +218,11 @@ const advisors: Array<Advisors> = [
         about: "Advocate Kushal Deb is a highly respected legal practitioner with a distinguished track record in civil, criminal, family, environmental and consumer law. With a large number of successfully handled cases and a renowned presence at the Tripura High Court, he is recognized for his sharp legal acumen, courtroom command, and commitment to justice. Over the years, Advocate Deb has built a reputation for delivering strategic legal solutions across a wide spectrum of matters, earning the trust of clients and peers alike. His ability to interpret and apply the law with precision makes him a sought- after counsel in both complex litigation and everyday legal affairs. As a Legal Advisor to Go Green Plus, Advocate Deb brings unmatched legal insight and experience to guide the organization in regulatory compliance, risk mitigation, and contractual governance. His involvement strengthens the company&#39;s foundation with lawful integrity and ensures that all initiatives align with current legal standards and ethical practices.",
     },
     {
-        id:"manik_chakraborty",
-        name:"Dr Manik Chakraborty",
-        country:"India",
-        image:manik_chakraborty,
-        about:"Dr. Manik Chakraborty is an accomplished academician and researcher in the field of Commerce, currently serving as an Assistant Professor in the Department of Commerce at St. Xavier’s University, Kolkata.He ranked 1st in the Higher Secondary (+2) Examination conducted by the Tripura Board of Secondary Education in 2011 and received the Economic Science Society of Tripura (ESSOT) award for securing the top position in the same year. He completed his B.Com (Honours) from Goenka College of Commerce and Business Administration, Kolkata, where he was awarded for outstanding performance in 2014. Dr. Chakraborty obtained his M.Com degree from the University of Calcutta in 2016. He qualified both the National Eligibility Test (NET) conducted by UGC and the State Level Eligibility Test (SLET) in 2017. He was awarded a Ph.D. in Commerce from Tripura (Central) University in 2024 for his research on “Impact of Capital Structure on Corporate Financial Performance: Evidence from NSE Listed Public Companies in India.” His area of specialization lies in Accounting and Finance, with strong research interests in corporate finance, capital structure, and regional economic development. Before joining St. Xavier’s University, Dr. Chakraborty served as a Guest Faculty at MBB College, BBM College, and Tripura (Central) University, and later as an Assistant Professor at Holy Cross College, Agartala. His academic journey reflects a blend of excellence, dedication, and a strong commitment to advancing commerce education and research.As an advisor of Go Green Plus, Dr. Chakraborty will contribute significantly to the Go Green Plus initiative by guiding its financial planning, cost benefit analysis, and PPP framework. His expertise in corporate finance and economic impact assessment will help design a sustainable and scalable revenue model, ensuring that the project aligns with both economic viability and environmental sustainability goals of Tripura’s clean-tech tourism ecosystem."
+        id: "manik_chakraborty",
+        name: "Dr Manik Chakraborty",
+        country: "India",
+        image: manik_chakraborty,
+        about: "Dr. Manik Chakraborty is an accomplished academician and researcher in the field of Commerce, currently serving as an Assistant Professor in the Department of Commerce at St. Xavier’s University, Kolkata.He ranked 1st in the Higher Secondary (+2) Examination conducted by the Tripura Board of Secondary Education in 2011 and received the Economic Science Society of Tripura (ESSOT) award for securing the top position in the same year. He completed his B.Com (Honours) from Goenka College of Commerce and Business Administration, Kolkata, where he was awarded for outstanding performance in 2014. Dr. Chakraborty obtained his M.Com degree from the University of Calcutta in 2016. He qualified both the National Eligibility Test (NET) conducted by UGC and the State Level Eligibility Test (SLET) in 2017. He was awarded a Ph.D. in Commerce from Tripura (Central) University in 2024 for his research on “Impact of Capital Structure on Corporate Financial Performance: Evidence from NSE Listed Public Companies in India.” His area of specialization lies in Accounting and Finance, with strong research interests in corporate finance, capital structure, and regional economic development. Before joining St. Xavier’s University, Dr. Chakraborty served as a Guest Faculty at MBB College, BBM College, and Tripura (Central) University, and later as an Assistant Professor at Holy Cross College, Agartala. His academic journey reflects a blend of excellence, dedication, and a strong commitment to advancing commerce education and research.As an advisor of Go Green Plus, Dr. Chakraborty will contribute significantly to the Go Green Plus initiative by guiding its financial planning, cost benefit analysis, and PPP framework. His expertise in corporate finance and economic impact assessment will help design a sustainable and scalable revenue model, ensuring that the project aligns with both economic viability and environmental sustainability goals of Tripura’s clean-tech tourism ecosystem."
     }
 ];
 
@@ -160,7 +233,7 @@ const executives: Array<Executive> = [
         country: "India",
         role: "Director & Founder, Go Green Plus",
         image: bilash_chandra_roy,
-        email:"director.gogreenplus@gmail.com",
+        email: "director.gogreenplus@gmail.com",
         linkedIn:
             "https://www.linkedin.com/in/dr-bilash-chandra-roy-1b5a13143/",
         googleScholar:
@@ -177,7 +250,7 @@ const executives: Array<Executive> = [
     },
 ];
 
-const itTeam :Array<Executive> = [
+const itTeam: Array<Executive> = [
     {
         id: "debaprasadpaul",
         name: "Debaprasad Paul",
@@ -193,11 +266,11 @@ const itTeam :Array<Executive> = [
         name: "Mrigangka Datta",
         country: "India",
         role: "Developer",
-        image: mrigangkadatta, 
+        image: mrigangkadatta,
         linkedIn:
             "https://www.linkedin.com/in/mrigangkad",
         about: "Mrigangka Datta is a 23-year-old Software Developer currently working at a startup in Bangalore. He builds scalable web and backend systems, with a focus on clean architecture, reliability, and solving real-world engineering problems.",
     },
 ]
 
-export { advisors, executives, services, futureInnovations , itTeam };
+export { advisors, executives, services, futureInnovations, itTeam };

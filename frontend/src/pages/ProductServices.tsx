@@ -1,4 +1,5 @@
 import React from "react";
+import { Link} from "react-router-dom";
 
 import { services,futureInnovations } from "../data/data";
 
@@ -16,6 +17,7 @@ interface InnovationCardProps {
 }
 
 const ProductsAndServices: React.FC = () => {
+
     return (
         <div className="min-h-screen bg-gray-50">
             {/* Hero Header with Modern Design */}
@@ -64,13 +66,19 @@ const ProductsAndServices: React.FC = () => {
             {/* Products Section with Modern Cards */}
             <div className="space-y-0">
                 {services.map((product, index) => (
-                    <ProductCard
-                        key={index}
-                        title={product.title}
-                        description={product.description}
-                        imageSrc={product.image}
-                        reversed={product.reversed}
-                    />
+                    <Link 
+                        key={index} 
+                        to="/product-and-services/details" 
+                        state={{ service: product }}
+                        className="block hover:opacity-95 transition-opacity"
+                    >
+                        <ProductCard
+                            title={product.title}
+                            description={product.description}
+                            imageSrc={product.image}
+                            reversed={index % 2 === 0}
+                        />
+                    </Link>
                 ))}
             </div>
 
@@ -108,12 +116,18 @@ const ProductsAndServices: React.FC = () => {
 
                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 max-w-7xl mx-auto">
                         {futureInnovations.map((innovation, index) => (
-                            <InnovationCard
-                                key={index}
-                                title={innovation.title}
-                                description={innovation.description}
-                                imageSrc={innovation.image}
-                            />
+                            <Link 
+                                key={index} 
+                                to="/product-and-services/details" 
+                                state={{ service: innovation }}
+                                className="block"
+                            >
+                                <InnovationCard
+                                    title={innovation.title}
+                                    description={innovation.description}
+                                    imageSrc={innovation.image}
+                                />
+                            </Link>
                         ))}
                     </div>
                 </div>
@@ -126,7 +140,7 @@ const ProductCard: React.FC<ProductCardProps> = ({
     title,
     description,
     imageSrc,
-    reversed = false,
+    reversed,
 }) => {
     const bgColor = reversed ? "bg-white" : "bg-green-600";
     const textColor = reversed ? "text-gray-900" : "text-white";

@@ -2,8 +2,8 @@ import { useState, useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import {
   Plus, Search, Loader2, Trash2, Edit2, Eye, Heart, Share2,
-  MapPin, Calendar, Image, Video, Tag, MoreVertical, X,
-  FileText, Filter, ArrowLeft, ExternalLink, Save,
+  MapPin, Calendar, Image, Video, Tag, X,
+  FileText, Save,
   ImagePlus,
 } from "lucide-react";
 import axiosInstance from "../../api";
@@ -63,11 +63,13 @@ export default function ManageFeeds() {
   const fetchFeeds = async () => {
     setLoading(true);
     try {
-      const res = await axiosInstance.get("/feeds/all");
-      if ((res.data as any)?.success) {
-        setFeeds((res.data as any).data ?? []);
+      const res = await axiosInstance.get<{ success: boolean; data: FeedItem[] }>("/feeds/all");
+      if (res.data?.success) {
+        setFeeds(res.data.data ?? []);
       }
-    } catch { }
+    } catch (err) {
+      console.error("Failed to fetch feeds:", err);
+    }
     setLoading(false);
   };
 
@@ -79,7 +81,9 @@ export default function ManageFeeds() {
     try {
       await axiosInstance.delete(`/feeds/${id}`);
       setFeeds((prev) => prev.filter((f) => f._id !== id));
-    } catch { }
+    } catch (err) {
+      console.error("Failed to delete feed:", err);
+    }
     setDeletingId(null);
   };
 
@@ -120,7 +124,9 @@ export default function ManageFeeds() {
       await axiosInstance.patch(`/feeds/${editFeed._id}`, payload);
       setEditFeed(null);
       fetchFeeds();
-    } catch { }
+    } catch (err) {
+      console.error("Failed to update feed:", err);
+    }
     setSaving(false);
   };
 

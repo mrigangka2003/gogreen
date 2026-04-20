@@ -19,12 +19,10 @@ import {
   Send,
   Search,
   Mic,
-  MicOff,
   CheckCheck,
   Trash2,
   Play,
   Pause,
-  Clock,
   User,
   Building2,
   Briefcase,
@@ -245,7 +243,7 @@ export default function ChatAdmin() {
           reader.onloadend = () => resolve(reader.result as string);
           reader.readAsDataURL(blob);
         });
-        const { data } = await api.post("/chat/upload-audio", { audio: base64 });
+        const { data } = await api.post("/chat/upload-audio", { audio: base64 }) as { data: { url: string } };
         const audioUrl = data.url;
 
         await addDoc(collection(db, "chats", selectedChatId, "messages"), {

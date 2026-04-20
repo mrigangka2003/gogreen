@@ -150,7 +150,7 @@ export default function UserChat() {
         });
       }
     });
-  }, [user?.id]);
+  }, [user?.id, user?.name, chatUserRole]);
 
   // Listen to messages
   useEffect(() => {
@@ -220,7 +220,7 @@ export default function UserChat() {
           reader.onloadend = () => resolve(reader.result as string);
           reader.readAsDataURL(blob);
         });
-        const { data } = await api.post("/chat/upload-audio", { audio: base64 });
+        const { data } = await api.post("/chat/upload-audio", { audio: base64 }) as { data: { url: string } };
         const audioUrl = data.url;
 
         await addDoc(collection(db, "chats", chatId, "messages"), {

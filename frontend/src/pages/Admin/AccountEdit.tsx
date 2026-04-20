@@ -30,13 +30,11 @@ const AccountEdit: React.FC = () => {
     const navigate = useNavigate();
     const { user } = useAuthStore();
     const isSuperAdmin = user?.role === "super-admin";
-    const basePath = isSuperAdmin ? "/dashboard/super-admin" : "/dashboard/admin";
 
     const [loading, setLoading] = useState(true);
     const [saving, setSaving] = useState(false);
     const [error, setError] = useState<string | null>(null);
     const [notification, setNotification] = useState<{ message: string; type: "success" | "error" } | null>(null);
-    const [accountRole, setAccountRole] = useState<string>("");
 
     const { register, handleSubmit, reset, formState: { errors } } = useForm<FormValues>();
 
@@ -46,16 +44,15 @@ const AccountEdit: React.FC = () => {
             setError(null);
             try {
                 const endpoint = isSuperAdmin ? "/super/accounts" : "/admin/accounts";
-                const res = await axiosInstance.get(endpoint);
-                if ((res.data as any)?.success) {
-                    const accounts = (res.data as any).data ?? [];
-                    const account = accounts.find((a: any) => a._id === id);
+                const res = await axiosInstance.get<{ success: boolean; data: Record<string, any>[] }>(endpoint);
+                if (res.data?.success) {
+                    const accounts = res.data.data ?? [];
+                    const account = accounts.find((a) => a._id === id);
                     if (!account) {
                         setError("Account not found");
                         return;
                     }
                     const roleName = account.role?.name || "";
-                    setAccountRole(roleName);
                     reset({
                         name: account.name || "",
                         email: account.email || "",
@@ -80,7 +77,7 @@ const AccountEdit: React.FC = () => {
         setSaving(true);
         try {
             const endpoint = isSuperAdmin ? `/super/accounts/${id}` : `/admin/accounts/${id}`;
-            const payload: any = {
+            const payload: Record<string, string | null | undefined> = {
                 name: data.name,
                 email: data.email,
                 phone: data.phone,
@@ -88,15 +85,16 @@ const AccountEdit: React.FC = () => {
             };
             if (data.password) payload.password = data.password;
 
-            const res = await axiosInstance.patch(endpoint, payload);
-            if ((res.data as any)?.success || res.status === 200) {
+            const res = await axiosInstance.patch<{ success: boolean; message?: string }>(endpoint, payload);
+            if (res.data?.success || res.status === 200) {
                 setNotification({ message: "Account updated successfully", type: "success" });
                 setTimeout(() => navigate(-1), 1500);
             } else {
-                throw new Error((res.data as any)?.message || "Update failed");
+                throw new Error(res.data?.message || "Update failed");
             }
-        } catch (err: any) {
-            setNotification({ message: err?.response?.data?.message || err?.message || "Failed to update", type: "error" });
+        } catch (err) {
+            const error = err as any;
+            setNotification({ message: error?.response?.data?.message || error?.message || "Failed to update", type: "error" });
         } finally {
             setSaving(false);
         }

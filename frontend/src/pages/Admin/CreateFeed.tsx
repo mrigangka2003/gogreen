@@ -2,8 +2,8 @@ import { useState, useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import {
   ArrowLeft, Loader2, ImagePlus, X, MapPin, Tag, FileText,
-  ClipboardList, Calendar, Clock, Search, ChevronDown, Video,
-  Eye, Save, Send as SendIcon,
+  ClipboardList, Search, ChevronDown, Video,
+  Save, Send as SendIcon,
 } from "lucide-react";
 import axiosInstance from "../../api";
 import { useAuthStore } from "../../stores/auth";
@@ -21,7 +21,7 @@ type BookingFeedData = {
   booking: { _id: string; serviceType: string; address: string; date: string; status: string; userName?: string };
   photos: string[];
   videos: string[];
-  locations: { start: any[]; end: any[] };
+  locations: { start: { lat?: number; lng?: number }[]; end: { lat?: number; lng?: number }[] };
 };
 
 export default function CreateFeed() {
@@ -66,18 +66,20 @@ export default function CreateFeed() {
       setLoadingBookings(true);
       try {
         const prefix = isSuperAdmin ? "/super" : "/admin";
-        const res = await axiosInstance.get(`${prefix}/bookings`);
-        if ((res.data as any)?.success) {
-          const all = (res.data as any).data ?? [];
+        const res = await axiosInstance.get<{ success: boolean; data: BookingOption[] }>(`${prefix}/bookings`);
+        if (res.data?.success) {
+          const all = res.data.data ?? [];
           // Show completed bookings first, then others
-          const sorted = all.sort((a: any, b: any) => {
+          const sorted = all.sort((a, b) => {
             if (a.status === "completed" && b.status !== "completed") return -1;
             if (a.status !== "completed" && b.status === "completed") return 1;
             return new Date(b.date).getTime() - new Date(a.date).getTime();
           });
           setBookings(sorted);
         }
-      } catch { }
+      } catch (err) {
+        console.error("Failed to fetch bookings:", err);
+      }
       setLoadingBookings(false);
     };
     fetchBookings();
@@ -89,10 +91,9 @@ export default function CreateFeed() {
     setLoadingBookingData(true);
 
     try {
-      const prefix = isSuperAdmin ? "/super" : "/admin";
-      const res = await axiosInstance.get(`/feeds/booking/${bookingId}`);
-      if ((res.data as any)?.success) {
-        const data: BookingFeedData = (res.data as any).data;
+      const res = await axiosInstance.get<{ success: boolean; data: BookingFeedData }>(`/feeds/booking/${bookingId}`);
+      if (res.data?.success) {
+        const data = res.data.data;
 
         // Populate form with booking data
         setServiceType(data.booking.serviceType || "");
@@ -117,7 +118,9 @@ export default function CreateFeed() {
           if (el.lng) setEndLocationLng(String(el.lng));
         }
       }
-    } catch { }
+    } catch (err) {
+      console.error("Failed to fetch booking feed data:", err);
+    }
     setLoadingBookingData(false);
   };
 
@@ -152,7 +155,20 @@ export default function CreateFeed() {
     setError(null);
 
     try {
-      const payload: any = {
+      const payload: {
+        heading: string;
+        description: string;
+        serviceType: string;
+        status: string;
+        photos: string[];
+        videos: string[];
+        tags: string[];
+        source: string;
+        bookingId?: string;
+        location?: { address: string; lat?: number; lng?: number };
+        startLocation?: { address: string; lat?: number; lng?: number };
+        endLocation?: { address: string; lat?: number; lng?: number };
+      } = {
         heading: heading.trim(),
         description: description.trim(),
         serviceType: serviceType.trim(),

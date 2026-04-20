@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useMemo } from "react";
+import React, { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import {
     ArrowLeft, User, Mail, Phone, MapPin, Calendar, Clock,
@@ -19,7 +19,7 @@ type EmployeeInfo = {
 };
 
 type Assignment = {
-    employeeId: any;
+    employeeId: { _id: string; id?: string; name?: string } | string;
     status: string;
     assignedAt?: string;
     startTime?: string;
@@ -157,7 +157,7 @@ const BookingCard: React.FC<{
     onClick: () => void;
 }> = ({ booking, employeeId, onClick }) => {
     const empAssignment = booking.assignments?.find(
-        (a: any) => (a.employeeId?._id || a.employeeId) === employeeId || (a.employeeId?.id || a.employeeId) === employeeId
+        (a) => ( (a.employeeId as any)?._id || a.employeeId) === employeeId || ( (a.employeeId as any)?.id || a.employeeId) === employeeId
     );
     const assignmentStatus = empAssignment?.status || booking.status;
     const StatusIcon = statusIcon(assignmentStatus);
@@ -219,14 +219,14 @@ const EmployeeDetail: React.FC = () => {
             setError(null);
             try {
                 const endpoint = isSuperAdmin ? `/super/employees/${id}` : `/admin/employees/${id}`;
-                const res = await axiosInstance.get(endpoint);
-                if ((res.data as any)?.success) {
-                    const data = (res.data as any).data;
+                const res = await axiosInstance.get<{ success: boolean; data: any }>(endpoint);
+                if (res.data?.success) {
+                    const data = res.data.data;
                     setEmployee(data.employee);
                     setActiveBookings(data.activeBookings ?? []);
                     setPastBookings(data.pastBookings ?? []);
                 } else {
-                    throw new Error((res.data as any)?.message || "Failed to fetch");
+                    throw new Error(res.data?.message || "Failed to fetch");
                 }
             } catch (err: any) {
                 setError(err?.response?.data?.message || err?.message || "Network error");

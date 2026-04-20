@@ -1,7 +1,7 @@
-import React, { useEffect, useMemo, useState } from "react";
+import React, { useEffect, useMemo, useState, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
 import {
-    RefreshCw, Users, Search, X, Filter, ClipboardList, UserCheck, UserX,
+    RefreshCw, Users, Search, X, ClipboardList, UserCheck, UserX,
 } from "lucide-react";
 import axiosInstance from "../../api";
 import { useAuthStore } from "../../stores/auth";
@@ -35,28 +35,28 @@ const EmployeeManagement: React.FC = () => {
     const [searchQuery, setSearchQuery] = useState("");
     const [activeFilter, setActiveFilter] = useState<FilterTab>("all");
 
-    const fetchEmployees = async () => {
+    const fetchEmployees = useCallback(async () => {
         setLoading(true);
         setError(null);
         try {
             const endpoint = isSuperAdmin ? "/super/employees/available" : "/admin/employees/available";
-            const res = await axiosInstance.get(endpoint);
-            if ((res.data as any)?.success) {
-                const data = (res.data as any).data;
+            const res = await axiosInstance.get<{ success: boolean; data: { employees: Employee[] } }>(endpoint);
+            if (res.data?.success) {
+                const data = res.data.data;
                 setEmployees(data.employees ?? []);
             } else {
-                throw new Error((res.data as any)?.message || "Failed to fetch employees");
+                throw new Error(res.data?.message || "Failed to fetch employees");
             }
         } catch (err: any) {
             setError(err?.response?.data?.message || err?.message || "Network error");
         } finally {
             setLoading(false);
         }
-    };
+    }, [isSuperAdmin]);
 
     useEffect(() => {
         fetchEmployees();
-    }, [isSuperAdmin]);
+    }, [fetchEmployees]);
 
     const filteredEmployees = useMemo(() => {
         let list = employees;

@@ -122,7 +122,7 @@ function MapPickerDialog({ open, title, onClose, onConfirm, initialLat, initialL
                 markerRef.current = null;
             }
         };
-    }, [open]);
+    }, [open, initialLat, initialLng, lat, lng, placeMarker]);
 
     const handleGPS = () => {
         if (!navigator.geolocation) return;
@@ -144,7 +144,9 @@ function MapPickerDialog({ open, title, onClose, onConfirm, initialLat, initialL
             );
             const data = await res.json();
             if (data.length > 0) placeMarker(parseFloat(data[0].lat), parseFloat(data[0].lon));
-        } catch { }
+        } catch (err) {
+            console.error("Failed to search location:", err);
+        }
         setSearching(false);
     };
 
@@ -241,9 +243,9 @@ function AccountPickerDialog({ open, onClose, onSelect, baseEndpoint }: AccountP
     useEffect(() => {
         if (!open) return;
         setLoading(true);
-        axiosInstance.get(`${baseEndpoint}/accounts`)
-            .then((res) => { if ((res.data as any).success) setAccounts((res.data as any).data ?? []); })
-            .catch(() => { })
+        axiosInstance.get<{ success: boolean; data: AccountOption[] }>(`${baseEndpoint}/accounts`)
+            .then((res) => { if (res.data?.success) setAccounts(res.data.data ?? []); })
+            .catch((err) => { console.error("Failed to fetch accounts:", err); })
             .finally(() => setLoading(false));
     }, [open, baseEndpoint]);
 
@@ -387,7 +389,6 @@ export default function CreateBookingAdmin() {
     const [accountPickerOpen, setAccountPickerOpen] = useState(false);
 
     // Photo reference
-    const [photoFile, setPhotoFile] = useState<File | null>(null);
     const [photoPreview, setPhotoPreview] = useState<string | null>(null);
     const fileInputRef = useRef<HTMLInputElement>(null);
 
@@ -407,16 +408,15 @@ export default function CreateBookingAdmin() {
     const locationValid = locationMode === "single" ? !!address : (!!startAddress && !!endAddress);
 
     useEffect(() => {
-        axiosInstance.get(`${baseEndpoint}/services/all`)
-            .then((res) => { if ((res.data as any).success) setServices((res.data as any).data?.filter((s: any) => s.isActive) ?? []); })
-            .catch(() => { })
+        axiosInstance.get<{ success: boolean; data: ServiceOption[] }>(`${baseEndpoint}/services/all`)
+            .then((res) => { if (res.data?.success) setServices(res.data.data?.filter((s) => s.isActive) ?? []); })
+            .catch((err) => { console.error("Failed to fetch services:", err); })
             .finally(() => setLoadingServices(false));
     }, [baseEndpoint]);
 
     const handlePhotoChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const f = e.target.files?.[0];
         if (!f) return;
-        setPhotoFile(f);
         const reader = new FileReader();
         reader.onload = (ev) => setPhotoPreview(ev.target?.result as string);
         reader.readAsDataURL(f);
@@ -435,7 +435,7 @@ export default function CreateBookingAdmin() {
         if (!selectedServiceId || !locationValid) return;
         const finalAddress = locationMode === "single" ? address : `${startAddress} → ${endAddress}`;
         try {
-            const payload: any = {
+            const payload: Record<string, any> = {
                 ...data,
                 serviceId: selectedServiceId,
                 address: finalAddress,
@@ -690,7 +690,7 @@ export default function CreateBookingAdmin() {
                             {photoPreview ? (
                                 <div className="relative rounded-2xl overflow-hidden border-2 border-green-700/15" style={{ height: "100px" }}>
                                     <img src={photoPreview} alt="preview" className="w-full h-full object-cover" />
-                                    <button type="button" onClick={() => { setPhotoFile(null); setPhotoPreview(null); }}
+                                    <button type="button" onClick={() => { setPhotoPreview(null); }}
                                         className="absolute top-2 right-2 w-7 h-7 rounded-full bg-black/50 text-white flex items-center justify-center hover:bg-black/70 transition-colors">
                                         <X className="w-3.5 h-3.5" />
                                     </button>

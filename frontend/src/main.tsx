@@ -30,6 +30,7 @@ import {
 import ProtectedRoute from "./components/ProtectedRoute.tsx";
 import DashboardLayout from "./components/Dashboard-layout/DashboardLayout.tsx";
 import { AdminDashboard, UserDashboard } from "./components/index.ts";
+import ServiceDetails from "./components/ServiceDetails.tsx";
 
 const SuperAdminDashboard = lazy(() => import("./pages/super/SuperAdminDashboard.tsx"));
 const SuperReviews = lazy(() => import("./pages/super/SuperReviews.tsx"));
@@ -63,6 +64,13 @@ const router = createBrowserRouter([
             {
                 path: "/product-and-services",
                 element: <ProductsServices />,
+            },
+            {
+                path: "/product-and-services/details",
+                element: 
+                <Suspense fallback={<div className="p-6 text-fifth">Loading...</div>}>
+                    <ServiceDetails/>
+                </Suspense>,
             },
             {
                 path: "/corporate-responsibility",
