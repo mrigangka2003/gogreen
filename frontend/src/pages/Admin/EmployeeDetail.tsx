@@ -219,7 +219,7 @@ const EmployeeDetail: React.FC = () => {
             setError(null);
             try {
                 const endpoint = isSuperAdmin ? `/super/employees/${id}` : `/admin/employees/${id}`;
-                const res = await axiosInstance.get<{ success: boolean; data: any }>(endpoint);
+                const res = await axiosInstance.get<{ success: boolean; data: any; message?: string }>(endpoint);
                 if (res.data?.success) {
                     const data = res.data.data;
                     setEmployee(data.employee);

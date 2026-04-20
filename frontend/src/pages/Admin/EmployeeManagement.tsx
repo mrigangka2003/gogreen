@@ -40,7 +40,7 @@ const EmployeeManagement: React.FC = () => {
         setError(null);
         try {
             const endpoint = isSuperAdmin ? "/super/employees/available" : "/admin/employees/available";
-            const res = await axiosInstance.get<{ success: boolean; data: { employees: Employee[] } }>(endpoint);
+            const res = await axiosInstance.get<{ success: boolean; data: { employees: Employee[] }; message?: string }>(endpoint);
             if (res.data?.success) {
                 const data = res.data.data;
                 setEmployees(data.employees ?? []);

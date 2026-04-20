@@ -40,7 +40,7 @@ const ICON_MAP: Record<string, React.ReactNode> = {
 
 const TIME_SLOTS = ["08:00-10:00", "10:00-12:00", "12:00-14:00", "14:00-16:00", "16:00-18:00"];
 
-type ServiceOption = { _id: string; title: string; description: string; icon: string; color: string; };
+type ServiceOption = { _id: string; title: string; description: string; icon: string; color: string; isActive: boolean; };
 type AccountOption = { _id: string; name: string; email: string; role?: { name: string }; };
 type FormValues = { phoneNumber: string; instruction: string; date: string; timeSlot: string; };
 
@@ -408,7 +408,7 @@ export default function CreateBookingAdmin() {
     const locationValid = locationMode === "single" ? !!address : (!!startAddress && !!endAddress);
 
     useEffect(() => {
-        axiosInstance.get<{ success: boolean; data: ServiceOption[] }>(`${baseEndpoint}/services/all`)
+        axiosInstance.get<{ success: boolean; data: ServiceOption[]; message?: string }>(`${baseEndpoint}/services/all`)
             .then((res) => { if (res.data?.success) setServices(res.data.data?.filter((s) => s.isActive) ?? []); })
             .catch((err) => { console.error("Failed to fetch services:", err); })
             .finally(() => setLoadingServices(false));
